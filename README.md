@@ -30,7 +30,7 @@ PC. There is no cloud and no account.
 | **Backup & restore** | One .zip with all data (optionally secrets); restore with preview, Merge or Replace, automatic safety copy, live reload of every open page |
 | **Email reports** | Gmail / Outlook / Zoho / Yahoo / custom SMTP. Campaign and bulk reports are emailed automatically when finished (HTML summary + CSV) |
 | **Setup wizard** | Detects the board, flashes the prebuilt ESP32 firmware (no Arduino IDE), layered tests (Wi-Fi → module → SIM → network), driver guidance, diagnostics report |
-| **Talk on calls** | Wiring guides: speaker+mic, **3.5 mm headset jack** (any wired earphones with mic), USB sound card + PC audio bridge (also for Bluetooth headsets paired to the PC), I2S codec. Live call audio controls (volume `AT+COUTGAIN`, mic gain, earpiece/loudspeaker path, mute, test voice) |
+| **Talk on calls** | Main guide: solder a **3.5 mm headset socket** once and plug in any wired earphones with mic (parts list, plug pin diagram, wiring, tick-off steps, test, troubleshooting). Live call audio controls (volume, mic, earpiece/loudspeaker path, mute, test voice). Other ways (speaker+mic, PC bridge, Wi-Fi codec) folded under one section |
 | **Robustness** | Auto-reconnect after COM renumbering, Wi-Fi fallback, call recovery after restart, single-instance launcher, friendly errors, app log |
 | **UI** | Light/dark theme, collapsible sidebar (Ctrl+B), mobile drawer, animated logo, splash + progress loaders, Help & guide page |
 

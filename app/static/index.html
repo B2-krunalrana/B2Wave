@@ -665,6 +665,47 @@ details.manual{margin-top:12px}details.manual summary{cursor:pointer;color:var(-
 .quickacts{grid-template-columns:repeat(4,1fr)}
 @media (max-width:860px){.heroacts{width:100%}.heroacts .btn{flex:1}}
 .stepper button,.stepper button.final{flex-direction:row!important;justify-content:flex-start!important;text-align:left}
+
+/* headset guide */
+.hsguide .cardhead .tag{margin:0}
+.hsrow{display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
+.hsbox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px}
+.hsbox h4{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:15px}
+.hsbox h4 small{font-weight:500;margin-left:auto}
+.num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:13px;font-weight:700;flex:none}
+ul.buy{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+ul.buy li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+ul.buy li svg.lucide{color:var(--accent);margin-top:2px}
+ul.buy small{display:block;color:var(--muted);font-size:12.5px}
+.plug{width:100%;max-width:440px;display:block;margin:4px auto 6px}
+.plug .pmetal{fill:#c7cdd8;stroke:#94a3b8}.plug .pins{fill:#1f2937}.plug .pbody{fill:#334155}
+.plug .pl{font:600 12px Inter,system-ui;fill:var(--muted);text-anchor:middle}
+.plug .pv{font:700 13px Inter,system-ui;text-anchor:middle}
+.plug .pv.l,.plug .pv.r{fill:#dc2626}.plug .pv.g{fill:var(--text)}.plug .pv.m{fill:#2563eb}
+.hswire{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.hswire img{width:230px;max-width:100%;border-radius:12px;border:1px solid var(--line);background:#fff}
+.warnnote{display:flex;gap:10px;margin-top:12px;background:var(--warn-soft)!important;color:var(--warn-ink);border-color:transparent!important}
+.hssteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;counter-reset:s}
+.hssteps li{counter-increment:s;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;transition:.15s}
+.hssteps li label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin:0;color:var(--text);font-size:14px}
+.hssteps li label::before{content:counter(s);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);font-size:12px;font-weight:700;flex:none}
+.hssteps li input{margin-top:4px}
+.hssteps li.done{border-color:color-mix(in srgb,var(--ok) 40%,var(--line));background:var(--ok-soft)}
+.hssteps li.done span{opacity:.8}
+.hstest{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hstest>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.hstest b{display:block;margin-bottom:4px}.hstest small{color:var(--muted);font-size:13px}
+#audOther .seg{margin-top:4px}
+@media (max-width:860px){.hsrow,.hstest{grid-template-columns:1fr}}
+/* the hidden attribute must always win over component display rules */
+[hidden]{display:none!important}
+
+.hssteps li label{display:flex!important;align-items:flex-start;gap:10px}
+.hssteps li input[type=checkbox]{width:18px;height:18px;min-width:18px;flex:none;margin:3px 0 0;accent-color:var(--ok)}
+.hssteps li label span{flex:1;text-align:left}
+.hstest b{display:inline}.hstest>div>b{display:block}
+.hstest small{display:block;line-height:1.5}
+input[type=checkbox],input[type=radio]{width:auto}
 </style>
 </head>
 <body>
@@ -1111,15 +1152,74 @@ details.manual{margin-top:12px}details.manual summary{cursor:pointer;color:var(-
       </div>
     </section>
 
-    <!-- AUDIO / WIRING -->
+    <!-- AUDIO / TALK ON CALLS -->
     <section class="view" id="v-audio">
       <div class="wiz">
-        <div class="card">
+        <div class="card audintro">
           <h2>Talk on calls</h2>
-          <p class="sub" style="margin-bottom:8px">The A7672S firmware on this board (A131B01A7672M6) can't send call audio over USB. Voice only comes out of the <b>SPK</b> and <b>MIC</b> pads on the back of the board. Pick one of these setups.</p>
-          <div class="seg" id="audSeg"><button data-o="a" class="on"><i data-lucide="speaker"></i> A · Speaker + mic</button><button data-o="d"><i data-lucide="headphones"></i> B · Headset jack</button><button data-o="b"><i data-lucide="monitor-speaker"></i> C · Through this PC</button><button data-o="c"><i data-lucide="wifi"></i> D · Over Wi-Fi</button></div>
+          <p class="sub" style="margin:0">Call voice comes out of the board's <b>SPK</b> and <b>MIC</b> pads (this module can't send it over USB). The simplest way to talk is a <b>headset socket</b>: solder it once, then plug in any wired earphones with a mic.</p>
         </div>
+        <div class="card hsguide">
+          <div class="cardhead"><span class="cicon"><i data-lucide="headphones"></i></span><div style="flex:1"><h3>Talk with any wired earphones</h3><small>Solder one headset socket to the board once. Then plug in any phone earphones with a mic, like a landline handset.</small></div><span class="tag">Recommended · ~₹150 · 20 min</span></div>
 
+          <div class="hsrow">
+            <div class="hsbox">
+              <h4><span class="num">1</span> What you need</h4>
+              <ul class="buy">
+                <li><i data-lucide="circle-dot"></i><div><b>3.5 mm 4-pole (TRRS) female socket module</b><small>Pins marked <b>L, R, G, M</b>. Search "TRRS audio jack breakout". ~₹60</small></div></li>
+                <li><i data-lucide="battery"></i><div><b>47 µF capacitor</b>, 16 V or higher<small>Blocks DC, lets voice through. ~₹5</small></div></li>
+                <li><i data-lucide="minus"></i><div><b>22 Ω resistor</b>, ¼ watt<small>Keeps the volume safe for your ears. ~₹2</small></div></li>
+                <li><i data-lucide="cable"></i><div><b>4 thin wires</b> (~10 cm) + heat-shrink or tape</div></li>
+                <li><i data-lucide="wrench"></i><div><b>Soldering iron</b>, solder, multimeter (optional)</div></li>
+                <li><i data-lucide="headset"></i><div><b>Any wired earphones with mic</b><small>The 3.5 mm kind that came with most phones</small></div></li>
+              </ul>
+            </div>
+            <div class="hsbox">
+              <h4><span class="num">2</span> Know the plug</h4>
+              <div id="plugSvg"></div>
+              <p class="hint">Earphones with a mic have <b>3 black rings</b> on the plug (4 metal parts). The socket module brings these out as 4 pins: <b>L</b> left ear, <b>R</b> right ear, <b>G</b> ground, <b>M</b> microphone.</p>
+            </div>
+          </div>
+
+          <div class="hsbox" style="margin-top:12px">
+            <h4><span class="num">3</span> Wiring</h4>
+            <div class="hswire"><img src="/doc/image-back.png" alt="Board back: SPK and MIC pads near the SIM slot"><div id="wireD" style="flex:1;min-width:300px"></div></div>
+            <div class="note warnnote"><i data-lucide="triangle-alert"></i><div><b>One rule:</b> leave the <b>SPK −</b> pad unconnected. It's an active output, and connecting it to ground can damage the module's amplifier.</div></div>
+          </div>
+
+          <div class="hsbox" style="margin-top:12px">
+            <h4><span class="num">4</span> Step by step <small class="muted" id="hsProg"></small></h4>
+            <ol class="hssteps" id="hsSteps">
+              <li data-k="1"><label><input type="checkbox"><span><b>Power off</b> the board and unplug all cables.</span></label></li>
+              <li data-k="2"><label><input type="checkbox"><span><b>Find the pads.</b> Turn the board over. Next to the SIM slot are two pad pairs, <b>SPK</b> and <b>MIC</b>, each with one pad marked <b>+</b>.</span></label></li>
+              <li data-k="3"><label><input type="checkbox"><span><b>Join L and R</b> on the socket module with a short wire, so you hear the call in both ears.</span></label></li>
+              <li data-k="4"><label><input type="checkbox"><span><b>Speaker:</b> solder the capacitor's <b>long (+) leg</b> to <b>SPK +</b>. Its other leg goes to the 22 Ω resistor, and the resistor goes to socket <b>L/R</b>.</span></label></li>
+              <li data-k="5"><label><input type="checkbox"><span><b>Ground:</b> one wire from socket <b>G</b> to the <b>MIC −</b> pad, and one from <b>G</b> to board <b>GND</b> (header pin 41 or 43).</span></label></li>
+              <li data-k="6"><label><input type="checkbox"><span><b>Microphone:</b> one wire from socket <b>M</b> to the <b>MIC +</b> pad.</span></label></li>
+              <li data-k="7"><label><input type="checkbox"><span><b>Check</b> nothing touches <b>SPK −</b>, cover joints with heat-shrink or tape, then fix the socket with a dab of hot glue.</span></label></li>
+              <li data-k="8"><label><input type="checkbox"><span><b>Power on</b>, plug in your earphones and do the test below.</span></label></li>
+            </ol>
+          </div>
+
+          <div class="hsbox" style="margin-top:12px">
+            <h4><span class="num">5</span> Test it</h4>
+            <div class="hstest">
+              <div><b>Hear</b><small>Click <i>Play test voice</i> in Call audio controls below. You should hear a voice in the earphones. If not, switch the <b>Audio output path</b>.</small></div>
+              <div><b>Talk</b><small>Call your own mobile from <b>Phone</b> and speak. The other phone should hear you clearly. Adjust <b>Microphone sensitivity</b>.</small></div>
+              <div><b>Tune</b><small>Set <b>volume</b> to a comfortable level (4–6 is typical with the 22 Ω resistor).</small></div>
+            </div>
+            <table class="tbl" style="margin-top:12px">
+              <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+              <tbody>
+                <tr><td>No sound in the earphones</td><td>Switch <b>Audio output path</b>, raise volume, check the capacitor's + leg is on SPK +</td></tr>
+                <tr><td>Sound in one ear only</td><td>L and R are not joined on the socket</td></tr>
+                <tr><td>Other person can't hear you</td><td>Check M → MIC + and G → MIC −. Very old Nokia/Sony earphones (OMTP) swap G and M, so try a newer pair.</td></tr>
+                <tr><td>Hum or buzz</td><td>Shorten the wires and make sure G is connected to board GND</td></tr>
+                <tr><td>Too loud or distorted</td><td>Lower volume, or use a 33–47 Ω resistor instead of 22 Ω</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
         <div class="card" id="audCtl">
           <div class="cardhead"><span class="cicon"><i data-lucide="sliders-horizontal"></i></span><div style="flex:1"><h3>Call audio controls</h3><small>Changes apply to the 4G module instantly, even during a call</small></div><span class="rs" id="acState">Not loaded</span></div>
           <div class="grid2">
@@ -1135,61 +1235,11 @@ details.manual{margin-top:12px}details.manual summary{cursor:pointer;color:var(-
           </div>
         </div>
 
-        <div class="card audopt" data-o="d" hidden>
-          <h3>Headset jack: plug in any wired earphones with mic <span class="tag">Easy · ~₹150</span></h3>
-          <p class="sub">Add a standard <b>3.5 mm 4-pole (TRRS) socket</b> to the board's SPK and MIC pads. Then any phone earphones with a mic (the kind that came with your phone) plug straight in, like a landline handset.</p>
-          <div id="wireD"></div>
-          <div class="grid2 top">
-            <div>
-              <h4>Parts</h4>
-              <ul class="plain">
-                <li>1 × <b>3.5 mm TRRS female jack breakout</b>, 4 pins marked L / R / G / M (search "TRRS audio jack module")</li>
-                <li>1 × <b>47 µF</b> electrolytic capacitor (16 V or more)</li>
-                <li>1 × <b>22 Ω</b> resistor (¼ W)</li>
-                <li>4 thin wires, soldering iron, a little heat-shrink</li>
-                <li>Any <b>wired earphones with mic</b> (3.5 mm, 4-pole)</li>
-              </ul>
-            </div>
-            <div>
-              <h4>What each part does</h4>
-              <ul class="plain">
-                <li><b>The capacitor</b> lets the voice through but blocks the steady DC voltage, so your earphones don't get a constant current.</li>
-                <li><b>The resistor</b> limits the volume and protects both your ears and the module's speaker amplifier.</li>
-                <li><b>Both ears (L and R) are joined</b>, so you hear the call in both.</li>
-              </ul>
-            </div>
-          </div>
-          <h4>Steps</h4>
-          <ol class="plain">
-            <li>Power off the board. Turn it over: the <b>SPK</b> and <b>MIC</b> pad pairs are near the SIM slot, each with a <b>+</b> mark.</li>
-            <li><b>SPK +</b> → capacitor <b>+ leg</b>. Capacitor − leg → 22 Ω resistor → jack <b>L</b> and <b>R</b> (bridge L and R together).</li>
-            <li>Jack <b>G</b> (ground) → board <b>GND</b> (header pin 41 or 43) <b>and</b> → <b>MIC −</b> pad.</li>
-            <li>Jack <b>M</b> (mic) → <b>MIC +</b> pad.</li>
-            <li><b>Leave SPK − unconnected.</b> Never connect it to ground: it's an active output, and grounding it can damage the amplifier.</li>
-            <li>Power on, plug in your earphones, then use <b>Call audio controls</b> above: <i>Play test voice</i>, choose the path that works, set volume and mic.</li>
-          </ol>
-          <div class="note" style="display:flex;gap:10px;margin-top:10px"><i data-lucide="info"></i><div><b>Earphone standard:</b> almost all phone earphones since 2012 use the <b>CTIA</b> layout (L, R, Ground, Mic), which is what the steps above assume. Very old Nokia/Sony earphones (OMTP) swap Ground and Mic. If the mic doesn't work, that's usually why. Plain earphones without a mic also work for listening.</div></div>
-        </div>
-
-        <div class="card" id="audBt">
-          <div class="cardhead"><span class="cicon"><i data-lucide="bluetooth"></i></span><div><h3>Bluetooth headset?</h3><small>What the board's "Bluetooth 5.0 LE" can and can't do</small></div></div>
-          <div class="btgrid">
-            <div class="btno"><b><i data-lucide="circle-x"></i> Not directly on this board</b>
-              <ul class="plain">
-                <li>The ESP32-S3 only has <b>Bluetooth Low Energy</b> (for sensors and data). Handsfree headsets and car kits use <b>Bluetooth Classic</b> (the "HFP" call profile), which this chip doesn't have.</li>
-                <li>New "LE Audio" earbuds need radio features the ESP32-S3 lacks too.</li>
-                <li>The ESP32 also has no audio wires to the 4G module, so it can't carry call sound.</li>
-              </ul></div>
-            <div class="btyes"><b><i data-lucide="circle-check"></i> What works today</b>
-              <ul class="plain">
-                <li><b>Pair the Bluetooth headset with your PC</b>, then wire the board to a USB sound card (option C, "Through this PC").</li>
-                <li>In the <b>PC audio bridge</b>, pick the headset as <i>PC speaker</i> and <i>PC microphone</i>. You talk on GSM calls through your Bluetooth headset.</li>
-                <li>Or use the <b>headset jack</b> option for a wired headset with no PC involved.</li>
-              </ul></div>
-          </div>
-        </div>
+        <details class="hsec" id="audOther"><summary><span><i data-lucide="layers"></i></span> Other ways to talk <small class="muted" style="font-weight:500;margin-left:6px">speaker, PC, Wi-Fi</small></summary>
+          <div class="seg" id="audSeg"><button data-o="a" class="on"><i data-lucide="speaker"></i> Speaker + mic</button><button data-o="b"><i data-lucide="monitor-speaker"></i> Through this PC</button><button data-o="c"><i data-lucide="wifi"></i> Over Wi-Fi</button></div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
         <div class="card audopt" data-o="a">
-          <h3>Option A: speaker + mic straight on the board <span class="tag">Easiest · ~₹100</span></h3>
+          <h3>Speaker + mic on the board <span class="tag">Easiest · ~₹100</span></h3>
           <p class="sub">You talk at the board, like a desk phone. The app still dials, answers and hangs up.</p>
           <div class="boardimg"><img src="/doc/image-back.png" alt="Board back: SPK and MIC pads"><div id="wireA" style="flex:1;min-width:280px"></div></div>
           <h4>Parts</h4>
@@ -1202,7 +1252,7 @@ details.manual{margin-top:12px}details.manual summary{cursor:pointer;color:var(-
         </div>
 
         <div class="card audopt" data-o="b" hidden>
-          <h3>Option C: talk through this PC <span class="tag">Recommended for AI calls · ~₹250</span></h3>
+          <h3>Through this PC (USB sound card) <span class="tag">Recommended for AI calls · ~₹250</span></h3>
           <p class="sub">A cheap USB sound card carries call audio to your laptop. The bridge below plays it on your PC speakers and sends your PC mic into the call. Use headphones to avoid echo.</p>
           <div id="wireB"></div>
           <h4>Parts</h4>
@@ -1228,12 +1278,14 @@ details.manual{margin-top:12px}details.manual summary{cursor:pointer;color:var(-
         </div>
 
         <div class="card audopt" data-o="c" hidden>
-          <h3>Option D: voice over Wi-Fi, no laptop <span class="tag">Advanced · ~₹350</span></h3>
+          <h3>Over Wi-Fi with an audio codec <span class="tag">Advanced · ~₹350</span></h3>
           <p class="sub">An I2S audio codec board sits between the ESP32 and the SPK/MIC pads. The ESP32 streams the call audio over Wi-Fi to any browser, even your phone. Needs a firmware update, which I'll build once you have the parts.</p>
           <div id="wireC"></div>
           <h4>Parts</h4>
           <ul class="plain"><li>1 × <b>ES8388</b> or <b>WM8960</b> audio codec module with line-in and line-out, 3.3 V</li><li>2 × 10 µF capacitors, 10 kΩ + 100 Ω resistors (same mic divider as option B)</li><li>Dupont jumper wires</li></ul>
         </div>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -3179,7 +3231,6 @@ setTab(lsGet('setTab')||'device');
 
 
 // ---------------- headset jack diagram + call audio controls
-(()=>{ const bt=$('#audBt'); if(bt) bt.parentNode.appendChild(bt); })();
 $('#wireD').innerHTML=wiring('Board','3.5 mm TRRS jack',[
   {l:'SPK +',r:'L + R (both ears)',p:'47µF (+ to board) → 22Ω',c:'red'},
   {l:'GND (pin 41/43)',r:'G  (ground)'},
@@ -3227,6 +3278,24 @@ function renderKpis(){
     $('#kBulk').textContent=`${sent}/${j.results.length} sent`; $('#kBulkS').textContent=`${j.name}${f?` · ${f} failed`:''} · ${j.status}`; }
 }
 async function loadHomeData(){ try{ const [a,b]=await Promise.all([api('campaigns_list'),api('bulk_list')]); C.campaigns=a.campaigns; BK.jobs=b.jobs; renderKpis(); renderCharts(); }catch{} }
+
+
+// ---------------- headset guide: plug drawing + step checklist
+$('#plugSvg').innerHTML=`<svg viewBox="0 0 420 120" class="plug" role="img" aria-label="3.5 mm TRRS plug: tip left ear, ring 1 right ear, ring 2 ground, sleeve microphone">
+  <rect x="300" y="38" width="110" height="44" rx="10" class="pbody"/>
+  <rect x="236" y="44" width="68" height="32" rx="3" class="pmetal"/><text x="270" y="100" class="pl">Sleeve</text><text x="270" y="114" class="pv m">M · Mic</text>
+  <rect x="226" y="44" width="10" height="32" class="pins"/>
+  <rect x="168" y="44" width="58" height="32" class="pmetal"/><text x="197" y="28" class="pl">Ring 2</text><text x="197" y="14" class="pv g">G · Ground</text>
+  <rect x="158" y="44" width="10" height="32" class="pins"/>
+  <rect x="100" y="44" width="58" height="32" class="pmetal"/><text x="129" y="100" class="pl">Ring 1</text><text x="129" y="114" class="pv r">R · Right</text>
+  <rect x="90" y="44" width="10" height="32" class="pins"/>
+  <path d="M90 44 H48 Q22 60 48 76 H90 Z" class="pmetal"/><text x="56" y="28" class="pl">Tip</text><text x="56" y="14" class="pv l">L · Left</text>
+</svg>`;
+function hsLoad(){ let done={}; try{ done=JSON.parse(lsGet('hsSteps')||'{}'); }catch{}
+  document.querySelectorAll('#hsSteps li').forEach(li=>{ const cb=li.querySelector('input'); cb.checked=!!done[li.dataset.k]; li.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{ done[li.dataset.k]=cb.checked; li.classList.toggle('done',cb.checked); lsSet('hsSteps',JSON.stringify(done)); hsProg(); }; }); hsProg(); }
+function hsProg(){ const all=document.querySelectorAll('#hsSteps li').length, n=document.querySelectorAll('#hsSteps li.done').length; $('#hsProg').textContent=n?`${n}/${all} done`:''; }
+hsLoad();
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();
