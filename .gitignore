@@ -1,0 +1,19 @@
+# personal data: messages, numbers, call logs, settings
+app/data/
+logs/
+
+# environments / build tools (recreated by run.bat and tools/build_firmware.py)
+app/.venv/
+tools/.pio-venv/
+firmware/.pio/
+__pycache__/
+*.pyc
+
+# editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# photo shows the module IMEI
+doc/image.png

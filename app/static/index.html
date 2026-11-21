@@ -1,0 +1,1297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>B2Wave</title>
+<style>
+:root{
+  --bg:#f4f5f7;--panel:#fff;--panel2:#f0f2f5;--line:#e3e6eb;--text:#14171c;--muted:#6b7280;
+  --accent:#2563eb;--accent-ink:#fff;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--bubble-out:#2563eb;--bubble-in:#eceff3;
+  --radius:14px;--shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05)
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0d0f13;--panel:#151820;--panel2:#1b1f29;--line:#262b36;--text:#e8eaef;--muted:#8b93a7;
+  --accent:#3b82f6;--bubble-out:#2f6fe4;--bubble-in:#222734;--shadow:none}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,textarea,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+.app{display:grid;grid-template-columns:76px 1fr;height:100vh;height:100dvh}
+nav{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px}
+nav .logo{width:40px;height:40px;border-radius:12px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;margin-bottom:12px}
+nav button{width:58px;padding:8px 0;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);position:relative}
+nav button svg{width:22px;height:22px}
+nav button.on{background:var(--panel2);color:var(--accent)}
+nav .badge{position:absolute;top:4px;right:10px;background:var(--bad);color:#fff;font-size:10px;border-radius:9px;padding:1px 5px;min-width:16px}
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+header{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:17px;margin:0 auto 0 0}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:5px 10px;border-radius:20px;background:var(--panel2);color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.bars i{width:3px;background:var(--line);border-radius:1px}
+.bars i.on{background:var(--ok)}
+.banner{padding:10px 18px;background:#fef3c7;color:#92400e;font-size:14px;display:none}
+@media (prefers-color-scheme:dark){.banner{background:#3a2a0a;color:#fbbf24}}
+.view{flex:1;min-height:0;display:none}
+.view.on{display:flex}
+/* messages */
+.threads{width:320px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+.threads .top{padding:12px;display:flex;gap:8px}
+.list{overflow:auto;flex:1}
+.thread{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.thread:hover,.thread.on{background:var(--panel2)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:600;flex:none;font-size:14px}
+.thread .meta{min-width:0;flex:1}
+.thread .row{display:flex;justify-content:space-between;gap:8px}
+.thread b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thread small{color:var(--muted);font-size:12px;white-space:nowrap}
+.thread p{margin:2px 0 0;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thread.unread b,.thread.unread p{color:var(--text);font-weight:700}
+.conv{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.conv .head{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.conv .head input{max-width:280px}
+.conv .head .grow{flex:1;min-width:0}
+.bubbles{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:6px}
+.b{max-width:72%;padding:8px 12px;border-radius:16px;white-space:pre-wrap;word-wrap:break-word;position:relative}
+.b.in{background:var(--bubble-in);align-self:flex-start;border-bottom-left-radius:4px}
+.b.out{background:var(--bubble-out);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.b .t{display:block;font-size:11px;opacity:.7;margin-top:3px;text-align:right}
+.b.failed{background:var(--bad)}
+.b .x{display:none;position:absolute;top:-8px;right:-8px;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:50%;width:22px;height:22px;font-size:12px}
+.b:hover .x{display:block}
+.day{align-self:center;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--panel);align-items:flex-end}
+.composer textarea{resize:none;max-height:140px;min-height:44px}
+.counter{font-size:11px;color:var(--muted);text-align:right;padding:0 14px 6px;background:var(--panel)}
+.btn{background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:10px;font-weight:600;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:var(--panel2);color:var(--text)}
+.btn.red{background:var(--bad);color:#fff}
+.btn.green{background:var(--ok);color:#fff}
+.empty{margin:auto;color:var(--muted);text-align:center;padding:30px}
+/* phone */
+.phone{flex:1;display:flex;gap:18px;padding:18px;overflow:auto;flex-wrap:wrap;align-content:flex-start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.dialer{width:340px;max-width:100%}
+.dialer input{font-size:26px;text-align:center;letter-spacing:1px;border:0;background:none;padding:8px 0}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.keys button{height:62px;border-radius:50%;background:var(--panel2);font-size:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;aspect-ratio:1;justify-self:center}
+.keys button small{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px}
+.keys button:active{background:var(--line)}
+.callrow{display:flex;justify-content:center;gap:16px;align-items:center}
+.round{width:62px;height:62px;border-radius:50%;display:grid;place-items:center}
+.round svg{width:26px;height:26px}
+.recent{flex:1;min-width:280px}
+.recent h3,.settings h3{margin:0 0 10px;font-size:15px}
+.callitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.callitem .meta{flex:1;min-width:0}
+.callitem small{color:var(--muted)}
+.miss{color:var(--bad)}
+/* call overlay */
+.overlay{position:fixed;inset:0;background:rgba(5,8,15,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.overlay.on{display:flex}
+.callcard{background:var(--panel);border-radius:22px;padding:28px;width:340px;max-width:100%;text-align:center}
+.callcard .avatar{width:84px;height:84px;font-size:30px;margin:0 auto 12px}
+.callcard h2{margin:0;font-size:24px}
+.callcard .st{color:var(--muted);margin:6px 0 20px}
+.callcard .keys button{height:50px;font-size:20px}
+.vol{display:flex;align-items:center;gap:10px;margin:8px 0 16px;color:var(--muted);font-size:13px}
+.pulse{animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,.6)}70%{box-shadow:0 0 0 18px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+/* console */
+.consolev{flex:1;display:flex;flex-direction:column;min-height:0;padding:18px;gap:10px}
+.log{flex:1;overflow:auto;background:#0b0d11;color:#cdd3de;border-radius:12px;padding:12px;font:13px/1.5 ui-monospace,Consolas,monospace}
+.log .tx{color:#7dd3fc}.log .rx{color:#cdd3de}.log .err{color:#f87171}.log .ts{color:#4b5563;margin-right:8px}
+.consolev form{display:flex;gap:8px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick button{background:var(--panel2);padding:5px 10px;border-radius:8px;font-size:12px;font-family:ui-monospace,Consolas,monospace}
+/* settings */
+.settings{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:16px;max-width:760px}
+.settings label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.seg{display:flex;background:var(--panel2);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;padding:8px;border-radius:8px;color:var(--muted)}
+.seg button.on{background:var(--panel);color:var(--text);box-shadow:var(--shadow)}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:14px}
+.kv span:nth-child(odd){color:var(--muted)}
+.pick{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:6px;gap:10px}
+/* setup wizard */
+.wiz{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:16px;max-width:860px;width:100%}
+.steps{display:flex;gap:6px}
+.steps div{flex:1;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.steps div::before{content:"";height:4px;border-radius:2px;background:var(--line)}
+.steps div.done::before,.steps div.cur::before{background:var(--accent)}
+.steps div.cur{color:var(--text);font-weight:600}
+.wiz h2{margin:0 0 4px;font-size:20px}
+.wiz .sub{color:var(--muted);margin:0 0 16px}
+.checks{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:10px}
+.checks li{display:flex;gap:10px;align-items:flex-start}
+.checks .ic{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:13px;background:var(--panel2);color:var(--muted)}
+.checks .ic.ok{background:var(--ok);color:#fff}.checks .ic.bad{background:var(--bad);color:#fff}.checks .ic.warn{background:var(--warn);color:#fff}
+.checks .ic.run{border:2px solid var(--accent);border-top-color:transparent;background:none;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.checks small{display:block;color:var(--muted)}
+.boardimg{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.boardimg img{width:260px;max-width:100%;border-radius:12px;border:1px solid var(--line);background:#fff}
+.boardimg .checks{flex:1;min-width:240px}
+.prog{height:10px;background:var(--panel2);border-radius:5px;overflow:hidden;margin:12px 0}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.wlog{background:#0b0d11;color:#9aa4b5;font:12px/1.5 ui-monospace,Consolas,monospace;border-radius:10px;padding:10px;max-height:160px;overflow:auto;margin-top:10px;white-space:pre-wrap}
+.wlog:empty{display:none}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice .card{cursor:pointer;border-width:2px}
+.choice .card.on{border-color:var(--accent)}
+.choice .card h3{margin:0 0 4px;font-size:16px}
+.choice .card p{margin:0;color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:11px;background:var(--accent);color:#fff;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.note{padding:10px 12px;border-radius:10px;background:var(--panel2);font-size:14px;margin-top:12px}
+.note.bad{background:#fee2e2;color:#991b1b}.note.good{background:#dcfce7;color:#166534}
+@media (prefers-color-scheme:dark){.note.bad{background:#3b1212;color:#fca5a5}.note.good{background:#0f2e1a;color:#86efac}}
+@media (max-width:760px){.choice{grid-template-columns:1fr}.steps div{font-size:0}.wiz{padding:14px}}
+
+/* audio + campaigns */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.grid2.top{gap:16px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wiz label,.card label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+label.chk{display:flex;align-items:center;gap:8px;color:var(--text);margin-top:12px}
+label.chk input{width:auto}
+.wiz h4{margin:16px 0 6px;font-size:14px}
+ul.plain,ol.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.wire{width:100%;height:auto;max-width:680px;display:block;margin:6px 0}
+.wbox{fill:var(--panel2);stroke:var(--line)}
+.wt{fill:var(--text);font:600 14px system-ui;text-anchor:middle}
+.wl{fill:var(--text);font:13px system-ui}
+.wp{fill:var(--text);font:11px system-ui}
+.wpart{fill:var(--panel);stroke:var(--line)}
+.wline{stroke:var(--muted);stroke-width:2.5}.wdot{fill:var(--muted)}
+.wline.red{stroke:#dc2626}.wdot.red{fill:#dc2626}.wline.blue{stroke:#2563eb}.wdot.blue{fill:#2563eb}
+.wline.warn{stroke:#d97706;stroke-dasharray:6 5}.wdot.warn{fill:#d97706}
+.meters{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
+.meter{height:8px;background:var(--panel);border-radius:4px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .08s}
+.flist{display:flex;flex-direction:column;gap:6px}
+.frow{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+.frow>div{flex:1;min-width:0}.frow small{display:block;color:var(--muted);font-size:12px}
+.frow b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn.sm{padding:6px 10px;font-size:13px}
+.dfeed{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.dkey{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.dkey small{display:block;color:var(--muted);font-size:12px}
+.kbig{width:38px;height:38px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700}
+.camp{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.camp summary{cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.cst{font-size:12px;padding:2px 8px;border-radius:10px;background:var(--panel2);color:var(--muted)}.cst.run{background:var(--accent);color:#fff}
+.kchip{font-size:13px;padding:4px 10px;border-radius:14px;background:var(--panel2)}
+.tblwrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;color:var(--muted);font-weight:500;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.tbl td.keys{font:600 16px ui-monospace,Consolas,monospace;letter-spacing:2px}
+.rs{font-size:12px;padding:2px 8px;border-radius:10px;background:var(--panel2);white-space:nowrap}
+.rs.ok{background:#dcfce7;color:#166534}.rs.bad{background:#fee2e2;color:#991b1b}.rs.run{background:#dbeafe;color:#1e40af}
+@media (prefers-color-scheme:dark){.rs.ok{background:#0f2e1a;color:#86efac}.rs.bad{background:#3b1212;color:#fca5a5}.rs.run{background:#132447;color:#93c5fd}}
+@media (max-width:860px){.grid2,.grid2.top{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
+/* B2Wave brand */
+nav .logo{background:linear-gradient(135deg,#2563eb,#7c3aed);font-size:13px;letter-spacing:-.5px}
+header h1 small{font-weight:500;color:var(--muted);font-size:13px;margin-left:8px}
+nav{overflow-y:auto}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;opacity:0;transition:.25s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1}
+.mobile-back{display:none}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  nav{order:2;flex-direction:row;justify-content:space-around;padding:6px;border-right:0;border-top:1px solid var(--line)}
+  nav .logo{display:none}
+  .threads{width:100%;border-right:0}
+  #v-messages.in-thread .threads{display:none}
+  #v-messages:not(.in-thread) .conv{display:none}
+  .mobile-back{display:inline-flex}
+  header{padding:10px 14px}
+  .phone,.settings,.consolev{padding:14px}
+  .b{max-width:85%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav>
+    <div class="logo" title="B2Wave">B2W</div>
+    <button data-v="setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Setup</button>
+    <button data-v="messages" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="badge" id="unreadBadge" hidden></span></button>
+    <button data-v="phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Phone</button>
+    <button data-v="campaigns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Campaigns</button>
+    <button data-v="audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Audio</button>
+    <button data-v="console"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 17 6-6-6-6M12 19h8"/></svg>Console</button>
+    <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+  </nav>
+
+  <main>
+    <header>
+      <h1 id="title">Messages</h1>
+      <span class="chip"><span class="dot" id="connDot"></span><span id="connText">Offline</span></span>
+      <span class="chip" title="Signal"><span class="bars" id="bars"><i style="height:3px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i></span><span id="opText">No network</span></span>
+    </header>
+    <div class="banner" id="banner"></div>
+
+    <!-- MESSAGES -->
+    <section class="view on" id="v-messages">
+      <div class="threads">
+        <div class="top"><input id="search" placeholder="Search"><button class="btn" id="newMsg">New</button></div>
+        <div class="list" id="threadList"></div>
+      </div>
+      <div class="conv">
+        <div class="head">
+          <button class="btn ghost mobile-back" id="backBtn">&larr;</button>
+          <div class="grow" id="convTitle"><b>Select a conversation</b></div>
+          <button class="btn ghost" id="convCall" hidden>Call</button>
+          <button class="btn ghost" id="convDel" hidden>Delete</button>
+        </div>
+        <div class="bubbles" id="bubbles"><div class="empty">Pick a conversation or tap <b>New</b> to send an SMS.</div></div>
+        <div class="counter" id="counter"></div>
+        <form class="composer" id="composer">
+          <textarea id="msgText" rows="1" placeholder="Type a message"></textarea>
+          <button class="btn" id="sendBtn">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- PHONE -->
+    <section class="view" id="v-phone">
+      <div class="phone">
+        <div class="card dialer">
+          <input id="dialNum" placeholder="Enter number" inputmode="tel" autocomplete="off">
+          <div class="keys" id="keys"></div>
+          <div class="callrow">
+            <button class="round btn green" id="dialBtn" title="Call"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></button>
+            <button class="round btn ghost" id="delBtn" title="Delete">&#9003;</button>
+          </div>
+        </div>
+        <div class="card recent">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>Recent calls</h3><button class="btn ghost" id="clearCalls" style="padding:6px 10px;font-size:13px">Clear</button></div>
+          <div id="callList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONSOLE -->
+    <section class="view" id="v-console">
+      <div class="consolev">
+        <div class="quick" id="quick"></div>
+        <div class="log" id="log"></div>
+        <form id="atForm"><input id="atCmd" placeholder="AT command, e.g. AT+CSQ" autocomplete="off" spellcheck="false"><button class="btn">Send</button></form>
+      </div>
+    </section>
+
+    <!-- SETUP WIZARD -->
+    <section class="view" id="v-setup">
+      <div class="wiz">
+        <div class="steps" id="steps"><div>1 · Connect</div><div>2 · Install</div><div>3 · Test</div><div>4 · Link</div><div>5 · Done</div></div>
+
+        <!-- step 1 -->
+        <div class="card wstep" data-s="1">
+          <h2>Connect your board</h2>
+          <p class="sub">No Arduino IDE needed. This page installs everything for you.</p>
+          <div class="boardimg">
+            <img src="/doc/image-front.png" alt="Board pinout">
+            <ul class="checks">
+              <li><span class="ic">1</span><div>Insert a <b>nano SIM</b> on the back (no PIN lock)<small>Gold contacts facing the board</small></div></li>
+              <li><span class="ic">2</span><div>Attach the <b>LTE antenna</b> to the "LTE" connector<small>Small gold U.FL connector near the SIMCom chip</small></div></li>
+              <li><span class="ic">3</span><div>Plug USB-C into the <b>ESP_UART</b> port<small>The USB-C port nearer the SIMCom A7672S chip (silkscreen "ESP_UART")</small></div></li>
+              <li><span class="ic">4</span><div>Use a <b>data</b> USB cable<small>Some charge-only cables don't carry data</small></div></li>
+              <li><span class="ic">5</span><div>Turn on the Wi-Fi hotspot <b>B2-ios</b> with password <b>12345678</b><small>iPhone: Settings &gt; Personal Hotspot, and turn on <b>Maximize Compatibility</b> (the board needs 2.4 GHz). Connect this PC to B2-ios too.</small></div></li>
+            </ul>
+          </div>
+          <div class="actions"><button class="btn" id="wDetect">Detect board</button><button class="btn ghost" id="wSkip">Skip setup</button></div>
+          <div id="wDetectOut"></div>
+          <div class="wlog" id="wDetectLog"></div>
+        </div>
+
+        <!-- step 2 -->
+        <div class="card wstep" data-s="2" hidden>
+          <h2>Install firmware</h2>
+          <p class="sub" id="wFwSub"></p>
+          <div class="prog"><i id="wProg"></i></div>
+          <div id="wFlashMsg" style="color:var(--muted);font-size:14px">Ready</div>
+          <div class="actions"><button class="btn" id="wFlash">Install firmware</button><button class="btn ghost" id="wFlashSkip" hidden>Skip, already installed</button><button class="btn ghost" id="wBack2">Back</button></div>
+          <div id="wFlashOut"></div>
+          <div class="wlog" id="wFlashLog"></div>
+        </div>
+
+        <!-- step 3 -->
+        <div class="card wstep" data-s="3" hidden>
+          <h2>Testing, layer by layer</h2>
+          <p class="sub">Wi-Fi first, then the 4G module, then the SIM and network. The first failing layer is where the problem is.</p>
+          <ul class="checks" id="wTests"></ul>
+          <div id="wTestOut"></div>
+          <div id="wUsbTest" hidden class="card" style="margin-top:12px;border:2px solid var(--accent)">
+            <h3 style="margin:0 0 4px">Next test: check the 4G module over its own USB</h3>
+            <p class="sub" style="margin:0 0 12px">This tests the module and your SIM directly, without the ESP32. Follow the steps in order. Each one ticks when it's detected.</p>
+            <ul class="checks" id="wUsbSteps">
+              <li><span class="ic" id="uS1">1</span><div><b>Keep cable 1 where it is</b> (ESP_UART port to laptop)<small id="uS1t">Checking…</small></div></li>
+              <li><span class="ic" id="uS2">2</span><div><b>Slide the USB_SELECT switch to "4G"</b><small>The tiny switch between the two USB-C ports, marked ESP / 4G. Push it toward the "4G" label. Use a pen tip if needed.</small></div></li>
+              <li><span class="ic" id="uS3">3</span><div><b>Plug cable 2</b> from the <b>4G_USB</b> port into another laptop USB port<small>4G_USB is the USB-C port nearer the ESP32 module. Use a data cable.</small></div></li>
+              <li><span class="ic run" id="uS4"></span><div><b>4G module detected on USB</b><small id="uS4t">Waiting… (Windows takes about 10 s to set up the module the first time)</small></div></li>
+              <li><span class="ic" id="uS5">5</span><div><b>Module + SIM test</b><small id="uS5t">Runs automatically once step 4 ticks</small></div></li>
+            </ul>
+            <div id="wUsbTestState"></div>
+          </div>
+          <div class="actions">
+            <button class="btn" id="wTestNext" disabled>Continue</button>
+            <button class="btn ghost" id="wRetest">Run tests again</button>
+            <button class="btn ghost" id="wReset4g">Restart 4G module</button>
+            <button class="btn ghost" id="wDiag">Diagnostics report</button>
+          </div>
+          <pre class="wlog" id="wDiagOut" style="max-height:320px"></pre>
+        </div>
+
+        <!-- step 4 -->
+        <div class="card wstep" data-s="4" hidden>
+          <h2>How should the app reach the board?</h2>
+          <p class="sub">Pick one. You can change this later in Settings.</p>
+          <div class="choice">
+            <div class="card on" data-c="wifi"><h3>Wi-Fi <span class="tag">Recommended</span></h3><p>The board joins your Wi-Fi. Keep it anywhere with power, and the USB cable isn't needed after this.</p></div>
+            <div class="card" data-c="usb"><h3>USB cable</h3><p>Move the cable to the board's 4G_USB port. The app talks to the 4G module directly.</p></div>
+          </div>
+          <div id="wWifi" style="margin-top:16px">
+            <label style="font-size:13px;color:var(--muted)">Wi-Fi network</label>
+            <div style="display:flex;gap:8px;margin-top:4px"><select id="wSsid"><option value="">Scanning…</option></select><button class="btn ghost" id="wRescan">Rescan</button></div>
+            <input id="wSsidManual" value="B2-ios" placeholder="Or type network name (hidden networks)" style="margin-top:8px">
+            <input id="wPass" type="password" value="12345678" placeholder="Wi-Fi password" style="margin-top:8px">
+            <div class="actions"><button class="btn" id="wJoin">Connect board to Wi-Fi</button></div>
+          </div>
+          <div id="wUsb" hidden style="margin-top:16px">
+            <ul class="checks">
+              <li><span class="ic">1</span><div>Slide the <b>USB_SELECT</b> switch to <b>4G</b><small>The small switch between the two USB-C ports</small></div></li>
+              <li><span class="ic">2</span><div>Move the cable to the <b>4G_USB</b> port<small>The USB-C port nearer the ESP32 module (silkscreen "4G_USB")</small></div></li>
+              <li><span class="ic" id="wUsbIc">3</span><div id="wUsbTxt">Waiting for the 4G module to appear…</div></li>
+            </ul>
+          </div>
+          <div id="wLinkOut"></div>
+        </div>
+
+        <!-- step 5 -->
+        <div class="card wstep" data-s="5" hidden>
+          <h2>All set 🎉</h2>
+          <p class="sub" id="wDoneSub">Connecting the app to your board…</p>
+          <ul class="checks" id="wDoneChecks"></ul>
+          <div class="actions"><button class="btn" id="wGoMsg">Open Messages</button><button class="btn ghost" id="wGoPhone">Open Phone</button><button class="btn ghost" id="wRestart">Run setup again</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUDIO / WIRING -->
+    <section class="view" id="v-audio">
+      <div class="wiz">
+        <div class="card">
+          <h2>Talk on calls</h2>
+          <p class="sub" style="margin-bottom:8px">The A7672S firmware on this board (A131B01A7672M6) can't send call audio over USB. Voice only comes out of the <b>SPK</b> and <b>MIC</b> pads on the back of the board. Pick one of these setups.</p>
+          <div class="seg" id="audSeg"><button data-o="a" class="on">A · Speaker + mic</button><button data-o="b">B · Through this PC</button><button data-o="c">C · Over Wi-Fi</button></div>
+        </div>
+
+        <div class="card audopt" data-o="a">
+          <h3>Option A: speaker + mic straight on the board <span class="tag">Easiest · ~₹100</span></h3>
+          <p class="sub">You talk at the board, like a desk phone. The app still dials, answers and hangs up.</p>
+          <div class="boardimg"><img src="/doc/image-back.png" alt="Board back: SPK and MIC pads"><div id="wireA" style="flex:1;min-width:280px"></div></div>
+          <h4>Parts</h4>
+          <ul class="plain"><li>1 × small speaker, <b>8–32 Ω, 0.5–1 W</b> (any old phone or laptop speaker works)</li><li>1 × <b>electret condenser mic</b> capsule (2-pin, 6–9 mm)</li><li>Thin wires, a soldering iron, or a 2-pin header with jumper wires</li></ul>
+          <h4>Steps</h4>
+          <ol class="plain"><li>Turn the board over. Near the SIM slot there are two pad pairs marked <b>SPK</b> and <b>MIC</b>, each with a <b>+</b>.</li>
+          <li>Solder the speaker: red wire to <b>SPK +</b>, black wire to the other SPK pad.</li>
+          <li>Solder the mic: the mic leg <b>not</b> connected to its metal case goes to <b>MIC +</b>. The case leg goes to the other MIC pad.</li>
+          <li>Make a call. Adjust loudness with the volume slider on the call screen.</li></ol>
+        </div>
+
+        <div class="card audopt" data-o="b" hidden>
+          <h3>Option B: talk through this PC <span class="tag">Recommended · ~₹250</span></h3>
+          <p class="sub">A cheap USB sound card carries call audio to your laptop. The bridge below plays it on your PC speakers and sends your PC mic into the call. Use headphones to avoid echo.</p>
+          <div id="wireB"></div>
+          <h4>Parts</h4>
+          <ul class="plain"><li>1 × <b>USB sound card</b> with separate mic-in and headphone-out (the ₹150–300 "USB 7.1" dongle)</li><li>2 × <b>3.5 mm mono/stereo cables</b> (cut one end) or 3.5 mm plug breakouts</li><li>2 × <b>10 µF</b> electrolytic capacitors, 1 × <b>4.7 kΩ</b>, 1 × <b>10 kΩ</b>, 1 × <b>100 Ω</b> resistor</li></ul>
+          <h4>Steps</h4>
+          <ol class="plain"><li><b>Call audio to PC:</b> board <b>SPK +</b> → 10 µF (+ leg to the board) → 4.7 kΩ → sound card <b>MIC-IN tip</b>. Cable <b>sleeve</b> → board <b>GND</b> (header pin 41 or 43). <b>Leave SPK − unconnected.</b> Never connect it to GND.</li>
+          <li><b>PC voice into the call:</b> sound card <b>HEADPHONE tip</b> → 10 µF → 10 kΩ → board <b>MIC +</b>. Also connect <b>100 Ω from MIC + to GND</b> (this drops the level about 100×). Cable sleeve → GND.</li>
+          <li>Plug the sound card into the laptop. In the bridge below, choose: <i>Call audio in</i> = USB sound card mic, <i>PC speaker</i> = your headphones, <i>PC mic</i> = your laptop mic, <i>Into call</i> = USB sound card output. Then click <b>Start bridge</b>.</li></ol>
+
+          <div class="card" style="margin-top:14px;background:var(--panel2)">
+            <h3 style="margin-top:0">PC audio bridge</h3>
+            <div class="grid2">
+              <div><label>Call audio in (from board SPK)</label><select id="bCallIn"></select></div>
+              <div><label>PC speaker / headphones</label><select id="bPcOut"></select></div>
+              <div><label>PC microphone</label><select id="bPcMic"></select></div>
+              <div><label>Into call (to board MIC)</label><select id="bCallOut"></select></div>
+            </div>
+            <div class="meters"><span>Caller</span><div class="meter"><i id="mIn"></i></div><span>You</span><div class="meter"><i id="mOut"></i></div></div>
+            <label class="chk"><input type="checkbox" id="bAuto"> Start automatically when a call connects</label>
+            <div class="actions"><button class="btn" id="bStart">Start bridge</button><button class="btn ghost" id="bStop" disabled>Stop</button><button class="btn ghost" id="bDevs">Refresh devices</button></div>
+            <div id="bNote" style="color:var(--muted);font-size:13px;margin-top:8px"></div>
+          </div>
+        </div>
+
+        <div class="card audopt" data-o="c" hidden>
+          <h3>Option C: voice over Wi-Fi, no laptop <span class="tag">Advanced · ~₹350</span></h3>
+          <p class="sub">An I2S audio codec board sits between the ESP32 and the SPK/MIC pads. The ESP32 streams the call audio over Wi-Fi to any browser, even your phone. Needs a firmware update, which I'll build once you have the parts.</p>
+          <div id="wireC"></div>
+          <h4>Parts</h4>
+          <ul class="plain"><li>1 × <b>ES8388</b> or <b>WM8960</b> audio codec module with line-in and line-out, 3.3 V</li><li>2 × 10 µF capacitors, 10 kΩ + 100 Ω resistors (same mic divider as option B)</li><li>Dupont jumper wires</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAMPAIGNS / IVR -->
+    <section class="view" id="v-campaigns">
+      <div class="wiz" style="max-width:1100px">
+        <div class="grid2 top">
+          <div class="card">
+            <h3 style="margin-top:0">1 · Audio prompts on the module</h3>
+            <p class="sub" style="margin-bottom:8px">Upload any audio file (MP3, WAV, M4A…). It's converted to telephone quality (8 kHz mono) and stored on the 4G module. Example script: <i>"Press 1 for yes, press 2 for no."</i></p>
+            <div id="fileList" class="flist"></div>
+            <div id="fileSpace" style="font-size:12px;color:var(--muted);margin:6px 0 12px"></div>
+            <input type="file" id="upFile" accept="audio/*">
+            <div class="grid2" style="margin-top:8px"><div><label>Save as</label><input id="upName" placeholder="prompt1.wav"></div><div><label>Max length</label><input id="upMax" type="number" value="20" min="2" max="60"></div></div>
+            <div id="upInfo" style="font-size:13px;color:var(--muted);margin-top:6px"></div>
+            <div class="actions"><button class="btn" id="upBtn" disabled>Upload to module</button><button class="btn ghost" id="upPreview" disabled>Preview</button></div>
+            <details style="margin-top:12px"><summary style="cursor:pointer;color:var(--muted)">Or use text-to-speech (English)</summary>
+              <textarea id="ttsText" rows="2" placeholder="Hello, press 1 to confirm your order, press 2 to cancel." style="margin-top:8px"></textarea>
+              <div class="actions"><button class="btn ghost" id="ttsLocal">Speak on board</button><button class="btn ghost" id="ttsCall">Speak into current call</button></div>
+            </details>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">2 · Batch call campaign</h3>
+            <label>Campaign name</label><input id="cName" placeholder="Order confirmation">
+            <label>Phone numbers (one per line, or comma-separated)</label>
+            <textarea id="cNums" rows="4" placeholder="+919800000001&#10;9800000002"></textarea>
+            <div class="actions" style="margin-top:6px"><button class="btn ghost" id="cMine" style="padding:6px 10px;font-size:13px">Test with one number</button><span id="cCount" style="font-size:13px;color:var(--muted)"></span></div>
+            <label>What the person hears</label>
+            <select id="cAudio"></select>
+            <div class="grid3">
+              <div><label>Play times</label><input id="cRepeat" type="number" value="1" min="1" max="5"></div>
+              <div><label>Ring timeout (s)</label><input id="cRing" type="number" value="35" min="10" max="90"></div>
+              <div><label>Wait for key (s)</label><input id="cWait" type="number" value="10" min="3" max="60"></div>
+              <div><label>Gap between calls (s)</label><input id="cGap" type="number" value="5" min="2" max="120"></div>
+            </div>
+            <label class="chk"><input type="checkbox" id="cStopKey" checked> Hang up after the first key press</label>
+            <div class="actions"><button class="btn green" id="cStart">Start campaign</button><button class="btn red" id="cStop" disabled>Stop</button></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">3 · Live key presses</h3><span style="font-size:12px;color:var(--muted)">Captured from any call: campaign or manual</span></div>
+          <div id="dtmfFeed" class="dfeed"><div class="empty" style="padding:14px">No key presses yet. During a call, the keys the other person presses show up here.</div></div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">4 · Results</h3>
+          <div id="campList"><div class="empty">No campaigns yet</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="v-settings">
+      <div class="settings">
+        <div class="card">
+          <h3>Device</h3>
+          <div class="kv" id="devInfo"></div>
+        </div>
+        <div class="card">
+          <h3>Connection</h3>
+          <div class="seg" id="modeSeg">
+            <button data-m="auto">Auto</button><button data-m="wifi">Wi-Fi bridge</button><button data-m="serial">USB cable</button>
+          </div>
+          <div id="wifiBox"><label>Bridge IP address</label><input id="hostIn" placeholder="e.g. 192.168.1.50"></div>
+          <div id="serialBox"><label>COM port</label><select id="portSel"></select></div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn" id="saveConn">Save &amp; connect</button>
+            <button class="btn ghost" id="scanBtn">Scan network &amp; ports</button>
+            <button class="btn ghost" id="reconBtn">Reconnect</button>
+          </div>
+          <div id="scanOut"></div>
+        </div>
+        <div class="card">
+          <h3>Notifications</h3>
+          <p style="color:var(--muted);margin:0 0 10px;font-size:14px">Desktop alerts and ringtone for incoming SMS and calls.</p>
+          <button class="btn ghost" id="notifBtn">Enable notifications</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- CALL OVERLAY -->
+<div class="overlay" id="callOv">
+  <div class="callcard">
+    <div class="avatar" id="cAv">?</div>
+    <h2 id="cNum"></h2>
+    <div class="st" id="cSt"></div>
+    <div id="cKeysWrap" hidden>
+      <div class="keys" id="cKeys"></div>
+      <div class="vol">Volume <input type="range" min="0" max="5" value="3" id="vol"></div>
+    </div>
+    <div class="callrow">
+      <button class="round btn green pulse" id="cAnswer" title="Answer"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></button>
+      <button class="round btn ghost" id="cPad" title="Keypad">#</button>
+      <button class="round btn red" id="cHang" title="Hang up"><svg viewBox="0 0 24 24" fill="currentColor" style="transform:rotate(135deg)"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const S = {status:{}, call:{state:'idle'}, messages:[], calls:[], config:{}, thread:null, newMode:false, view:'messages'};
+let ws, rid = 0; const waiting = {};
+
+// ---------------------------------------------------------------- socket
+function connect(){
+  ws = new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
+  ws.onmessage = e => handle(JSON.parse(e.data));
+  ws.onclose = () => { setConn(false,'App server stopped - restart gsm_app.py'); setTimeout(connect,1500); };
+}
+function api(op, data={}){
+  return new Promise((res,rej)=>{
+    const id = ++rid; waiting[id] = {res,rej};
+    ws.send(JSON.stringify({op, rid:id, ...data}));
+  });
+}
+function handle(e){
+  switch(e.type){
+    case 'snapshot':
+      Object.assign(S,{status:e.status,call:e.call,messages:e.messages,calls:e.calls,config:e.config});
+      $('#log').innerHTML=''; e.console.forEach(addLog);
+      renderAll();
+      if(!S.booted){ S.booted=true; if(!S.config.setup_done) show('setup'); }
+      break;
+    case 'status': S.status=e.status; const prev=S.call.state; S.call=e.call; renderStatus(); renderCall(prev); W.onStatus(); if(prev!==S.call.state) Bridge.onCall(S.call.state); break;
+    case 'wizard': W.onEvent(e); break;
+    case 'campaign': onCampaign(e.campaign); break;
+    case 'dtmf': onDtmf(e); break;
+    case 'message': upsertMsg(e.msg); if(e.notify) notifySms(e.msg); break;
+    case 'messages': S.messages=e.messages; renderThreads(); renderConv(); break;
+    case 'call_log': S.calls.push(e.call); renderCalls(); break;
+    case 'calls': S.calls=e.calls; renderCalls(); break;
+    case 'config': S.config=e.config; renderSettings(); break;
+    case 'log': addLog(e); break;
+    case 'reply': { const w=waiting[e.rid]; if(!w) return; delete waiting[e.rid]; e.ok?w.res(e.data):w.rej(new Error(e.error)); } break;
+  }
+}
+
+// ---------------------------------------------------------------- helpers
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const initials = n => { const d=String(n).replace(/\D/g,''); return /[a-z]/i.test(n)? n.trim().slice(0,2).toUpperCase() : (d.slice(-2)||'#'); };
+const colorFor = n => { let h=0; for(const c of String(n)) h=(h*31+c.charCodeAt(0))%360; return `hsl(${h} 55% 48%)`; };
+function fmtTime(iso, full){
+  const d=new Date(iso); if(isNaN(d)) return '';
+  const today=new Date().toDateString()===d.toDateString();
+  const t=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  return full? t : today? t : d.toLocaleDateString([], {day:'numeric',month:'short'});
+}
+const fmtDur = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+let toastT; function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),3200); }
+const normNum = n => String(n).replace(/[^\d+]/g,'').replace(/^00/,'+');
+const sameNum = (a,b) => { const x=normNum(a), y=normNum(b); if(!x||!y) return a===b; return x===y || x.slice(-10)===y.slice(-10); };
+
+// ---------------------------------------------------------------- nav
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+function show(v){
+  S.view=v;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns'}[v];
+  if(v==='campaigns'){ loadFiles(); loadCampaigns(); }
+  document.title='B2Wave · '+$('#title').textContent;
+  if(v==='console') $('#log').scrollTop=1e9;
+}
+
+// ---------------------------------------------------------------- status
+function setConn(ok, text, warn){
+  $('#connDot').className='dot'+(ok?' ok':warn?' warn':'');
+  $('#connText').textContent=text;
+}
+function renderStatus(){
+  const s=S.status;
+  if(s.connected){
+    const simOk = (s.sim||'').includes('READY');
+    setConn(simOk, simOk ? (s.transport.startsWith('Wi-Fi')?'Wi-Fi bridge':'USB') : 'SIM: '+(s.sim||'?'), !simOk);
+  } else setConn(false, 'Offline');
+  const lvl = s.signal<0||s.signal===99 ? 0 : s.signal>=20?4:s.signal>=15?3:s.signal>=10?2:s.signal>=2?1:0;
+  document.querySelectorAll('#bars i').forEach((b,i)=>b.classList.toggle('on',i<lvl));
+  $('#opText').textContent = s.connected ? (s.operator || s.network || 'No network') : '—';
+  const b=$('#banner');
+  let msg='';
+  if(!s.connected) msg = s.error || 'Connecting to board...';
+  else if(s.sim && !s.sim.includes('READY')) msg='SIM problem: '+s.sim+'. Insert a nano SIM (no PIN lock) and reset the board.';
+  else if(s.network && !['registered','roaming'].includes(s.network)) msg='Network: '+s.network+'. Check the LTE antenna is connected.';
+  b.textContent=msg; b.style.display=msg?'block':'none';
+  renderSettings();
+}
+
+// ---------------------------------------------------------------- messages
+function upsertMsg(m){
+  const i=S.messages.findIndex(x=>x.id===m.id);
+  if(i>=0) S.messages[i]=m; else S.messages.push(m);
+  renderThreads(); renderConv();
+}
+function threads(){
+  const map=new Map();
+  for(const m of S.messages){
+    let key=[...map.keys()].find(k=>sameNum(k,m.number)) ?? m.number;
+    if(!map.has(key)) map.set(key,[]);
+    map.get(key).push(m);
+  }
+  return [...map.entries()].map(([num,list])=>{
+    list.sort((a,b)=>a.time.localeCompare(b.time));
+    return {num, list, last:list[list.length-1], unread:list.filter(x=>x.dir==='in'&&!x.read).length};
+  }).sort((a,b)=>b.last.time.localeCompare(a.last.time));
+}
+function renderThreads(){
+  const q=$('#search').value.toLowerCase();
+  const ts=threads().filter(t=>!q||t.num.toLowerCase().includes(q)||t.list.some(m=>m.text.toLowerCase().includes(q)));
+  const unread=ts.reduce((a,t)=>a+t.unread,0);
+  $('#unreadBadge').hidden=!unread; $('#unreadBadge').textContent=unread;
+  $('#threadList').innerHTML = ts.length? ts.map(t=>`
+    <div class="thread ${t.unread?'unread':''} ${S.thread&&sameNum(S.thread,t.num)?'on':''}" data-n="${esc(t.num)}">
+      <div class="avatar" style="background:${colorFor(t.num)}">${esc(initials(t.num))}</div>
+      <div class="meta"><div class="row"><b>${esc(t.num)}</b><small>${fmtTime(t.last.time)}</small></div>
+      <p>${t.last.dir==='out'?'You: ':''}${esc(t.last.text)}</p></div>
+    </div>`).join('') : '<div class="empty">No messages yet</div>';
+  document.querySelectorAll('.thread').forEach(el=>el.onclick=()=>openThread(el.dataset.n));
+}
+function openThread(n){
+  S.thread=n; S.newMode=false;
+  $('#v-messages').classList.add('in-thread');
+  if(S.messages.some(m=>sameNum(m.number,n)&&m.dir==='in'&&!m.read)){
+    S.messages.forEach(m=>{ if(sameNum(m.number,n)) m.read=true; });
+    api('mark_read',{number:n}).catch(()=>{});
+  }
+  renderThreads(); renderConv(); $('#msgText').focus();
+}
+function renderConv(){
+  const head=$('#convTitle');
+  $('#convCall').hidden=$('#convDel').hidden=!S.thread||S.newMode;
+  if(S.newMode){
+    head.innerHTML='<input id="toNum" placeholder="To: phone number" inputmode="tel">';
+    $('#bubbles').innerHTML='<div class="empty">New message</div>';
+    $('#toNum').focus(); return;
+  }
+  if(!S.thread){ head.innerHTML='<b>Select a conversation</b>'; return; }
+  head.innerHTML=`<b>${esc(S.thread)}</b>`;
+  const list=S.messages.filter(m=>sameNum(m.number,S.thread)).sort((a,b)=>a.time.localeCompare(b.time));
+  let lastDay='', html='';
+  for(const m of list){
+    const day=new Date(m.time).toDateString();
+    if(day!==lastDay){ html+=`<div class="day">${new Date(m.time).toLocaleDateString([], {weekday:'short',day:'numeric',month:'short',year:'numeric'})}</div>`; lastDay=day; }
+    const st = m.dir==='out' ? ` · ${m.status==='failed'?'Failed: '+esc(m.error||''):esc(m.status||'')}` : '';
+    html+=`<div class="b ${m.dir} ${m.status==='failed'?'failed':''}">${esc(m.text)}<span class="t">${fmtTime(m.time,true)}${st}</span><button class="x" data-id="${m.id}" title="Delete">&times;</button></div>`;
+  }
+  const bb=$('#bubbles'); bb.innerHTML=html||'<div class="empty">No messages</div>'; bb.scrollTop=1e9;
+  bb.querySelectorAll('.x').forEach(x=>x.onclick=()=>api('delete_message',{id:x.dataset.id}).catch(e=>toast(e.message)));
+}
+$('#search').oninput=renderThreads;
+$('#newMsg').onclick=()=>{ S.newMode=true; S.thread=null; $('#v-messages').classList.add('in-thread'); renderThreads(); renderConv(); };
+$('#backBtn').onclick=()=>{ $('#v-messages').classList.remove('in-thread'); S.thread=null; S.newMode=false; renderThreads(); renderConv(); };
+$('#convCall').onclick=()=>dial(S.thread);
+$('#convDel').onclick=()=>{ if(confirm('Delete this whole conversation (also from SIM)?')) api('delete_thread',{number:S.thread}).then(()=>{S.thread=null;renderConv();}).catch(e=>toast(e.message)); };
+
+const GSM=/^[A-Za-z0-9 \r\n.,!?'"@#%&*()\-+=/:;<>_$]*$/;
+function updateCounter(){
+  const t=$('#msgText').value; if(!t){ $('#counter').textContent=''; return; }
+  const uni=!GSM.test(t), lim=uni?70:160, parts=Math.ceil(t.length/lim);
+  $('#counter').textContent=`${t.length} chars · ${parts} SMS${uni?' · Unicode':''}`;
+}
+const ta=$('#msgText');
+ta.oninput=()=>{ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; updateCounter(); };
+ta.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); $('#composer').requestSubmit(); } };
+$('#composer').onsubmit=async e=>{
+  e.preventDefault();
+  const text=ta.value.trim(); const to=S.newMode?($('#toNum')?.value||'').trim():S.thread;
+  if(!text) return; if(!to){ toast('Enter a phone number'); return; }
+  if(!S.status.connected){ toast('Board is offline'); return; }
+  ta.value=''; ta.style.height='auto'; updateCounter();
+  if(S.newMode){ S.newMode=false; S.thread=to; renderConv(); }
+  try{ await api('send_sms',{to,text}); toast('SMS sent'); } catch(err){ toast('SMS failed: '+err.message); }
+};
+
+// ---------------------------------------------------------------- phone
+const KEYS=[['1',''],['2','ABC'],['3','DEF'],['4','GHI'],['5','JKL'],['6','MNO'],['7','PQRS'],['8','TUV'],['9','WXYZ'],['*',''],['0','+'],['#','']];
+function buildKeys(el, onKey){
+  el.innerHTML=KEYS.map(([k,s])=>`<button type="button" data-k="${k}">${k}<small>${s||'&nbsp;'}</small></button>`).join('');
+  el.querySelectorAll('button').forEach(b=>{
+    let t; b.onpointerdown=()=>{ if(b.dataset.k==='0') t=setTimeout(()=>{onKey('+'); t='done';},600); };
+    b.onclick=()=>{ if(t==='done'){t=null;return;} clearTimeout(t); onKey(b.dataset.k); };
+  });
+}
+buildKeys($('#keys'), k=>{ $('#dialNum').value+=k; beep(k); });
+buildKeys($('#cKeys'), k=>{ beep(k); api('dtmf',{digit:k}).catch(e=>toast(e.message)); });
+$('#delBtn').onclick=()=>{ const i=$('#dialNum'); i.value=i.value.slice(0,-1); };
+$('#dialBtn').onclick=()=>dial($('#dialNum').value);
+$('#dialNum').onkeydown=e=>{ if(e.key==='Enter') dial(e.target.value); };
+async function dial(n){
+  n=(n||'').trim(); if(!n){ toast('Enter a number'); return; }
+  if(!S.status.connected){ toast('Board is offline'); return; }
+  try{ await api('dial',{number:n}); } catch(e){ toast(e.message); }
+}
+function renderCalls(){
+  const list=[...S.calls].reverse().slice(0,100);
+  $('#callList').innerHTML = list.length? list.map(c=>{
+    const missed=c.direction==='in'&&!c.answered;
+    const label=missed?'Missed':c.direction==='in'?'Incoming':'Outgoing';
+    return `<div class="callitem"><div class="avatar" style="background:${colorFor(c.number)}">${esc(initials(c.number))}</div>
+      <div class="meta"><b class="${missed?'miss':''}">${esc(c.number||'Unknown')}</b><br><small>${label} · ${fmtTime(c.time)} ${fmtTime(c.time,true)}${c.answered?' · '+fmtDur(c.duration):''}</small></div>
+      <button class="btn ghost" data-n="${esc(c.number)}" style="padding:6px 10px">Call</button>
+      <button class="btn ghost" data-s="${esc(c.number)}" style="padding:6px 10px">SMS</button></div>`;}).join('')
+    : '<div class="empty">No calls yet</div>';
+  $('#callList').querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>dial(b.dataset.n));
+  $('#callList').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{ show('messages'); openThread(b.dataset.s); });
+}
+$('#clearCalls').onclick=()=>api('clear_calls');
+
+// call overlay
+let callTimer;
+function renderCall(prev){
+  const c=S.call, ov=$('#callOv');
+  clearInterval(callTimer);
+  if(!c || c.state==='idle'){ ov.classList.remove('on'); stopRing(); return; }
+  ov.classList.add('on');
+  $('#cNum').textContent=c.number||'Unknown';
+  $('#cAv').textContent=initials(c.number||'?'); $('#cAv').style.background=colorFor(c.number||'?');
+  const incoming=c.state==='incoming';
+  $('#cAnswer').hidden=!incoming; $('#cPad').hidden=c.state!=='active';
+  if(c.state!=='active') $('#cKeysWrap').hidden=true;
+  const label={dialing:'Calling…',ringing:'Ringing…',incoming:'Incoming call',held:'On hold'}[c.state];
+  if(c.state==='active'){
+    stopRing();
+    const tick=()=>$('#cSt').textContent='In call · '+fmtDur(Math.max(0,Math.floor(Date.now()/1000-c.started)));
+    tick(); callTimer=setInterval(tick,1000);
+  } else $('#cSt').textContent=label||c.state;
+  if(incoming && prev!=='incoming'){ startRing(); notify('Incoming call', c.number||'Unknown'); }
+}
+$('#cAnswer').onclick=()=>api('answer').catch(e=>toast(e.message));
+$('#cHang').onclick=()=>api('hangup').catch(e=>toast(e.message));
+$('#cPad').onclick=()=>$('#cKeysWrap').hidden=!$('#cKeysWrap').hidden;
+$('#vol').onchange=e=>api('volume',{level:+e.target.value}).catch(err=>toast(err.message));
+
+// ---------------------------------------------------------------- sound / notifications
+let actx; const ac=()=>actx||(actx=new (window.AudioContext||window.webkitAudioContext)());
+function tone(freqs, ms, vol=.08){
+  try{ const a=ac(), g=a.createGain(); g.gain.value=vol; g.connect(a.destination);
+    freqs.forEach(f=>{ const o=a.createOscillator(); o.frequency.value=f; o.connect(g); o.start(); o.stop(a.currentTime+ms/1000); });
+  }catch{}
+}
+const DT={'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770,1336],'6':[770,1477],'7':[852,1209],'8':[852,1336],'9':[852,1477],'*':[941,1209],'0':[941,1336],'#':[941,1477],'+':[941,1336]};
+const beep=k=>tone(DT[k]||[800],120,.05);
+let ringT; function startRing(){ stopRing(); const r=()=>{tone([440,480],900,.1);}; r(); ringT=setInterval(r,2500); }
+function stopRing(){ clearInterval(ringT); }
+function notify(title, body){
+  if(document.hasFocus()) return;
+  if('Notification' in window && Notification.permission==='granted') new Notification(title,{body});
+}
+function notifySms(m){
+  tone([880],120); setTimeout(()=>tone([1320],160),140);
+  if(!(S.thread&&sameNum(S.thread,m.number)&&S.view==='messages')) toast(`SMS from ${m.number}: ${m.text.slice(0,60)}`);
+  else { m.read=true; api('mark_read',{number:m.number}).catch(()=>{}); renderThreads(); }
+  notify('SMS from '+m.number, m.text);
+}
+$('#notifBtn').onclick=async()=>{ ac(); if('Notification' in window){ const p=await Notification.requestPermission(); toast(p==='granted'?'Notifications on':'Notifications blocked'); } };
+
+// ---------------------------------------------------------------- console
+const QUICK=['AT','AT+CSQ','AT+CPIN?','AT+COPS?','AT+CEREG?','AT+CGMR','AT+CPMS?','AT+CNUM','ATI'];
+$('#quick').innerHTML=QUICK.map(q=>`<button>${q}</button>`).join('');
+$('#quick').querySelectorAll('button').forEach(b=>b.onclick=()=>sendAt(b.textContent));
+function addLog(e){
+  const l=$('#log'); const atBottom=l.scrollHeight-l.scrollTop-l.clientHeight<40;
+  const d=document.createElement('div'); d.className=e.dir;
+  d.innerHTML=`<span class="ts">${new Date(e.t*1000).toLocaleTimeString()}</span>${e.dir==='tx'?'&rarr; ':'&larr; '}${esc(e.line)}`;
+  l.appendChild(d); while(l.childNodes.length>600) l.firstChild.remove();
+  if(atBottom) l.scrollTop=1e9;
+}
+async function sendAt(c){ if(!c) return; try{ await api('at',{cmd:c}); }catch(e){ toast(e.message); } }
+$('#atForm').onsubmit=e=>{ e.preventDefault(); sendAt($('#atCmd').value.trim()); $('#atCmd').value=''; };
+
+// ---------------------------------------------------------------- settings
+let cfgMode='auto', ports=[];
+function renderSettings(){
+  const s=S.status;
+  $('#devInfo').innerHTML=[['Status',s.connected?'Connected':'Offline'],['Link',s.transport||'—'],['Model',s.model||'—'],['IMEI',s.imei||'—'],
+    ['SIM',s.sim||'—'],['Phone no.',s.phone||'—'],['Operator',s.operator||'—'],['Network',s.network||'—'],['Signal',s.signal>=0&&s.signal!==99?`${s.signal}/31 (${s.signal_pct}%)`:'—']]
+    .map(([k,v])=>`<span>${k}</span><span>${esc(v)}</span>`).join('');
+  if(document.activeElement?.closest?.('#v-settings')) return;
+  cfgMode=S.config.mode||'auto';
+  $('#hostIn').value=S.config.host||'';
+  setMode(cfgMode);
+}
+function setMode(mode){
+  cfgMode=mode;
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+  $('#wifiBox').hidden=mode!=='wifi'; $('#serialBox').hidden=mode!=='serial';
+  if(mode==='serial'&&!ports.length) scan();
+}
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+async function scan(){
+  $('#scanOut').innerHTML='<p style="color:var(--muted)">Scanning…</p>';
+  try{
+    const r=await api('discover'); ports=r.ports;
+    $('#portSel').innerHTML=ports.map(p=>`<option value="${esc(p.device)}" ${p.device===S.config.serial_port?'selected':''}>${esc(p.device)} — ${esc(p.description)}${p.simcom?' (SIMCom)':''}</option>`).join('')||'<option value="">No COM ports</option>';
+    $('#scanOut').innerHTML=(r.bridges.length? r.bridges.map(b=>`<div class="pick"><span><b>${esc(b.name||'gsm-bridge')}</b> · ${esc(b.ip)} ${b.modem?'· modem OK':'· modem not answering'}</span><button class="btn" data-ip="${esc(b.ip)}">Use</button></div>`).join('')
+      : '<p style="color:var(--muted)">No Wi-Fi bridge found on this network.</p>');
+    $('#scanOut').querySelectorAll('[data-ip]').forEach(b=>b.onclick=()=>{ $('#hostIn').value=b.dataset.ip; setMode('wifi'); save(); });
+  }catch(e){ $('#scanOut').textContent=e.message; }
+}
+async function save(){
+  await api('set_config',{mode:cfgMode,host:$('#hostIn').value.trim(),serial_port:$('#portSel').value||''});
+  toast('Saved — connecting…');
+}
+$('#scanBtn').onclick=scan; $('#saveConn').onclick=save; $('#reconBtn').onclick=()=>api('reconnect').then(()=>toast('Reconnecting…'));
+
+// ---------------------------------------------------------------- setup wizard
+const W = {
+  step:1, port:null, fwInstalled:null, fwBundled:null, busy:false, usbTimer:null, waitingLink:false,
+  go(n){
+    this.step=n;
+    document.querySelectorAll('.wstep').forEach(el=>el.hidden=+el.dataset.s!==n);
+    document.querySelectorAll('#steps div').forEach((el,i)=>{ el.className=i+1<n?'done':i+1===n?'cur':''; });
+    clearInterval(this.usbTimer); clearInterval(this.usbTestTimer);
+    if(n===2) this.prepFlash();
+    if(n===3) this.runTests();
+    if(n===4) this.pick(this.choice||'wifi');
+    if(n===5) this.renderDone();
+  },
+  log(id,msg){ const l=$(id); l.textContent+=msg+'\n'; l.scrollTop=1e9; },
+  note(id,html,kind=''){ $(id).innerHTML=html?`<div class="note ${kind}">${html}</div>`:''; },
+  onEvent(e){
+    if(e.stage==='detect') this.log('#wDetectLog',e.msg);
+    if(e.stage==='flash'){
+      if(e.pct!=null){ $('#wProg').style.width=e.pct+'%'; $('#wFlashMsg').textContent=e.pct>=100?'Done':`Writing… ${Math.round(e.pct)}%`; }
+      else if(!/^Writing at/.test(e.msg)) this.log('#wFlashLog',e.msg);
+    }
+  },
+  async detect(){
+    const b=$('#wDetect'); b.disabled=true; b.textContent='Detecting…';
+    $('#wDetectLog').textContent=''; this.note('#wDetectOut','');
+    try{
+      const r=await api('wizard_detect');
+      if(r.esp){
+        this.port=r.esp.device; this.fwInstalled=r.esp.firmware;
+        this.note('#wDetectOut',`✅ Found <b>${esc(r.esp.chip)}</b> on <b>${esc(r.esp.device)}</b> (${esc(r.esp.description)})`+
+          (r.esp.firmware?`<br>GSM Bridge firmware v${esc(r.esp.firmware)} is already installed.`:'<br>No GSM Bridge firmware yet, so we will install it next.'),'good');
+        setTimeout(()=>this.go(2),900);
+      } else if(r.uart_driver_missing){
+        const d=r.uart_driver_missing;
+        this.note('#wDetectOut',`⚠️ Your board is plugged in (<b>${esc(d.name)}</b>), but Windows has no <b>${esc(d.chip)}</b> driver yet, so no COM port appears.<br><br>
+          <b>Fix (about 1 minute):</b><br>
+          1. Open <b>Device Manager</b>, right-click <i>${esc(d.name)}</i>, choose <b>Update driver</b>, then <b>Search automatically</b>.<br>
+          2. If that finds nothing: download the driver from <a href="${esc(d.url)}" target="_blank">${esc(d.url)}</a>, unzip it, then right-click <b>${d.chip==='CP210x'?'silabser.inf':'the .inf file'}</b> and choose <b>Install</b>.<br>
+          3. Unplug and replug the board, then click <b>Detect board</b> again.`,'bad');
+      } else if(r.simcom.length){
+        this.note('#wDetectOut','⚠️ I can see the <b>4G module</b> USB port, so the cable is in <b>4G_USB</b>. For setup, move it to the <b>ESP_UART</b> port (nearer the SIMCom chip) and click Detect again.','bad');
+      } else {
+        this.note('#wDetectOut',`❌ Board not found.<br>• Try another USB-C cable (it must carry data)<br>• Check the red VIN LED is on<br>• If Windows shows an unknown device, install the <a href="https://www.wch-ic.com/downloads/CH343SER_EXE.html" target="_blank">CH343 USB driver</a>, then replug`+
+          (r.others.length?`<br><small>Serial ports seen: ${r.others.map(p=>esc(p.device+' '+p.description)).join(', ')}</small>`:''),'bad');
+      }
+    }catch(e){ this.note('#wDetectOut','❌ '+esc(e.message),'bad'); }
+    b.disabled=false; b.textContent='Detect board';
+  },
+  async prepFlash(){
+    $('#wProg').style.width='0'; $('#wFlashLog').textContent=''; this.note('#wFlashOut',''); $('#wFlashMsg').textContent='Ready';
+    const info=(await api('wizard_info')).firmware; this.fwBundled=info.version;
+    if(!info.available){ $('#wFwSub').textContent='Firmware file is missing from firmware/bin.'; $('#wFlash').disabled=true; return; }
+    $('#wFlash').disabled=false;
+    const same=this.fwInstalled && this.fwInstalled===info.version;
+    $('#wFwSub').innerHTML=`GSM Bridge firmware <b>v${esc(info.version)}</b> (${Math.round(info.size/1024)} KB) → <b>${esc(this.port)}</b>.<br>`+
+      (same?'This version is already on the board. You can skip this step.':this.fwInstalled?`The board has v${esc(this.fwInstalled)}. This will update it.`:'Takes about 30 seconds. Don\'t unplug the board.');
+    $('#wFlashSkip').hidden=!this.fwInstalled; $('#wFlash').textContent=same?'Reinstall':'Install firmware';
+  },
+  async flash(){
+    $('#wFlash').disabled=true; $('#wBack2').disabled=true; $('#wFlashSkip').disabled=true; this.note('#wFlashOut','');
+    $('#wFlashLog').textContent='';
+    try{
+      const r=await api('wizard_flash',{port:this.port});
+      this.fwInstalled=r.firmware; $('#wProg').style.width='100%'; $('#wFlashMsg').textContent='Installed ✔';
+      this.note('#wFlashOut',`✅ Firmware v${esc(r.firmware)} is running.`,'good');
+      setTimeout(()=>this.go(3),1000);
+    }catch(e){
+      this.note('#wFlashOut','❌ '+esc(e.message)+'<br><small>Tip: hold the <b>BOOT</b> button, tap <b>RESET</b>, release BOOT, then click Install again.</small>','bad');
+    }
+    $('#wFlash').disabled=false; $('#wBack2').disabled=false; $('#wFlashSkip').disabled=false;
+  },
+  testRow(ic,title,sub){ return `<li><span class="ic ${ic}">${ic==='ok'?'✓':ic==='bad'?'✕':ic==='warn'?'!':''}</span><div>${title}${sub?`<small>${sub}</small>`:''}</div></li>`; },
+  head(t){ return `<li style="margin-top:6px"><b style="font-size:12px;letter-spacing:.5px;color:var(--muted)">${t}</b></li>`; },
+  simInfo(sim){
+    const s=(sim||'').toUpperCase();
+    if(/READY/.test(s)) return ['ok','SIM ready'];
+    if(/SIM PIN/.test(s)) return ['bad','SIM error: PIN lock is on. Put the SIM in a phone, turn off "SIM PIN lock", then put it back.'];
+    if(/PUK/.test(s)) return ['bad','SIM error: SIM is PUK-blocked. Call your operator to unblock it.'];
+    if(/NOT INSERTED|ERROR: 10\b/.test(s)) return ['bad','SIM error: no SIM detected. Insert the nano SIM gold side down, push until it clicks, then restart the 4G module.'];
+    if(/FAILURE|ERROR: 13\b/.test(s)) return ['bad','SIM error: SIM failure. Clean the contacts and reseat it, or try another SIM.'];
+    if(/BUSY|ERROR: 14\b/.test(s)) return ['run','SIM busy, still starting…'];
+    return ['bad','SIM error: '+(sim||'no answer')];
+  },
+  // SIM / signal / network rows from a modem test result (UART or USB)
+  cellRows(m, via){
+    const rows=[];
+    const [simIc,simTxt]=this.simInfo(m.sim); const simOk=simIc==='ok';
+    rows.push(this.testRow(simIc,'SIM card',esc(simTxt)+` <i>(via ${via})</i>`));
+    if(!simOk) return {rows, ok:false, simOk:false, retry:simIc==='run'};
+    const csq=+((m.csq||'').match(/CSQ:\s*(\d+)/)||[])[1]; const sig=isNaN(csq)||csq===99?null:csq;
+    rows.push(this.testRow(sig==null?'bad':sig<10?'warn':'ok','Signal',sig==null?'No signal. Check the LTE antenna is screwed onto the "LTE" connector.':`${sig}/31, ${sig>=20?'excellent':sig>=15?'good':sig>=10?'ok':'weak: move the antenna or the board'}`));
+    const regs=((m.reg||'')+' '+(m.creg||'')).match(/REG:\s*\d+,(\d)/g)||[]; const codes=regs.map(x=>x.slice(-1));
+    const registered=codes.some(c=>c==='1'||c==='5'), denied=codes.includes('3');
+    const op=((m.op||'').match(/"([^"]+)"/)||[])[1]||'';
+    const jio=/jio/i.test(op);
+    rows.push(this.testRow(registered?'ok':denied?'bad':'run','Mobile network',
+      registered?`Registered on <b>${esc(op||'network')}</b>${codes.includes('5')?' (roaming)':''}`:
+      denied?'Registration DENIED: SIM not activated, out of balance, or barred. Check it works in a phone.':'Searching for the network… (can take up to 1 minute)'));
+    if(registered) rows.push(this.testRow(jio?'warn':'ok','SMS and calls', jio?'Jio: SMS works. Calls need VoLTE, which depends on the module firmware. Test a call after SMS.':'SMS and calls supported'));
+    return {rows, ok:registered, simOk:true, retry:!registered && !denied};
+  },
+  async runTests(attempt=0){
+    clearInterval(this.usbTestTimer); $('#wUsbTest').hidden=true;
+    $('#wTestNext').disabled=true; this.note('#wTestOut','');
+    const rows=[]; const R=(extra=[])=>$('#wTests').innerHTML=rows.concat(extra).join('');
+    // ---- Layer 1: ESP32 + Wi-Fi
+    rows.push(this.head('LAYER 1 · ESP32 + WI-FI'));
+    R([this.testRow('run','ESP32 firmware')]);
+    let fw; try{ fw=(await api('wizard_ping',{port:this.port})).firmware; }catch{}
+    if(!fw){ rows.push(this.testRow('bad','ESP32 firmware','Not answering on '+esc(this.port)+'. Press RESET on the board, or go back and reinstall.')); R(); return; }
+    rows.push(this.testRow('ok','ESP32 firmware','v'+esc(fw)+' on '+esc(this.port)));
+    R([this.testRow('run','Board on Wi-Fi')]);
+    let st={}; try{ st=await api('wizard_status',{port:this.port}); }catch{}
+    const onWifi=st.ip && st.ip!=='0.0.0.0';
+    rows.push(this.testRow(onWifi?'ok':'bad','Board on Wi-Fi', onWifi?`<b>${esc(st.ssid)}</b> · ${esc(st.ip)} · ${st.rssi} dBm`:'Not connected. Turn on the B2-ios hotspot (password 12345678, Maximize Compatibility on). The board retries automatically.'));
+    if(onWifi){
+      R([this.testRow('run','PC can reach the board')]);
+      let reach={}; try{ reach=await api('wizard_wifi_reach',{host:st.ip}); }catch(e){ reach={ok:false,error:e.message}; }
+      rows.push(this.testRow(reach.ok?'ok':'bad','PC can reach the board', reach.ok?'Wi-Fi link to the board works':'This PC cannot reach '+esc(st.ip)+'. Connect this PC to <b>'+esc(st.ssid)+'</b> too.'));
+    }
+    // ---- Layer 2: 4G module
+    rows.push(this.head('LAYER 2 · 4G MODULE (A7672S)'));
+    rows.push(this.testRow(st.modem_power?'ok':'bad','Module power', st.modem_power?'STATUS pin high: module is powered':'STATUS pin low: module is off. Use a 5 V 2 A supply (phone charger) or VIN.'));
+    R([this.testRow('run','ESP32 to 4G serial link', st.bringup==='probing'?'Module starting, auto-detecting baud and reset level…':'Asking the module…')]);
+    let m; try{ m=await api('wizard_modem_test',{port:this.port}); }catch(e){ m={ok:false,error:e.message}; }
+    if(!m.ok && m.bringup==='probing' && attempt<12){ R([this.testRow('run','ESP32 to 4G serial link',`Module starting… auto-detect in progress (${attempt+1}/12)`)]); setTimeout(()=>this.runTests(attempt+1),5000); return; }
+    // ---- Layer 3: SIM + network
+    if(m.ok){
+      rows.push(this.testRow('ok','ESP32 to 4G serial link',esc(m.model||'A7672S')+(m.swapped?' (pins auto-corrected)':'')));
+      rows.push(this.head('LAYER 3 · SIM + NETWORK'));
+      const c=this.cellRows(m,'ESP32');
+      rows.push(...c.rows); R();
+      $('#wTestNext').disabled=false;
+      if(c.ok) this.note('#wTestOut','✅ All layers pass. Ready for SMS and calls.','good');
+      else if(c.retry && attempt<20) setTimeout(()=>this.runTests(attempt+1),5000);
+      return;
+    }
+    rows.push(this.testRow('bad','ESP32 to 4G serial link','No reply from the module on its serial pins. Next, check the module directly over USB (below).'));
+    R();
+    this.note('#wTestOut','The problem is in <b>layer 2</b>: the 4G module is not answering the ESP32. The test below shows whether the module and SIM work.','bad');
+    $('#wUsbTest').hidden=false;
+    this.usbTestTimer=setInterval(()=>this.pollUsbTest(rows),2500); this.pollUsbTest(rows);
+  },
+  async pollUsbTest(rows){
+    const tick=(id,cls,txt)=>{ const e=$('#'+id); e.className='ic '+cls; e.textContent=cls==='ok'?'✓':cls==='bad'?'✕':cls==='warn'?'!':''; };
+    let fw=null; try{ fw=(await api('wizard_ping',{port:this.port})).firmware; }catch{}
+    tick('uS1',fw?'ok':'bad'); $('#uS1t').textContent=fw?`Board answering on ${this.port}`:`Board not answering on ${this.port}. Is cable 1 still plugged in?`;
+    let r; try{ r=await api('wizard_simcom_ports'); }catch{ return; }
+    const el=$('#wUsbTestState');
+    if(!r.ports.length){
+      if(r.driver_missing){ tick('uS4','warn'); $('#uS4t').innerHTML='Windows sees the 4G module (it is powered and running) but has <b>no driver</b> for its AT ports.<br>1. Download the driver: <a href="https://files.waveshare.com/wiki/ESP32-S3-A7670E-4G/A7600X-Windows-Driver.7z" target="_blank">A7600X-Windows-Driver.7z</a> (SIMCom A76xx family driver; works for A7672S)<br>2. Right-click the file and choose <b>Extract All</b>.<br>3. In <b>Device Manager</b>, right-click <b>Mobile AT Interface</b>, choose <b>Update driver</b>, then <b>Browse my computer</b>, pick the extracted folder, tick <i>Include subfolders</i>, and click Next.<br>4. Repeat for the second <b>Mobile AT Interface</b> and for <b>Mobile Diag Interface</b>.<br>5. You should now see <b>SimTech HS-USB AT Port 9011 (COMx)</b>. This page detects it automatically.'; }
+      else { tick('uS4','run'); $('#uS4t').textContent='Waiting… Check the switch is on "4G" and cable 2 is in the 4G_USB port.'; }
+      return;
+    }
+    clearInterval(this.usbTestTimer);
+    const p=r.ports[0];
+    tick('uS2','ok'); tick('uS3','ok'); tick('uS4','ok'); $('#uS4t').textContent=`Found ${p.device}: ${p.description}`;
+    tick('uS5','run'); $('#uS5t').textContent='Talking to the module…';
+    let m; try{ m=await api('wizard_usb_modem_test',{port:p.device}); }catch(e){ m={ok:false,error:e.message}; }
+    tick('uS5',m.ok?'ok':'bad'); $('#uS5t').textContent=m.ok?'Module answered. See the results above.':'No answer from the module over USB.';
+    const extra=[this.head('4G MODULE OVER USB')];
+    if(!m.ok){ extra.push(this.testRow('bad','Module over USB','Port found but no AT reply: '+esc(m.error||JSON.stringify(m.raw||{})))); $('#wTests').innerHTML=rows.concat(extra).join(''); return; }
+    extra.push(this.testRow('ok','Module over USB',esc(m.model||'A7672S')+' · fw '+esc((m.fwver||'').replace('+CGMR:','').trim())));
+    const c=this.cellRows(m,'USB'); extra.push(...c.rows);
+    $('#wTests').innerHTML=rows.concat(extra).join('');
+    el.innerHTML=c.ok?`✅ The module and SIM work over USB, so the problem is only the ESP32 serial link. <b>You can send SMS right now in USB mode.</b> <button class="btn" id="wUseUsbNow" style="margin-left:6px">Use USB mode &amp; open Messages</button>`
+      :`The module answers over USB, so it is alive. Fix the SIM or network item above, then click Run tests again.`;
+    const usePort=m.port||p.device; const b=$('#wUseUsbNow'); if(b) b.onclick=async()=>{ await api('wizard_use_serial',{port:usePort}); this.linkLabel='USB '+usePort; this.go(5); };
+  },
+  pick(c){
+    this.choice=c;
+    document.querySelectorAll('.choice .card').forEach(el=>el.classList.toggle('on',el.dataset.c===c));
+    $('#wWifi').hidden=c!=='wifi'; $('#wUsb').hidden=c!=='usb'; this.note('#wLinkOut','');
+    clearInterval(this.usbTimer);
+    if(c==='wifi'){ if(!this.scanned) this.scan(); this.checkJoined(); }
+    if(c==='usb'){ this.pollUsb(); this.usbTimer=setInterval(()=>this.pollUsb(),2500); }
+  },
+  async checkJoined(){
+    try{
+      const st=await api('wizard_status',{port:this.port});
+      if(st && st.ip && st.ip!=='0.0.0.0'){
+        this.note('#wLinkOut',`✅ The board is already on <b>${esc(st.ssid)}</b> at <b>${esc(st.ip)}</b>. <button class="btn" id="wUseJoined" style="margin-left:8px">Use this</button>`,'good');
+        $('#wUseJoined').onclick=async()=>{ await api('set_config',{mode:'wifi',host:st.ip}); await api('wizard_skip'); this.linkLabel='Wi-Fi '+st.ssid+' · '+st.ip; this.go(5); };
+      }
+    }catch{}
+  },
+  async scan(){
+    this.scanned=true; $('#wSsid').innerHTML='<option value="">Scanning…</option>';
+    try{
+      const r=await api('wizard_wifi_scan',{port:this.port});
+      $('#wSsid').innerHTML=r.networks.length? r.networks.map(n=>`<option value="${esc(n.ssid)}">${esc(n.ssid)} ${n.rssi>-60?'▂▄▆█':n.rssi>-70?'▂▄▆':n.rssi>-80?'▂▄':'▂'}${n.open?' (open)':''}</option>`).join('') : '<option value="">No networks found. Type the name below</option>';
+    }catch(e){ $('#wSsid').innerHTML='<option value="">Scan failed</option>'; }
+  },
+  async join(){
+    const ssid=$('#wSsidManual').value.trim()||$('#wSsid').value; if(!ssid){ toast('Choose a Wi-Fi network'); return; }
+    const b=$('#wJoin'); b.disabled=true; b.textContent='Connecting… (up to 20 s)'; this.note('#wLinkOut','');
+    try{
+      const r=await api('wizard_wifi_join',{port:this.port,ssid,password:$('#wPass').value});
+      if(r.ok){ this.note('#wLinkOut',`✅ Board joined <b>${esc(ssid)}</b> at <b>${esc(r.ip)}</b>`,'good'); this.linkLabel='Wi-Fi '+ssid+' · '+r.ip; setTimeout(()=>this.go(5),900); }
+      else this.note('#wLinkOut','❌ Could not join: '+esc(r.error)+'. Check the password. The board only supports 2.4 GHz Wi-Fi.','bad');
+    }catch(e){ this.note('#wLinkOut','❌ '+esc(e.message),'bad'); }
+    b.disabled=false; b.textContent='Connect board to Wi-Fi';
+  },
+  async pollUsb(){
+    try{
+      const r=await api('wizard_simcom_ports');
+      if(r.ports.length){
+        clearInterval(this.usbTimer);
+        const p=r.ports[0];
+        $('#wUsbIc').className='ic ok'; $('#wUsbIc').textContent='✓';
+        $('#wUsbTxt').innerHTML=`4G module found on <b>${esc(p.device)}</b><small>${esc(p.description)}</small>`;
+        await api('wizard_use_serial',{port:p.device}); this.linkLabel='USB '+p.device;
+        setTimeout(()=>this.go(5),900);
+      } else if(r.driver_missing){
+        $('#wUsbIc').className='ic warn'; $('#wUsbIc').textContent='!';
+        $('#wUsbTxt').innerHTML='Windows sees the 4G module but needs its driver.<small><br>1. Download the driver: <a href="https://files.waveshare.com/wiki/ESP32-S3-A7670E-4G/A7600X-Windows-Driver.7z" target="_blank">A7600X-Windows-Driver.7z</a> (SIMCom A76xx family driver; works for A7672S)<br>2. Right-click the file and choose <b>Extract All</b>.<br>3. In <b>Device Manager</b>, right-click <b>Mobile AT Interface</b>, choose <b>Update driver</b>, then <b>Browse my computer</b>, pick the extracted folder, tick <i>Include subfolders</i>, and click Next.<br>4. Repeat for the second <b>Mobile AT Interface</b> and for <b>Mobile Diag Interface</b>.<br>5. You should now see <b>SimTech HS-USB AT Port 9011 (COMx)</b>. This page detects it automatically.</small>';
+      } else { $('#wUsbIc').className='ic run'; $('#wUsbIc').textContent=''; }
+    }catch{}
+  },
+  renderDone(){
+    const s=S.status, ok=s.connected;
+    $('#wDoneSub').textContent= ok?'Your board is connected. Send your first SMS or make a call.':'Connecting the app to your board… (a few seconds)';
+    $('#wDoneChecks').innerHTML=[
+      this.testRow(ok?'ok':'run','App connected',ok?esc(s.transport):esc(this.linkLabel||'')),
+      this.testRow(ok?((s.sim||'').includes('READY')?'ok':'bad'):'','SIM',ok?esc(s.sim):''),
+      this.testRow(ok?(['registered','roaming'].includes(s.network)?'ok':'warn'):'','Network',ok?esc((s.operator||s.network)+(s.signal>=0&&s.signal!==99?` · signal ${s.signal}/31`:'')):'')
+    ].join('');
+  },
+  onStatus(){ if(this.step===5 && S.view==='setup') this.renderDone(); }
+};
+$('#wDetect').onclick=()=>W.detect();
+$('#wSkip').onclick=()=>{ api('wizard_skip'); show('messages'); };
+$('#wFlash').onclick=()=>W.flash();
+$('#wFlashSkip').onclick=()=>W.go(3);
+$('#wBack2').onclick=()=>W.go(1);
+$('#wTestNext').onclick=()=>W.go(4);
+$('#wRetest').onclick=()=>W.runTests();
+$('#wDiag').onclick=async()=>{ const o=$('#wDiagOut'); o.textContent='Collecting diagnostics (about 15 s)…'; try{ const r=await api('wizard_diag',{port:W.port}); o.textContent=r.report; try{ await navigator.clipboard.writeText(r.report); toast('Report copied, paste it to support'); }catch{} }catch(e){ o.textContent='Failed: '+e.message; } };
+$('#wReset4g').onclick=async()=>{ try{ await api('wizard_reset4g',{port:W.port}); toast('4G module restarting (about 15 s)…'); setTimeout(()=>W.runTests(),12000); }catch(e){ toast(e.message); } };
+document.querySelectorAll('.choice .card').forEach(el=>el.onclick=()=>W.pick(el.dataset.c));
+$('#wRescan').onclick=()=>W.scan();
+$('#wJoin').onclick=()=>W.join();
+$('#wPass').onkeydown=e=>{ if(e.key==='Enter') W.join(); };
+$('#wGoMsg').onclick=()=>show('messages');
+$('#wGoPhone').onclick=()=>show('phone');
+$('#wRestart').onclick=()=>W.go(1);
+W.go(1);
+
+// ---------------------------------------------------------------- wiring diagrams
+function wiring(leftTitle, rightTitle, rows){
+  const rowH=46, top=56, h=top+rows.length*rowH+16, W=640;
+  const L=20, LW=170, R=W-190, RW=170;
+  let s=`<svg viewBox="0 0 ${W} ${h}" class="wire" role="img" aria-label="${esc(leftTitle)} to ${esc(rightTitle)} wiring">`;
+  s+=`<rect x="${L}" y="12" width="${LW}" height="${h-24}" rx="12" class="wbox"/><text x="${L+LW/2}" y="38" class="wt">${esc(leftTitle)}</text>`;
+  s+=`<rect x="${R}" y="12" width="${RW}" height="${h-24}" rx="12" class="wbox"/><text x="${R+RW/2}" y="38" class="wt">${esc(rightTitle)}</text>`;
+  rows.forEach((r,i)=>{
+    const y=top+i*rowH+18;
+    s+=`<circle cx="${L+LW}" cy="${y}" r="5" class="wdot ${r.c||''}"/><text x="${L+LW-12}" y="${y+4}" class="wl" text-anchor="end">${esc(r.l)}</text>`;
+    s+=`<circle cx="${R}" cy="${y}" r="5" class="wdot ${r.c||''}"/><text x="${R+12}" y="${y+4}" class="wl">${esc(r.r)}</text>`;
+    s+=`<line x1="${L+LW+5}" y1="${y}" x2="${R-5}" y2="${y}" class="wline ${r.c||''}"/>`;
+    if(r.p) s+=`<rect x="${W/2-78}" y="${y-11}" width="156" height="22" rx="6" class="wpart"/><text x="${W/2}" y="${y+4}" class="wp" text-anchor="middle">${esc(r.p)}</text>`;
+  });
+  return s+'</svg>';
+}
+$('#wireA').innerHTML=wiring('Board (back side)','Speaker / Mic',[
+  {l:'SPK +',r:'Speaker red (+)',c:'red'},{l:'SPK (other pad)',r:'Speaker black (−)'},
+  {l:'MIC +',r:'Mic + (leg not on case)',c:'red'},{l:'MIC (other pad)',r:'Mic − (case leg)'}]);
+$('#wireB').innerHTML=wiring('Board','USB sound card',[
+  {l:'SPK +',r:'MIC-IN tip',p:'10µF → 4.7kΩ',c:'red'},{l:'GND (pin 41/43)',r:'MIC-IN sleeve'},
+  {l:'MIC +',r:'HEADPHONE tip',p:'10µF → 10kΩ (+100Ω to GND)',c:'blue'},{l:'GND',r:'HEADPHONE sleeve'},
+  {l:'SPK −',r:'leave unconnected',p:'do NOT ground',c:'warn'}]);
+$('#wireC').innerHTML=wiring('ESP32 header pin','ES8388 / WM8960',[
+  {l:'GPIO15 (J6 pin 15)',r:'MCLK'},{l:'GPIO4 (J6 pin 7)',r:'BCLK / SCLK'},{l:'GPIO5 (J6 pin 9)',r:'LRCK / WS'},
+  {l:'GPIO6 (J6 pin 11)',r:'DIN (DAC data)',c:'blue'},{l:'GPIO7 (J6 pin 13)',r:'DOUT (ADC data)',c:'red'},
+  {l:'GPIO1 (J9 pin 4)',r:'SDA'},{l:'GPIO2 (J9 pin 6)',r:'SCL'},{l:'3V3 (J6 pin 1)',r:'3.3V / VCC',c:'red'},{l:'GND (J6 pin 41)',r:'GND'},
+  {l:'SPK + (back pad)',r:'LINE-IN L',p:'10µF'},{l:'MIC + (back pad)',r:'LINE-OUT L',p:'10µF → 10kΩ (+100Ω)'}]);
+document.querySelectorAll('#audSeg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#audSeg button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.audopt').forEach(c=>c.hidden=c.dataset.o!==b.dataset.o);
+  if(b.dataset.o==='b') Bridge.devices();
+});
+
+// ---------------------------------------------------------------- PC audio bridge (option B)
+const Bridge={
+  on:false, streams:[], els:[], raf:0,
+  async devices(){
+    try{
+      const tmp=await navigator.mediaDevices.getUserMedia({audio:true}); tmp.getTracks().forEach(t=>t.stop());
+    }catch(e){ $('#bNote').textContent='Microphone permission is needed to list audio devices.'; return; }
+    const ds=await navigator.mediaDevices.enumerateDevices();
+    const ins=ds.filter(d=>d.kind==='audioinput'), outs=ds.filter(d=>d.kind==='audiooutput');
+    const opt=(list,key)=>{ const saved=lsGet(key); return list.map(d=>`<option value="${esc(d.deviceId)}" ${d.deviceId===saved?'selected':''}>${esc(d.label||d.deviceId.slice(0,8))}</option>`).join(''); };
+    $('#bCallIn').innerHTML=opt(ins,'bCallIn'); $('#bPcMic').innerHTML=opt(ins,'bPcMic');
+    $('#bPcOut').innerHTML=opt(outs,'bPcOut'); $('#bCallOut').innerHTML=opt(outs,'bCallOut');
+    const usb=d=>/usb|c-media|generic|external/i.test(d.label);
+    if(!lsGet('bCallIn')){ const u=ins.find(usb); if(u) $('#bCallIn').value=u.deviceId; }
+    if(!lsGet('bCallOut')){ const u=outs.find(usb); if(u) $('#bCallOut').value=u.deviceId; }
+    if(!('setSinkId' in HTMLMediaElement.prototype)) $('#bNote').textContent='This browser cannot choose output devices. Use Chrome or Edge.';
+    else $('#bNote').textContent=`${ins.length} inputs, ${outs.length} outputs found.`;
+  },
+  async start(){
+    if(this.on) return;
+    ['bCallIn','bPcOut','bPcMic','bCallOut'].forEach(k=>lsSet(k,$('#'+k).value));
+    try{
+      const ac=new AudioContext();
+      const pipe=async(inId,outId,raw,meter)=>{
+        const st=await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:inId},echoCancellation:!raw,noiseSuppression:!raw,autoGainControl:!raw}});
+        const el=new Audio(); el.srcObject=st; if(el.setSinkId) await el.setSinkId(outId); await el.play();
+        const an=ac.createAnalyser(); an.fftSize=512; ac.createMediaStreamSource(st).connect(an);
+        this.streams.push(st); this.els.push(el); return [an,meter];
+      };
+      const meters=[await pipe($('#bCallIn').value,$('#bPcOut').value,true,'#mIn'), await pipe($('#bPcMic').value,$('#bCallOut').value,false,'#mOut')];
+      const buf=new Uint8Array(256);
+      const draw=()=>{ meters.forEach(([an,id])=>{ an.getByteTimeDomainData(buf); let p=0; for(const v of buf) p=Math.max(p,Math.abs(v-128)); $(id).style.width=Math.min(100,p/1.28)+'%'; }); this.raf=requestAnimationFrame(draw); };
+      draw(); this.ac=ac; this.on=true;
+      $('#bStart').disabled=true; $('#bStop').disabled=false; $('#bNote').textContent='Bridge running. Use headphones so the caller does not hear an echo.';
+    }catch(e){ this.stop(); $('#bNote').textContent='Could not start: '+e.message; }
+  },
+  stop(){
+    cancelAnimationFrame(this.raf);
+    this.streams.forEach(s=>s.getTracks().forEach(t=>t.stop())); this.els.forEach(e=>{e.pause();e.srcObject=null;});
+    this.streams=[]; this.els=[]; try{ this.ac&&this.ac.close(); }catch{}
+    this.on=false; $('#bStart').disabled=false; $('#bStop').disabled=true; $('#mIn').style.width=$('#mOut').style.width='0';
+  },
+  onCall(state){ if(!$('#bAuto').checked) return; if(state==='active') this.start(); else if(state==='idle' && this.on) this.stop(); }
+};
+function lsGet(k){ try{ return localStorage.getItem('b2w_'+k)||''; }catch{ return ''; } }
+function lsSet(k,v){ try{ localStorage.setItem('b2w_'+k,v); }catch{} }
+$('#bStart').onclick=()=>Bridge.start(); $('#bStop').onclick=()=>Bridge.stop(); $('#bDevs').onclick=()=>Bridge.devices();
+$('#bAuto').checked=lsGet('bAuto')==='1'; $('#bAuto').onchange=e=>lsSet('bAuto',e.target.checked?'1':'0');
+
+// ---------------------------------------------------------------- campaigns page
+const C={ files:[], free:0, wav:null, campaigns:[], running:false, dtmf:[] };
+const fmtKB=b=>b>=1024*1024?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';
+const wavSec=size=>Math.max(0,(size-44)/16000);
+
+async function loadFiles(){
+  try{
+    const r=await api('files_list'); C.files=r.files; C.free=r.free;
+    $('#fileList').innerHTML=r.files.length? r.files.map(f=>`<div class="frow"><div><b>${esc(f.name)}</b><small>${fmtKB(f.size)}${/\.wav$/i.test(f.name)?' · '+wavSec(f.size).toFixed(1)+' s':''}</small></div>
+      <button class="btn ghost sm" data-play="${esc(f.name)}" title="Play on the board speaker">▶ Board</button>
+      <button class="btn ghost sm" data-call="${esc(f.name)}" title="Play into the current call">▶ Call</button>
+      <button class="btn ghost sm" data-del="${esc(f.name)}" title="Delete">✕</button></div>`).join('') : '<div class="empty" style="padding:10px">No files on the module yet</div>';
+    $('#fileSpace').textContent=`Free space on module: ${fmtKB(r.free)} of ${fmtKB(r.total)} · about ${Math.floor(r.free/16000)} s of WAV`;
+    $('#fileList').querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>api('file_play',{name:b.dataset.play,remote:false}).then(()=>toast('Playing on the board speaker')).catch(e=>toast(e.message)));
+    $('#fileList').querySelectorAll('[data-call]').forEach(b=>b.onclick=()=>{ if(S.call.state!=='active'){ toast('Start a call first'); return; } api('file_play',{name:b.dataset.call,remote:true}).then(()=>toast('Playing into the call')).catch(e=>toast(e.message)); });
+    $('#fileList').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm(`Delete "${b.dataset.del}" from the module? This can't be undone.`)) api('file_delete',{name:b.dataset.del}).then(loadFiles).catch(e=>toast(e.message)); });
+    const sel=$('#cAudio'), prev=sel.value;
+    sel.innerHTML='<option value="">Choose…</option>'+r.files.map(f=>`<option value="file:${esc(f.name)}" data-size="${f.size}">🔊 ${esc(f.name)}</option>`).join('')+'<option value="tts">🗣 Text-to-speech (from the box on the left)</option>';
+    if(prev) sel.value=prev;
+  }catch(e){ $('#fileList').innerHTML=`<div class="note bad">${esc(e.message)}. Is the board connected? (Messages and calls need the module online.)</div>`; }
+}
+
+async function convertAudio(file, maxSec){
+  const raw=await file.arrayBuffer();
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const dec=await ctx.decodeAudioData(raw); ctx.close();
+  const secs=Math.min(dec.duration,maxSec);
+  const off=new OfflineAudioContext(1,Math.ceil(secs*8000),8000);
+  const src=off.createBufferSource(); src.buffer=dec; src.connect(off.destination); src.start(0);
+  const pcm=(await off.startRendering()).getChannelData(0);
+  let peak=0.0001; for(const v of pcm) peak=Math.max(peak,Math.abs(v));
+  const gain=Math.min(4,0.9/peak);                                   // normalise loudness
+  const buf=new ArrayBuffer(44+pcm.length*2), dv=new DataView(buf);
+  const w=(o,s)=>{ for(let i=0;i<s.length;i++) dv.setUint8(o+i,s.charCodeAt(i)); };
+  w(0,'RIFF'); dv.setUint32(4,36+pcm.length*2,true); w(8,'WAVE'); w(12,'fmt '); dv.setUint32(16,16,true);
+  dv.setUint16(20,1,true); dv.setUint16(22,1,true); dv.setUint32(24,8000,true); dv.setUint32(28,16000,true);
+  dv.setUint16(32,2,true); dv.setUint16(34,16,true); w(36,'data'); dv.setUint32(40,pcm.length*2,true);
+  for(let i=0;i<pcm.length;i++) dv.setInt16(44+i*2,Math.max(-1,Math.min(1,pcm[i]*gain))*32767,true);
+  return {bytes:new Uint8Array(buf), secs, orig:dec.duration};
+}
+function b64(bytes){ let s=''; for(let i=0;i<bytes.length;i+=0x8000) s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000)); return btoa(s); }
+
+$('#upFile').onchange=async e=>{
+  const f=e.target.files[0]; C.wav=null; $('#upBtn').disabled=$('#upPreview').disabled=true; if(!f) return;
+  $('#upName').value=$('#upName').value||f.name.replace(/\.[^.]+$/,'').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,30)+'.wav';
+  $('#upInfo').textContent='Converting…';
+  try{
+    const maxByFree=Math.max(2,Math.floor((C.free-8192)/16000));
+    const max=Math.min(+$('#upMax').value||20, maxByFree);
+    C.wav=await convertAudio(f,max);
+    $('#upInfo').innerHTML=`Ready: ${C.wav.secs.toFixed(1)} s · ${fmtKB(C.wav.bytes.length)}`+(C.wav.orig>C.wav.secs+0.1?` <b style="color:var(--warn)">(trimmed from ${C.wav.orig.toFixed(1)} s to fit)</b>`:'');
+    $('#upBtn').disabled=$('#upPreview').disabled=false;
+  }catch(err){ $('#upInfo').textContent='Could not read this audio file: '+err.message; }
+};
+$('#upPreview').onclick=()=>{ if(!C.wav) return; const a=new Audio(URL.createObjectURL(new Blob([C.wav.bytes],{type:'audio/wav'}))); a.play(); };
+$('#upBtn').onclick=async()=>{
+  let name=($('#upName').value||'prompt.wav').trim(); if(!/\.wav$/i.test(name)) name+='.wav';
+  if(!/^[A-Za-z0-9_.-]{1,40}$/.test(name)){ toast('Name: letters, digits, _ . - only'); return; }
+  const b=$('#upBtn'); b.disabled=true; b.textContent='Uploading…';
+  try{ await api('file_upload',{name,data:b64(C.wav.bytes)}); toast('Uploaded '+name); $('#upFile').value=''; C.wav=null; $('#upInfo').textContent=''; await loadFiles(); $('#cAudio').value='file:'+name; }
+  catch(e){ toast('Upload failed: '+e.message); b.disabled=false; }
+  b.textContent='Upload to module';
+};
+$('#ttsLocal').onclick=()=>api('tts_play',{text:$('#ttsText').value,remote:false}).then(()=>toast('Speaking on the board')).catch(e=>toast(e.message));
+$('#ttsCall').onclick=()=>{ if(S.call.state!=='active'){ toast('Start a call first'); return; } api('tts_play',{text:$('#ttsText').value,remote:true}).catch(e=>toast(e.message)); };
+
+const parseNums=()=>$('#cNums').value.split(/[\s,;]+/).map(x=>x.trim()).filter(x=>x.replace(/\D/g,'').length>=5);
+$('#cNums').oninput=()=>{ const n=parseNums().length; $('#cCount').textContent=n?`${n} number${n>1?'s':''}`:''; };
+$('#cMine').onclick=()=>{ const n=prompt('Number to test with (your own phone):',''); if(n){ $('#cNums').value=n; $('#cNums').oninput(); } };
+$('#cStart').onclick=async()=>{
+  const nums=parseNums(); const a=$('#cAudio').value;
+  if(!nums.length){ toast('Add phone numbers'); return; }
+  if(!a){ toast('Choose what the person hears'); return; }
+  if(a==='tts' && !$('#ttsText').value.trim()){ toast('Type the text-to-speech message'); return; }
+  if(!confirm(`Start calling ${nums.length} number${nums.length>1?'s':''} now?`)) return;
+  const size=+($('#cAudio').selectedOptions[0].dataset.size||0);
+  try{
+    await api('campaign_start',{name:$('#cName').value.trim(),numbers:nums,audio:a.startsWith('file:')?a.slice(5):'',audio_size:size,
+      tts:a==='tts'?$('#ttsText').value.trim():'',repeat:+$('#cRepeat').value,ring_timeout:+$('#cRing').value,key_wait:+$('#cWait').value,gap:+$('#cGap').value,stop_on_key:$('#cStopKey').checked});
+    toast('Campaign started');
+  }catch(e){ toast(e.message); }
+};
+$('#cStop').onclick=()=>api('campaign_stop').then(()=>toast('Stopping…')).catch(e=>toast(e.message));
+
+async function loadCampaigns(){ try{ const r=await api('campaigns_list'); C.campaigns=r.campaigns; C.running=r.running; C.dtmf=r.dtmf||[]; renderCampaigns(); renderDtmf(); }catch{} }
+function onCampaign(c){ const i=C.campaigns.findIndex(x=>x.id===c.id); if(i>=0) C.campaigns[i]=c; else C.campaigns.unshift(c); C.running=c.status==='running'||C.campaigns.some(x=>x.status==='running'); renderCampaigns(); }
+function renderCampaigns(){
+  $('#cStart').disabled=C.running; $('#cStop').disabled=!C.running;
+  if(!C.campaigns.length){ $('#campList').innerHTML='<div class="empty">No campaigns yet</div>'; return; }
+  $('#campList').innerHTML=C.campaigns.map(c=>{
+    const done=c.results.filter(r=>!['pending','dialing','ringing'].includes(r.status)).length;
+    const ans=c.results.filter(r=>r.status.startsWith('answered')).length;
+    const keys={}; c.results.forEach(r=>{ if(r.keys) keys[r.keys[0]]=(keys[r.keys[0]]||0)+1; });
+    const keySum=Object.keys(keys).sort().map(k=>`<span class="kchip">Pressed <b>${esc(k)}</b> · ${keys[k]}</span>`).join('')||'<span style="color:var(--muted);font-size:13px">No keys pressed yet</span>';
+    return `<details class="camp" ${c.status==='running'||c===C.campaigns[0]?'open':''}><summary><b>${esc(c.name)}</b> <span class="cst ${c.status==='running'?'run':''}">${esc(c.status)}</span>
+      <span style="color:var(--muted);font-size:13px">${done}/${c.results.length} called · ${ans} answered</span></summary>
+      <div class="prog"><i style="width:${c.results.length?done*100/c.results.length:0}%"></i></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${keySum}</div>
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>Number</th><th>Status</th><th>Keys</th><th>Talk</th><th>Time</th></tr></thead><tbody>
+      ${c.results.map(r=>`<tr><td>${esc(r.number)}</td><td><span class="rs ${r.status.startsWith('answered')?'ok':['dialing','ringing'].includes(r.status)?'run':r.status==='pending'?'':'bad'}">${esc(r.status)}</span>${r.error?`<br><small style="color:var(--bad)">${esc(r.error)}</small>`:''}</td><td class="keys">${esc(r.keys||'—')}</td><td>${r.duration?r.duration+' s':''}</td><td>${r.time?fmtTime(r.time,true):''}</td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">Download CSV</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">Delete</button>`:''}</div></details>`;
+  }).join('');
+  $('#campList').querySelectorAll('[data-csv]').forEach(b=>b.onclick=async()=>{ const r=await api('campaign_csv',{id:b.dataset.csv}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([r.csv],{type:'text/csv'})); a.download=r.name.replace(/[^\w-]+/g,'_')+'.csv'; a.click(); });
+  $('#campList').querySelectorAll('[data-cdel]').forEach(b=>b.onclick=()=>{ if(confirm('Delete this campaign and its results?')) api('campaign_delete',{id:b.dataset.cdel}).then(r=>{ C.campaigns=r.campaigns; renderCampaigns(); }); });
+}
+function renderDtmf(){
+  if(!C.dtmf.length) return;
+  $('#dtmfFeed').innerHTML=[...C.dtmf].reverse().slice(0,40).map(e=>`<div class="dkey"><span class="kbig">${esc(e.key)}</span><div><b>${esc(e.number||'Unknown')}</b><small>${fmtTime(e.time,true)}</small></div></div>`).join('');
+}
+function onDtmf(e){ C.dtmf.push(e); renderDtmf(); toast(`${e.number||'Caller'} pressed ${e.key}`); beep(e.key); }
+
+function renderAll(){ renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
+connect();
+</script>
+</body>
+</html>
