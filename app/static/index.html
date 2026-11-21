@@ -325,7 +325,7 @@ header{position:sticky;top:0;z-index:20;height:64px;padding:0 24px;gap:12px;back
 header .htitle{margin-right:auto;min-width:0}
 header h1{font-size:18px;font-weight:700;letter-spacing:-.2px;margin:0;white-space:nowrap}
 header .htitle small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hamb{display:none!important}
+.hamb{display:grid}
 .iconbtn{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line);background:var(--panel);transition:.12s}
 .iconbtn:hover{color:var(--text);border-color:var(--accent)}
 .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);font-weight:500;height:34px;padding:0 12px}
@@ -397,16 +397,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 div:where(.swal2-container).swal2-backdrop-show{background:rgba(10,12,20,.55)!important;backdrop-filter:blur(3px)}
 
 /* ---------- responsive */
-@media (max-width:1180px){
-  .app{grid-template-columns:76px 1fr}
-  .brand{justify-content:center;padding:16px 8px}
-  .brand>div,.ngroup,aside.side nav button span,.side-status .hide-sm{display:none}
-  aside.side nav{padding:6px 10px}
-  aside.side nav button{justify-content:center;padding:11px 0}
-  aside.side nav button.on::before{left:-10px}
-  aside.side nav .badge{position:absolute;top:3px;right:6px;padding:0 5px;font-size:10px;min-width:16px}
-  .side-status{margin:10px 8px;padding:10px 6px;align-items:center}
-}
 @media (max-width:760px){
   .app{grid-template-columns:1fr;grid-template-rows:1fr}
   aside.side{position:fixed;inset:0 auto 0 0;width:270px;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
@@ -416,7 +406,7 @@ div:where(.swal2-container).swal2-backdrop-show{background:rgba(10,12,20,.55)!im
   .brand>div,.ngroup,aside.side nav button span,.side-status .hide-sm{display:revert}
   aside.side nav button{justify-content:flex-start;padding:10px 12px}
   aside.side nav .badge{position:static;margin-left:auto}
-  .side-close{display:grid}.hamb{display:grid!important}
+  .side-close{display:grid}.side-toggle{display:none!important}
   header{padding:0 14px;height:58px}
   header .chip{display:none}
   .wiz{padding:14px}
@@ -455,6 +445,47 @@ main{min-width:0;overflow-x:hidden}
 input[type=file]{max-width:100%}
 .frow{flex-wrap:wrap}
 @media (max-width:760px){.frow>div{flex-basis:100%}.grid3{grid-template-columns:1fr 1fr}.boardimg img{width:100%}}
+
+/* collapsible sidebar (desktop) */
+.app{transition:grid-template-columns .2s ease}
+.side-toggle{position:absolute;top:22px;right:-13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--side-line);color:var(--muted);box-shadow:var(--shadow);z-index:45;cursor:pointer;transition:.12s}
+.side-toggle:hover{color:var(--accent);border-color:var(--accent)}
+.side-toggle svg.lucide{width:14px;height:14px}
+aside.side{position:relative}
+@media (min-width:761px){
+  body.side-collapsed .app{grid-template-columns:76px 1fr}
+  body.side-collapsed .brand{justify-content:center;padding:16px 8px}
+  body.side-collapsed .brand>div,body.side-collapsed .ngroup,body.side-collapsed aside.side nav button span,body.side-collapsed .side-status .hide-sm{display:none}
+  body.side-collapsed aside.side nav{padding:6px 10px;overflow:visible}
+  body.side-collapsed .ngroup+button,body.side-collapsed aside.side nav button{justify-content:center;padding:11px 0}
+  body.side-collapsed aside.side nav button.on::before{left:-10px}
+  body.side-collapsed aside.side nav .badge{position:absolute;top:3px;right:6px;padding:0 5px;font-size:10px;min-width:16px}
+  body.side-collapsed .side-status{margin:10px 8px;padding:10px 6px;align-items:center}
+  body.side-collapsed aside.side nav button:hover::after{content:attr(title);position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:var(--text);color:var(--panel);font-size:12px;font-weight:600;padding:5px 9px;border-radius:7px;white-space:nowrap;z-index:60;box-shadow:var(--shadow)}
+  body.side-collapsed .ngroup{display:block;height:10px;padding:0;font-size:0}
+}
+/* shared form bits */
+.cardhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cardhead h3{margin:0}.cardhead small{color:var(--muted);font-size:12.5px}
+.cicon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.cicon svg.lucide{width:19px;height:19px}
+.hint{color:var(--muted);font-size:12.5px;margin:6px 0 0}
+.hint code,.bkmsg code{background:var(--panel2);padding:1px 5px;border-radius:5px}
+.pill{display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--muted)}
+.pill.ok{background:var(--ok-soft);color:var(--ok-ink);border-color:transparent}
+.filebtn{cursor:pointer}
+.varbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}.varbar .spacer{flex:1}
+.varchip{font:600 12px ui-monospace,Consolas,monospace;padding:3px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);border:1px dashed color-mix(in srgb,var(--accent) 40%,transparent);margin-right:4px}
+.varchip:hover{background:var(--accent);color:#fff}
+.bkpreview{margin-top:12px;padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.bkpreview .b{max-width:100%;align-self:flex-end}
+.bkmsg{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;white-space:pre-wrap;font-size:14px}
+.msgcell{max-width:340px;font-size:13px;white-space:pre-wrap;word-break:break-word}
+.pw{display:flex;gap:6px}.pw input{flex:1}.pw .iconbtn{height:40px;width:40px}
+
+a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decoration:underline}
+@media (min-width:761px){body.side-collapsed #sLink{display:none}body.side-collapsed .side-status .row{justify-content:center}body.side-collapsed .side-status .dot{width:10px;height:10px}}
+.filebtn{display:inline-flex}
 </style>
 </head>
 <body>
@@ -462,11 +493,13 @@ input[type=file]{max-width:100%}
   <div class="side-backdrop" id="sideBackdrop"></div>
   <aside class="side" id="side">
     <div class="brand"><span class="logo"></span><div><b>B2Wave</b><small>4G voice &amp; SMS console</small></div><button class="side-close" id="sideClose" aria-label="Close menu"><i data-lucide="x"></i></button></div>
+    <button class="side-toggle" id="sideToggle" title="Collapse / expand sidebar (Ctrl+B)" aria-label="Toggle sidebar"></button>
     <nav aria-label="Main">
       <div class="ngroup">Overview</div>
       <button data-v="home" title="Home"><i data-lucide="layout-dashboard"></i><span>Home</span></button>
       <div class="ngroup">Communicate</div>
       <button data-v="messages" title="Messages"><i data-lucide="message-square-text"></i><span>Messages</span><em class="badge" id="unreadBadge" hidden></em></button>
+      <button data-v="bulk" title="Bulk SMS"><i data-lucide="send"></i><span>Bulk SMS</span></button>
       <button data-v="phone" title="Phone"><i data-lucide="phone"></i><span>Phone</span></button>
       <button data-v="campaigns" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></button>
       <div class="ngroup">Device</div>
@@ -485,7 +518,7 @@ input[type=file]{max-width:100%}
 
   <main>
     <header>
-      <button class="iconbtn hamb" id="hamb" aria-label="Open menu"><i data-lucide="menu"></i></button>
+      <button class="iconbtn hamb" id="hamb" title="Menu (Ctrl+B)" aria-label="Toggle menu"><i data-lucide="panel-left"></i></button>
       <div class="htitle"><h1 id="title">Home</h1><small id="subtitle"></small></div>
       <span class="chip"><span class="dot" id="connDot"></span><span id="connText">Offline</span></span>
       <span class="chip" title="Signal"><span class="bars" id="bars"><i style="height:3px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i></span><span id="opText">No network</span></span>
@@ -637,6 +670,25 @@ input[type=file]{max-width:100%}
             <li><b>Voice audio goes to the board's SPK/MIC pads, not the PC.</b> See "Talk from your PC" below.</li>
             <li><b>Jio</b>: calls use VoLTE, and they work on this module. Airtel and Vi also work.</li>
           </ul>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="send"></i></span> Bulk SMS</summary>
+          <ol class="plain">
+            <li>Open <b>Bulk SMS</b>. Paste numbers (one per line, optional name after a comma) or <b>Upload CSV</b> with a <code>number</code> column. Other columns become variables.</li>
+            <li>Write the message. Click a variable chip to insert <code>{name}</code>. Use <code>{name|Customer}</code> as a fallback for blank values. The preview shows the first recipient's text.</li>
+            <li>Set the gap between messages (3 s or more is safest with operators) and, optionally, an email for the delivery report.</li>
+            <li>Click <b>Send</b>. Each number shows sent / failed live. Failed numbers are retried once automatically, and "Retry failed" creates a new job for the rest.</li>
+            <li>Duplicates and invalid numbers are removed before sending. Every message also appears in <b>Messages</b>.</li>
+          </ol>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="mail"></i></span> Email reports (Gmail / SMTP)</summary>
+          <ol class="plain">
+            <li><b>Settings, then Email (SMTP)</b>. Choose Gmail and enter your address.</li>
+            <li>Gmail needs an <b>App Password</b>: turn on 2-Step Verification, then create one at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> and paste the 16 characters.</li>
+            <li>Click <b>Send test email</b> to confirm it works.</li>
+            <li>In a campaign or bulk SMS job, fill <b>Email report to</b>. When it finishes, a summary with a CSV attachment is emailed automatically. Use <b>Email report</b> on any finished job to send it again.</li>
+          </ol>
         </details>
 
         <details class="hsec"><summary><span><i data-lucide="megaphone"></i></span> Voice campaigns (play audio, capture 1 / 2)</summary>
@@ -906,6 +958,9 @@ input[type=file]{max-width:100%}
               <div><label>Gap between calls (s)</label><input id="cGap" type="number" value="5" min="2" max="120"></div>
             </div>
             <label class="chk"><input type="checkbox" id="cStopKey" checked> Hang up after the first key press</label>
+            <label>Email the report to (when the campaign ends)</label>
+            <input id="cEmail" placeholder="you@company.com, manager@company.com">
+            <div id="cSmtpNote"></div>
             <div class="actions"><button class="btn green" id="cStart">Start campaign</button><button class="btn red" id="cStop" disabled>Stop</button></div>
           </div>
         </div>
@@ -918,6 +973,46 @@ input[type=file]{max-width:100%}
         <div class="card">
           <h3 style="margin-top:0">4 · Results</h3>
           <div id="campList"><div class="empty">No campaigns yet</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BULK SMS -->
+    <section class="view" id="v-bulk">
+      <div class="wiz" style="max-width:1100px">
+        <div class="grid2 top">
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="users"></i></span><div><h3>1 · Recipients</h3><small>Paste numbers or upload a CSV</small></div></div>
+            <textarea id="bkNums" rows="8" placeholder="9800000001, Ravi&#10;9800000002, Priya&#10;+919800000003"></textarea>
+            <p class="hint">One number per line. Add a name after a comma to personalise. A CSV with a <b>number</b> column works too: every other column becomes a variable, like <code>{name}</code> or <code>{order}</code>. Use <code>{name|Customer}</code> to set a fallback for blank values.</p>
+            <div class="actions" style="margin-top:8px">
+              <label class="btn ghost sm filebtn"><i data-lucide="file-spreadsheet"></i> Upload CSV<input type="file" id="bkCsv" accept=".csv,.txt,text/csv" hidden></label>
+              <button class="btn ghost sm" id="bkClear"><i data-lucide="eraser"></i> Clear</button>
+              <span class="pill" id="bkCount">0 recipients</span>
+            </div>
+            <div id="bkWarn"></div>
+            <div id="bkPrevWrap" hidden><div class="tblwrap" style="margin-top:10px"><table class="tbl" id="bkPrev"></table></div></div>
+          </div>
+
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="message-square-text"></i></span><div><h3>2 · Message</h3><small>Personalise with variables</small></div></div>
+            <label>Job name</label><input id="bkName" placeholder="Diwali offer">
+            <label>Message</label>
+            <textarea id="bkText" rows="5" placeholder="Hi {name}, our Diwali offer is live. Reply STOP to opt out."></textarea>
+            <div class="varbar"><span class="muted" style="font-size:12px">Insert:</span><span id="bkVars"></span><span class="spacer"></span><span class="muted" id="bkCounter" style="font-size:12px"></span></div>
+            <div class="bkpreview"><small class="muted">Preview for the first recipient</small><div class="b out" id="bkPreview">Your message preview appears here</div></div>
+            <div class="grid2">
+              <div><label>Gap between messages (s)</label><input id="bkGap" type="number" value="3" min="1" max="120"></div>
+              <div><label>Email report to</label><input id="bkEmail" placeholder="you@company.com"></div>
+            </div>
+            <div id="bkSmtpNote"></div>
+            <div class="actions"><button class="btn green" id="bkStart"><i data-lucide="send"></i> Send</button><button class="btn red" id="bkStop" disabled><i data-lucide="square"></i> Stop</button><span class="muted" id="bkEta" style="font-size:13px"></span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardhead"><span class="cicon"><i data-lucide="history"></i></span><div><h3>3 · Jobs &amp; delivery report</h3><small>Live progress, per-number status, CSV and email report</small></div></div>
+          <div id="bkJobs"><div class="empty">No bulk SMS sent yet</div></div>
         </div>
       </div>
     </section>
@@ -942,6 +1037,20 @@ input[type=file]{max-width:100%}
             <button class="btn ghost" id="reconBtn">Reconnect</button>
           </div>
           <div id="scanOut"></div>
+        </div>
+        <div class="card" id="smtpCard">
+          <div class="cardhead"><span class="cicon"><i data-lucide="mail"></i></span><div style="flex:1"><h3>Email (SMTP)</h3><small>Email campaign and bulk SMS reports automatically when they finish</small></div><span class="rs" id="smtpState">Not set up</span></div>
+          <div class="grid2">
+            <div><label>Provider</label><select id="smPreset"><option value="gmail">Gmail</option><option value="outlook">Outlook / Microsoft 365</option><option value="zoho">Zoho Mail (India)</option><option value="yahoo">Yahoo Mail</option><option value="custom">Custom server</option></select></div>
+            <div><label>Sender name</label><input id="smFrom" placeholder="B2Wave"></div>
+            <div><label>Email address</label><input id="smUser" type="email" placeholder="you@gmail.com" autocomplete="off"></div>
+            <div><label>App password</label><div class="pw"><input id="smPass" type="password" placeholder="16-character app password" autocomplete="new-password"><button class="iconbtn" id="smEye" type="button" title="Show / hide"><i data-lucide="eye"></i></button></div></div>
+            <div><label>SMTP server</label><input id="smHost" placeholder="smtp.gmail.com"></div>
+            <div><label>Port</label><input id="smPort" type="number" placeholder="587"></div>
+          </div>
+          <label>Default report recipients</label><input id="smTo" placeholder="manager@company.com, ops@company.com">
+          <div class="note" style="margin-top:12px;display:flex;gap:10px"><i data-lucide="key-round"></i><div><b>Gmail:</b> turn on 2-Step Verification, then create an App Password at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> and paste it above. Your normal Gmail password will not work. The password is stored only on this PC (app/data/config.json).</div></div>
+          <div class="actions"><button class="btn" id="smSave"><i data-lucide="save"></i> Save</button><button class="btn ghost" id="smTest"><i data-lucide="send"></i> Send test email</button></div>
         </div>
         <div class="card">
           <h3>Notifications</h3>
@@ -1019,6 +1128,7 @@ function handle(e){
     case 'campaign': onCampaign(e.campaign); break;
     case 'dtmf': onDtmf(e); break;
     case 'upload_progress': onUploadProgress(e); break;
+    case 'bulk': onBulk(e.job); break;
     case 'message': upsertMsg(e.msg); if(e.notify) notifySms(e.msg); renderHome(); break;
     case 'messages': S.messages=e.messages; renderThreads(); renderConv(); break;
     case 'call_log': S.calls.push(e.call); renderCalls(); renderHome(); break;
@@ -1050,7 +1160,8 @@ function show(v){
   S.view=v;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide'}[v];
+  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS'}[v];
+  if(v==='bulk') loadBulk(); if(v==='settings'||v==='campaigns') loadSmtp();
   if(v==='home') renderHome();
   if(location.hash!=='#'+v) history.replaceState(null,'','#'+v);
   $('#subtitle').textContent=SUBTITLES[v]||'';
@@ -1698,7 +1809,7 @@ $('#cStart').onclick=async()=>{
   const size=+($('#cAudio').selectedOptions[0].dataset.size||0);
   try{
     await api('campaign_start',{name:$('#cName').value.trim(),numbers:nums,audio:a.startsWith('file:')?a.slice(5):'',audio_size:size,
-      tts:a==='tts'?$('#ttsText').value.trim():'',repeat:+$('#cRepeat').value,ring_timeout:+$('#cRing').value,key_wait:+$('#cWait').value,gap:+$('#cGap').value,stop_on_key:$('#cStopKey').checked});
+      tts:a==='tts'?$('#ttsText').value.trim():'',repeat:+$('#cRepeat').value,ring_timeout:+$('#cRing').value,key_wait:+$('#cWait').value,gap:+$('#cGap').value,stop_on_key:$('#cStopKey').checked,email_to:$('#cEmail').value.trim()});
     toast('Campaign started');
   }catch(e){ toast(e.message); }
 };
@@ -1753,9 +1864,11 @@ function renderCampaigns(){
         ${kpi('timer','Avg ring',sm.avg_ring_s+' s')}${kpi('clock','Avg talk',sm.avg_talk_s+' s')}</div>
       <div class="chips">${chips}${kchips}${!chips&&!kchips?'<span class="muted" style="font-size:13px">Results appear as calls complete</span>':''}</div>
       <div class="tblwrap"><table class="tbl rtbl"><thead><tr><th>Number</th><th>Outcome</th><th>Keys (time)</th><th>Ring</th><th>Talk</th><th>Prompt</th><th>Ended by</th><th>Network reason</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">${ICON('download')} Download CSV</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">${ICON('trash-2')} Delete</button>`:''}</div></details>`;
+      ${c.email_status?`<div class="note ${/^sent/.test(c.email_status)?'good':'bad'}" style="margin:8px 0;display:flex;gap:8px;align-items:center">${ICON('mail')}<span>Email report: ${esc(c.email_status)}</span></div>`:''}
+      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">${ICON('download')} Download CSV</button><button class="btn ghost sm" data-cmail="${c.id}">${ICON('mail')} Email report</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">${ICON('trash-2')} Delete</button>`:''}</div></details>`;
   }).join('');
   const L=$('#campList');
+  L.querySelectorAll('[data-cmail]').forEach(b=>b.onclick=()=>emailReport('campaign',b.dataset.cmail,(C.campaigns.find(x=>x.id===b.dataset.cmail)||{}).email_to));
   L.querySelectorAll('.tlbtn').forEach(b=>b.onclick=()=>{ const r=L.querySelector(`tr.tl[data-k="${b.dataset.k}"]`); if(r) r.hidden=!r.hidden; });
   L.querySelectorAll('[data-csv]').forEach(b=>b.onclick=async()=>{ const r=await api('campaign_csv',{id:b.dataset.csv}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+r.csv],{type:'text/csv'})); a.download=r.name.replace(/[^\w-]+/g,'_')+'.csv'; a.click(); toast('CSV downloaded'); });
   L.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete campaign?','Its results are removed permanently.',{danger:true,confirm:'Delete'})){ const r=await api('campaign_delete',{id:b.dataset.cdel}); C.campaigns=r.campaigns; renderCampaigns(); } });
@@ -1867,7 +1980,7 @@ document.querySelectorAll('#helpBody [data-go]').forEach(a=>a.onclick=ev=>{ ev.p
 // ================================================================ v2 shell: theme, drawer, toasts, dialogs, charts
 const SUBTITLES={home:'Overview of your board, SIM and activity',messages:'Send and receive SMS in any language',phone:'Dial, answer and review calls',
   campaigns:'Batch calls with audio prompts and key-press capture',setup:'Detect, flash and test the board layer by layer',audio:'Wiring options and the PC audio bridge',
-  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, device info and notifications'};
+  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, email, device info and notifications',bulk:'Send one personalised message to many numbers'};
 function applyTheme(t){
   const sys=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
   const th=t||lsGet('theme')||sys;
@@ -1952,6 +2065,174 @@ function renderCharts(force){
 }
 
 async function loadCampaignsQuiet(){ try{ const r=await api('campaigns_list'); C.campaigns=r.campaigns; C.running=r.running; C.dtmf=r.dtmf||[]; renderCharts(); }catch{} }
+// ================================================================ sidebar collapse / expand
+function sideApply(){
+  if(innerWidth<=760){ document.body.classList.remove('side-collapsed'); return; }
+  const pref=lsGet('side');
+  document.body.classList.toggle('side-collapsed', pref ? pref==='collapsed' : innerWidth<1180);
+  const t=$('#sideToggle'); if(t) t.innerHTML=ICON(document.body.classList.contains('side-collapsed')?'panel-left-open':'panel-left-close');
+}
+function sideToggle(){
+  if(innerWidth<=760){ document.body.classList.toggle('side-open'); return; }
+  lsSet('side', document.body.classList.contains('side-collapsed')?'expanded':'collapsed'); sideApply();
+  setTimeout(()=>{ if(window._charts) window._charts.forEach(c=>c.resize()); },220);
+}
+$('#hamb').onclick=sideToggle;
+$('#sideToggle').onclick=sideToggle;
+addEventListener('resize',()=>{ clearTimeout(window._sr); window._sr=setTimeout(sideApply,120); });
+addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&(e.key==='b'||e.key==='B')&&!/input|textarea|select/i.test(document.activeElement.tagName)){ e.preventDefault(); sideToggle(); } });
+sideApply();
+
+// ================================================================ email (SMTP) settings
+const SM={ cfg:{}, configured:false, presets:{} };
+async function loadSmtp(){
+  try{
+    const r=await api('smtp_get'); SM.cfg=r.smtp||{}; SM.configured=r.configured; SM.presets=r.presets||{};
+    const c=SM.cfg;
+    $('#smPreset').value=c.preset||'gmail'; $('#smFrom').value=c.from_name||''; $('#smUser').value=c.user||'';
+    $('#smHost').value=c.host||'smtp.gmail.com'; $('#smPort').value=c.port||587; $('#smTo').value=c.default_to||'';
+    $('#smPass').value=''; $('#smPass').placeholder=r.has_password?'Saved (leave empty to keep)':'16-character app password';
+    smState(); smtpNotes();
+  }catch(e){}
+}
+function smState(){ const s=$('#smtpState'); s.className='rs '+(SM.configured?'ok':'warn'); s.innerHTML=SM.configured?ICON('circle-check')+' Ready':ICON('circle-alert')+' Not set up'; }
+$('#smPreset').onchange=e=>{ const p=SM.presets[e.target.value]; if(p){ $('#smHost').value=p.host; $('#smPort').value=p.port; } };
+$('#smEye').onclick=()=>{ const i=$('#smPass'); i.type=i.type==='password'?'text':'password'; $('#smEye').innerHTML=ICON(i.type==='password'?'eye':'eye-off'); };
+async function smSave(silent){
+  const d={preset:$('#smPreset').value,from_name:$('#smFrom').value,user:$('#smUser').value,host:$('#smHost').value,port:+$('#smPort').value||587,default_to:$('#smTo').value};
+  if($('#smPass').value.trim()) d.password=$('#smPass').value.trim();
+  if(!d.user||!/@/.test(d.user)){ toast('Enter the email address that sends the reports'); return false; }
+  const r=await api('smtp_save',d); SM.configured=r.configured; smState(); smtpNotes();
+  if(!silent) toast(r.configured?'Email settings saved':'Saved. Add the app password to finish'); return true;
+}
+$('#smSave').onclick=()=>smSave(false).catch(e=>toast(e.message));
+$('#smTest').onclick=async()=>{
+  const b=$('#smTest'); b.disabled=true; b.innerHTML=ICON('loader-circle','spin')+' Sending…';
+  try{ if(!await smSave(true)) return; const r=await api('smtp_test',{to:$('#smTo').value||$('#smUser').value}); toast('Test email sent to '+r.sent_to.join(', '));
+    Swal&&Swal.fire({...swalBase,icon:'success',title:'Test email sent',html:'Check the inbox of <b>'+esc(r.sent_to.join(', '))+'</b>. Check spam if you do not see it in a minute.'}); }
+  catch(e){ Swal?Swal.fire({...swalBase,icon:'error',title:'Email not sent',html:esc(e.message)}):toast(e.message); }
+  finally{ b.disabled=false; b.innerHTML=ICON('send')+' Send test email'; }
+};
+function smtpNotes(){
+  const msg=SM.configured?'':`<div class="note" style="margin-top:10px;display:flex;gap:8px;align-items:center">${ICON('mail-warning')}<span>Email is not set up yet, so reports won't be sent. <a href="#settings" data-go="settings">Set it up in Settings</a></span></div>`;
+  ['#bkSmtpNote','#cSmtpNote'].forEach(id=>{ const el=$(id); if(el){ el.innerHTML=msg; el.querySelectorAll('[data-go]').forEach(a=>a.onclick=ev=>{ev.preventDefault();show('settings');}); } });
+  if(SM.cfg.default_to){ ['#bkEmail','#cEmail'].forEach(id=>{ const el=$(id); if(el&&!el.value&&!el.dataset.touched) el.value=SM.cfg.default_to; }); }
+}
+['#bkEmail','#cEmail'].forEach(id=>{ const el=$(id); if(el) el.oninput=()=>el.dataset.touched='1'; });
+
+// ================================================================ bulk SMS
+const BK={ headers:['number','name'], rows:[], jobs:[], running:false, invalid:0, dupes:0 };
+function csvParse(text){
+  const rows=[]; let row=[], cell='', q=false;
+  for(let i=0;i<text.length;i++){ const ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){ cell+='"'; i++; } else q=false; } else cell+=ch; }
+    else if(ch==='"') q=true; else if(ch===','||ch==='\t'||ch===';'){ row.push(cell); cell=''; }
+    else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&text[i+1]==='\n') i++; row.push(cell); if(row.some(c=>c.trim())) rows.push(row); row=[]; cell=''; }
+    else cell+=ch; }
+  row.push(cell); if(row.some(c=>c.trim())) rows.push(row);
+  return rows.map(r=>r.map(c=>c.trim()));
+}
+function bkParse(){
+  const lines=csvParse($('#bkNums').value);
+  let headers=BK.headers; let data=lines;
+  if(lines.length && !/\d{5,}/.test(lines[0].join(''))){ headers=lines[0].map(h=>h.toLowerCase().replace(/[^a-z0-9_]+/g,'_')||'col'); data=lines.slice(1); }
+  else if(!BK.fromCsv) headers=['number','name'];
+  let ni=headers.findIndex(h=>/^(number|phone|mobile|msisdn|contact|mobile_no|phone_number)$/.test(h)); if(ni<0) ni=0;
+  if(ni!==0){ headers=[headers[ni],...headers.filter((_,i)=>i!==ni)]; data=data.map(r=>[r[ni],...r.filter((_,i)=>i!==ni)]); }
+  headers[0]='number';
+  const seen=new Set(); BK.invalid=0; BK.dupes=0; BK.rows=[];
+  for(const r of data){
+    const num=(r[0]||'').replace(/[^\d+]/g,'');
+    if(num.replace('+','').length<5){ if((r[0]||'').trim()) BK.invalid++; continue; }
+    if(seen.has(num)){ BK.dupes++; continue; } seen.add(num);
+    const o={}; headers.forEach((h,i)=>{ o[h]=i===0?num:(r[i]||''); }); BK.rows.push(o);
+  }
+  BK.headers=headers; bkRender();
+}
+function bkRender(){
+  const n=BK.rows.length;
+  $('#bkCount').textContent=`${n} recipient${n===1?'':'s'}`; $('#bkCount').className='pill'+(n?' ok':'');
+  const w=[]; if(BK.invalid) w.push(`${BK.invalid} invalid number${BK.invalid>1?'s':''} skipped`); if(BK.dupes) w.push(`${BK.dupes} duplicate${BK.dupes>1?'s':''} removed`);
+  $('#bkWarn').innerHTML=w.length?`<div class="note" style="margin-top:10px;display:flex;gap:8px;align-items:center">${ICON('info')}<span>${w.join(' · ')}</span></div>`:'';
+  $('#bkPrevWrap').hidden=!n;
+  if(n) $('#bkPrev').innerHTML=`<thead><tr>${BK.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${BK.rows.slice(0,5).map(r=>`<tr>${BK.headers.map(h=>`<td>${esc(r[h])}</td>`).join('')}</tr>`).join('')}${n>5?`<tr><td colspan="${BK.headers.length}" class="muted">+ ${n-5} more</td></tr>`:''}</tbody>`;
+  $('#bkVars').innerHTML=BK.headers.map(h=>`<button class="varchip" data-var="${esc(h)}">{${esc(h)}}</button>`).join('');
+  $('#bkVars').querySelectorAll('[data-var]').forEach(b=>b.onclick=()=>{ const t=$('#bkText'), s=t.selectionStart??t.value.length; t.value=t.value.slice(0,s)+'{'+b.dataset.var+'}'+t.value.slice(t.selectionEnd??s); t.focus(); t.selectionStart=t.selectionEnd=s+b.dataset.var.length+2; bkMsg(); });
+  bkMsg();
+}
+function bkRenderText(tpl,row){ const v={}; Object.keys(row||{}).forEach(k=>v[k.toLowerCase()]=row[k]); return tpl.replace(/\{([A-Za-z0-9_]+)(?:\|([^}]*))?\}/g,(m,k,d)=>{ const x=v[k.toLowerCase()]; if(x==null) return d??m; return (String(x).trim()||d==null)?x:d; }); }
+function bkMsg(){
+  const tpl=$('#bkText').value, first=BK.rows[0]||{number:'9800000000',name:'Ravi'};
+  const txt=bkRenderText(tpl,first);
+  const uni=!GSM.test(txt), lim=uni?70:160, parts=txt?Math.ceil(txt.length/lim):0;
+  $('#bkCounter').innerHTML=txt?`${txt.length} chars · ${parts} SMS each${uni?' · Unicode':''}`:'';
+  $('#bkPreview').textContent=txt||'Your message preview appears here';
+  const n=BK.rows.length, gap=+$('#bkGap').value||3;
+  const secs=n*(gap+3*parts); $('#bkEta').textContent=n&&txt?`≈ ${n*parts} SMS · about ${secs<90?secs+' s':Math.ceil(secs/60)+' min'}`:'';
+  $('#bkStart').innerHTML=ICON('send')+(n?` Send to ${n}`:' Send');
+  $('#bkStart').disabled=BK.running||!n||!tpl.trim();
+}
+$('#bkNums').oninput=()=>{ BK.fromCsv=false; bkParse(); };
+$('#bkText').oninput=bkMsg; $('#bkGap').oninput=bkMsg;
+$('#bkClear').onclick=()=>{ $('#bkNums').value=''; BK.fromCsv=false; bkParse(); };
+$('#bkCsv').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const text=await f.text(); BK.fromCsv=true; $('#bkNums').value=text.replace(/^﻿/,''); bkParse();
+  toast(`Loaded ${BK.rows.length} recipients from ${f.name}`); e.target.value='';
+};
+$('#bkStart').onclick=async()=>{
+  const tpl=$('#bkText').value.trim(), n=BK.rows.length;
+  if(!S.status.connected){ toast('Board is offline'); return; }
+  const unknown=[...new Set([...tpl.matchAll(/\{([A-Za-z0-9_]+)(?:\|[^}]*)?\}/g)].map(m=>m[1].toLowerCase()))].filter(v=>!BK.headers.includes(v));
+  const extra=unknown.length?`<br><br><b style="color:var(--warn)">Unknown variable${unknown.length>1?'s':''}: ${unknown.map(v=>'{'+esc(v)+'}').join(', ')}</b>. These are sent as typed.`:'';
+  if(!await ask(`Send ${n} SMS?`,`Each recipient gets a personalised copy, one every ${+$('#bkGap').value||3} s. The modem must stay connected until it finishes.${extra}`,{confirm:`Send to ${n}`})) return;
+  try{ await api('bulk_start',{name:$('#bkName').value.trim(),rows:BK.rows,template:tpl,gap:+$('#bkGap').value||3,email_to:$('#bkEmail').value.trim()}); toast('Bulk SMS started'); }
+  catch(e){ toast(e.message); }
+};
+$('#bkStop').onclick=()=>api('bulk_stop').then(()=>toast('Stopping after the current message…'));
+async function loadBulk(){ if(!BK.inited){ BK.inited=true; bkParse(); } try{ const r=await api('bulk_list'); BK.jobs=r.jobs; BK.running=r.running; renderBulkJobs(); }catch{} loadSmtp(); }
+function onBulk(j){ const i=BK.jobs.findIndex(x=>x.id===j.id); if(i>=0) BK.jobs[i]=j; else BK.jobs.unshift(j); BK.running=BK.jobs.some(x=>x.status==='running'); renderBulkJobs(); }
+function renderBulkJobs(){
+  $('#bkStop').disabled=!BK.running; bkMsg();
+  if(!BK.jobs.length){ $('#bkJobs').innerHTML='<div class="empty">No bulk SMS sent yet</div>'; return; }
+  const openIds=new Set([...document.querySelectorAll('#bkJobs details[open]')].map(d=>d.dataset.id));
+  $('#bkJobs').innerHTML=BK.jobs.map((j,ji)=>{
+    const R=j.results, sent=R.filter(r=>r.status==='sent').length, failed=R.filter(r=>r.status==='failed').length, done=R.filter(r=>!['pending','sending'].includes(r.status)).length;
+    const parts=R.reduce((s,r)=>s+(r.parts||0),0);
+    const kpi=(icon,label,val,cls='')=>`<div class="kpi ${cls}"><span class="sic"><i data-lucide="${icon}"></i></span><small>${label}</small><b>${val}</b></div>`;
+    const st={sent:['ok','circle-check'],failed:['bad','circle-x'],sending:['run','loader-circle'],pending:['','clock'],skipped:['','skip-forward']};
+    const rows=R.map(r=>{ const [c,ic]=st[r.status]||['','circle']; return `<tr><td><b>${esc(r.number)}</b>${r.vars&&r.vars.name?`<br><small class="muted">${esc(r.vars.name)}</small>`:''}</td>
+      <td><span class="rs ${c}">${ICON(ic,r.status==='sending'?'spin':'')} ${esc(r.status)}</span>${r.error?`<br><small style="color:var(--bad)">${esc(r.error)}</small>`:''}</td>
+      <td class="msgcell">${esc(r.text)}</td><td>${r.parts||''}</td><td><small class="muted">${r.time?fmtTime(r.time,true):''}</small></td></tr>`; }).join('');
+    const isOpen=openIds.size?openIds.has(j.id):ji===0;
+    return `<details class="camp" data-id="${j.id}" ${isOpen||j.status==='running'?'open':''}>
+      <summary><span class="ctitle">${ICON('send')} <b>${esc(j.name)}</b></span><span class="cst ${j.status==='running'?'run':''}">${j.status==='running'?ICON('loader-circle','spin')+' ':''}${esc(j.status)}</span>
+        <span class="muted" style="font-size:13px">${done}/${R.length} processed · ${new Date(j.created).toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></summary>
+      <div class="prog"><i style="width:${R.length?done*100/R.length:0}%"></i></div>
+      <div class="kpis">${kpi('users','Recipients',R.length)}${kpi('circle-check','Sent',sent)}${kpi('circle-x','Failed',failed)}${kpi('messages-square','SMS parts',parts)}</div>
+      <div class="bkmsg"><small class="muted">Message template</small><div>${esc(j.template)}</div></div>
+      ${j.email_status?`<div class="note ${/^sent/.test(j.email_status)?'good':'bad'}" style="margin:8px 0;display:flex;gap:8px;align-items:center">${ICON('mail')}<span>Email report: ${esc(j.email_status)}</span></div>`:''}
+      <div class="tblwrap"><table class="tbl rtbl"><thead><tr><th>Number</th><th>Status</th><th>Message sent</th><th>Parts</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="actions"><button class="btn ghost sm" data-bcsv="${j.id}">${ICON('download')} CSV</button>
+        <button class="btn ghost sm" data-bmail="${j.id}">${ICON('mail')} Email report</button>
+        ${failed&&j.status!=='running'?`<button class="btn ghost sm" data-bretry="${j.id}">${ICON('rotate-ccw')} Retry ${failed} failed</button>`:''}
+        ${j.status!=='running'?`<button class="btn ghost sm" data-bdel="${j.id}">${ICON('trash-2')} Delete</button>`:''}</div></details>`;
+  }).join('');
+  const L=$('#bkJobs');
+  L.querySelectorAll('[data-bcsv]').forEach(b=>b.onclick=async()=>{ const r=await api('bulk_csv',{id:b.dataset.bcsv}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+r.csv],{type:'text/csv'})); a.download=r.name.replace(/[^\w-]+/g,'_')+'.csv'; a.click(); toast('CSV downloaded'); });
+  L.querySelectorAll('[data-bmail]').forEach(b=>b.onclick=()=>emailReport('bulk',b.dataset.bmail,(BK.jobs.find(x=>x.id===b.dataset.bmail)||{}).email_to));
+  L.querySelectorAll('[data-bdel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete job?','Its delivery report is removed. Sent messages stay in Messages.',{danger:true,confirm:'Delete'})){ const r=await api('bulk_delete',{id:b.dataset.bdel}); BK.jobs=r.jobs; renderBulkJobs(); } });
+  L.querySelectorAll('[data-bretry]').forEach(b=>b.onclick=async()=>{ const j=BK.jobs.find(x=>x.id===b.dataset.bretry); if(!j) return;
+    const rows=j.results.filter(r=>r.status==='failed').map(r=>r.vars||{number:r.number});
+    if(await ask(`Retry ${rows.length} failed?`,'A new job is created for the numbers that failed.',{confirm:'Retry'})) api('bulk_start',{name:j.name+' (retry)',rows,template:j.template,gap:j.gap,email_to:j.email_to}).then(()=>toast('Retry started')).catch(e=>toast(e.message)); });
+}
+async function emailReport(kind,id,current){
+  const to=await askText('Email report','Send the report to (comma-separated)',current||SM.cfg.default_to||'you@company.com','email');
+  if(!to) return;
+  try{ const r=await api('report_email',{kind,id,to}); toast('Report '+r.status); }
+  catch(e){ Swal?Swal.fire({...swalBase,icon:'error',title:'Email not sent',html:esc(e.message)}):toast(e.message); }
+}
+
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();
 </script>

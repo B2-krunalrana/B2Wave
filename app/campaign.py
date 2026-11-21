@@ -53,6 +53,7 @@ class CampaignRunner:
         self._cause_evt = asyncio.Event()
         self._play_done = asyncio.Event()
         self._stop = False
+        self.on_done = None                       # async (campaign) -> None, e.g. email report
 
     # ------------------------------------------------------------ live events from the modem
     @property
@@ -122,6 +123,7 @@ class CampaignRunner:
             "key_wait": max(3, min(60, int(cfg.get("key_wait", 10)))),
             "gap": max(2, min(120, int(cfg.get("gap", 5)))),
             "stop_on_key": bool(cfg.get("stop_on_key", True)),
+            "email_to": cfg.get("email_to", ""), "email_status": "",
             "results": [self._blank(n) for n in numbers],
         }
         self.store.data.insert(0, camp)
@@ -178,6 +180,12 @@ class CampaignRunner:
             self.current = None
             camp["summary"] = summarize(camp)
             await self._push(camp)
+            if self.on_done:
+                try:
+                    await self.on_done(camp)
+                except Exception:
+                    pass
+                await self._push(camp)
 
     async def _wait_state(self, states: set, timeout: float) -> str:
         t0 = time.time()

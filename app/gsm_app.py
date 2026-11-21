@@ -11,6 +11,7 @@ calls, live AT console.
 from __future__ import annotations
 
 import argparse
+import re
 import os
 import asyncio
 import json
@@ -26,6 +27,8 @@ from aiohttp import web, WSMsgType
 import modem as m
 import flasher
 import campaign as camp_mod
+import bulksms
+import mailer
 import base64
 
 ROOT = Path(__file__).parent
@@ -58,6 +61,7 @@ config = Store(DATA / "config.json", {"mode": "auto", "host": "", "serial_port":
 messages = Store(DATA / "messages.json", [])
 calls = Store(DATA / "calls.json", [])
 campaigns = Store(DATA / "campaigns.json", [])
+bulk = Store(DATA / "bulk.json", [])
 dtmf_log = deque(maxlen=200)
 console = deque(maxlen=400)
 clients: set[web.WebSocketResponse] = set()
@@ -131,6 +135,51 @@ modem = m.Modem(on_modem_event)
 runner = camp_mod.CampaignRunner(modem, broadcast, campaigns)
 
 
+async def record_sent(number: str, text: str, status: str, error: str):
+    """Bulk SMS also appears in the normal Messages threads."""
+    msg = {"dir": "out", "number": number, "text": text, "time": m.now_iso(), "read": True,
+           "status": status, "error": error, "id": uuid.uuid4().hex[:12], "bulk": True}
+    messages.data.append(msg)
+    messages.save()
+    await broadcast({"type": "message", "msg": msg})
+
+
+async def email_report(kind: str, obj: dict):
+    """Email a finished campaign / bulk job to its recipients (if set and SMTP configured)."""
+    to = obj.get("email_to") or ""
+    smtp = config.data.get("smtp") or {}
+    if not mailer.parse_recipients(to):
+        return
+    if not mailer.configured(smtp):
+        obj["email_status"] = "not sent: email is not set up in Settings"
+        return
+    if kind == "campaign":
+        subject, html_body, text = mailer.campaign_report(obj)
+        att = [(re.sub(r"[^\w-]+", "_", obj["name"]) + ".csv", camp_mod.to_csv(obj).encode("utf-8-sig"), "text/csv")]
+    else:
+        subject, html_body, text = mailer.bulk_report(obj)
+        att = [(re.sub(r"[^\w-]+", "_", obj["name"]) + ".csv", bulksms.to_csv(obj).encode("utf-8-sig"), "text/csv")]
+    try:
+        sent_to = await mailer.send(smtp, to, subject, html_body, text, att)
+        obj["email_status"] = "sent to " + ", ".join(sent_to)
+        log.info("report emailed to %s", sent_to)
+    except Exception as e:
+        obj["email_status"] = f"failed: {e}"
+        log.warning("report email failed: %s", e)
+
+
+async def _campaign_done(camp):
+    await email_report("campaign", camp)
+
+runner.on_done = _campaign_done
+
+
+async def _bulk_done(job):
+    await email_report("bulk", job)
+
+bulk_runner = bulksms.BulkSmsRunner(modem, broadcast, bulk, record_sent, _bulk_done)
+
+
 def repair_stored_messages():
     """Older versions stored some Unicode SMS as raw UCS2 hex - decode them once."""
     changed = 0
@@ -150,6 +199,13 @@ def repair_stored_messages():
 
 repair_stored_messages()
 
+for _j in bulk.data:                          # app restarted while a bulk job was running
+    if _j.get("status") == "running":
+        _j["status"] = "interrupted"
+        for _r in _j["results"]:
+            if _r["status"] in ("pending", "sending"):
+                _r["status"] = "not sent (interrupted)"
+bulk.save()
 for _c in campaigns.data:                     # app restarted while a campaign was running
     if _c.get("status") == "running":
         _c["status"] = "interrupted"
@@ -513,6 +569,64 @@ async def handle_op(op: str, d: dict):
         if not c:
             raise ValueError("campaign not found")
         return {"csv": camp_mod.to_csv(c), "name": c["name"]}
+    # ---------------- email (SMTP)
+    if op == "smtp_get":
+        s = dict(config.data.get("smtp") or {})
+        has = bool(s.pop("password", ""))
+        return {"smtp": s, "has_password": has, "configured": mailer.configured(config.data.get("smtp")),
+                "presets": mailer.PRESETS}
+    if op == "smtp_save":
+        cur = dict(config.data.get("smtp") or {})
+        for k in ("host", "port", "user", "from_name", "default_to", "preset"):
+            if k in d:
+                cur[k] = d[k].strip() if isinstance(d[k], str) else d[k]
+        if d.get("password"):                       # empty = keep the saved one
+            cur["password"] = d["password"].replace(" ", "")
+        cur["port"] = int(cur.get("port") or 587)
+        config.data["smtp"] = cur
+        config.save()
+        return {"configured": mailer.configured(cur)}
+    if op == "smtp_test":
+        smtp = config.data.get("smtp") or {}
+        to = d.get("to") or smtp.get("default_to") or smtp.get("user")
+        html_body = mailer._shell("Test email", "<p>Your B2Wave email settings work. Campaign and bulk SMS reports will arrive like this.</p>")
+        sent = await mailer.send(smtp, to, "B2Wave test email", html_body, "Your B2Wave email settings work.")
+        return {"sent_to": sent}
+    if op == "report_email":
+        kind = d.get("kind", "campaign")
+        store = campaigns if kind == "campaign" else bulk
+        obj = next((x for x in store.data if x["id"] == d["id"]), None)
+        if not obj:
+            raise ValueError("not found")
+        if d.get("to"):
+            obj["email_to"] = d["to"]
+        if not mailer.parse_recipients(obj.get("email_to")):
+            raise ValueError("enter at least one email address")
+        await email_report(kind, obj)
+        store.save()
+        if obj["email_status"].startswith("failed") or obj["email_status"].startswith("not sent"):
+            raise RuntimeError(obj["email_status"])
+        await broadcast({"type": "campaign" if kind == "campaign" else "bulk", ("campaign" if kind == "campaign" else "job"): obj})
+        return {"status": obj["email_status"]}
+    # ---------------- bulk SMS
+    if op == "bulk_list":
+        return {"jobs": bulk.data, "running": bulk_runner.running}
+    if op == "bulk_start":
+        return await bulk_runner.start(d)
+    if op == "bulk_stop":
+        await bulk_runner.stop()
+        return {}
+    if op == "bulk_delete":
+        if bulk_runner.running and bulk.data and bulk.data[0]["id"] == d["id"] and bulk.data[0]["status"] == "running":
+            raise RuntimeError("stop the job first")
+        bulk.data[:] = [j for j in bulk.data if j["id"] != d["id"]]
+        bulk.save()
+        return {"jobs": bulk.data}
+    if op == "bulk_csv":
+        j = next((j for j in bulk.data if j["id"] == d["id"]), None)
+        if not j:
+            raise ValueError("job not found")
+        return {"csv": bulksms.to_csv(j), "name": j["name"]}
     if op.startswith("wizard_"):
         return await handle_wizard(op[7:], d)
     raise ValueError(f"unknown op {op}")
