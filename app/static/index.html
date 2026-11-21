@@ -13,6 +13,7 @@
 <script src="/static/vendor/sweetalert2.all.min.js"></script>
 <link rel="stylesheet" href="/static/vendor/notyf.min.css">
 <script src="/static/vendor/notyf.min.js"></script>
+<script src="/static/vendor/livekit-client.umd.min.js"></script>
 <style>
 :root{
   --bg:#f4f5f7;--panel:#fff;--panel2:#f0f2f5;--line:#e3e6eb;--text:#14171c;--muted:#6b7280;
@@ -523,6 +524,38 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
 .view.on>*{animation:viewIn .28s ease both}
 @keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.view.on>*{animation:none}}
+
+/* AI agent page */
+.newtag{margin-left:auto;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.5px;padding:1px 6px;border-radius:6px;background:linear-gradient(135deg,var(--accent),#c026d3);color:#fff}
+@media (min-width:761px){body.side-collapsed .newtag{display:none}}
+.aihero{background:linear-gradient(120deg,var(--accent-soft),transparent 55%),var(--panel)}
+.aiflow{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap}
+.fnode{flex:1;min-width:110px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:center}
+.fnode svg.lucide{width:22px;height:22px;color:var(--muted)}
+.fnode.accent{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:var(--accent-soft)}
+.fnode.accent svg.lucide{color:var(--accent)}
+.fnode b{font-size:13px}.fnode small{font-size:11px;color:var(--muted)}
+.farrow{display:grid;place-items:center;color:var(--muted)}
+.farrow svg.lucide{width:16px;height:16px}
+.agentrun{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding:12px;border-radius:12px;background:var(--panel2);border:1px dashed var(--line)}
+.agentrun>div{flex:1;min-width:180px}.agentrun small{display:block;color:var(--muted);font-size:12px}
+.agentrun code{font:600 12.5px ui-monospace,Consolas,monospace;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.aimeter{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.aisteps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:190px;overflow:auto;font-size:13px}
+.aisteps li{display:flex;align-items:center;gap:8px}
+.aisteps li small{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.aisteps .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--panel);flex:none}
+.aisteps li.ok .ic{background:var(--ok);color:#fff}.aisteps li.bad .ic{background:var(--bad);color:#fff}.aisteps li.bad{color:var(--bad)}
+.aisteps .ic svg.lucide{width:12px;height:12px}
+.transcript{margin-top:14px;max-height:380px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.tline{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:start}
+.tline .tw{font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:5px;padding-top:7px}
+.tline.agent .tw{color:var(--accent)}
+.tline .tb{padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:14px;white-space:pre-wrap}
+.tline.agent .tb{background:var(--accent-soft);border-color:transparent}
+.tline .tb.partial{opacity:.65;font-style:italic}
+.tline small{color:var(--muted);font-size:11px;padding-top:9px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -548,6 +581,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
       <button data-v="bulk" title="Bulk SMS"><i data-lucide="send"></i><span>Bulk SMS</span></button>
       <button data-v="phone" title="Phone"><i data-lucide="phone"></i><span>Phone</span></button>
       <button data-v="campaigns" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></button>
+      <button data-v="ai" title="AI voice agent"><i data-lucide="bot"></i><span>AI voice agent</span><em class="newtag">AI</em></button>
       <div class="ngroup">Device</div>
       <button data-v="setup" title="Setup"><i data-lucide="cpu"></i><span>Setup &amp; tests</span></button>
       <button data-v="audio" title="Audio"><i data-lucide="headphones"></i><span>Talk on calls</span></button>
@@ -735,6 +769,18 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
             <li>Click <b>Send test email</b> to confirm it works.</li>
             <li>In a campaign or bulk SMS job, fill <b>Email report to</b>. When it finishes, a summary with a CSV attachment is emailed automatically. Use <b>Email report</b> on any finished job to send it again.</li>
           </ol>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="bot"></i></span> AI voice agent (LiveKit)</summary>
+          <ol class="plain">
+            <li>Create a free project at <a href="https://cloud.livekit.io" target="_blank" rel="noopener">cloud.livekit.io</a> and copy the URL, API key and secret. Get an OpenAI API key.</li>
+            <li><b>AI voice agent</b> page: paste the keys, click <b>Save</b>, then <b>Test LiveKit</b>.</li>
+            <li>Double-click <code>agent\run_agent.bat</code> and keep the window open. It sets itself up the first time.</li>
+            <li>Pick a template or write instructions, an opening line, voice and language.</li>
+            <li><b>Test with PC mic</b>: talk to the agent from this PC, with a live transcript.</li>
+            <li><b>Call a phone number</b>: B2Wave dials, and when the person answers the agent talks to them. This needs the USB sound card wiring (Talk on calls, option B), because this module can't stream call audio over USB.</li>
+          </ol>
+          <div class="note" style="margin-top:10px">The agent uses LiveKit Agents 1.0.23. Newer releases load native DLLs that Windows Smart App Control blocks on some PCs.</div>
         </details>
 
         <details class="hsec"><summary><span><i data-lucide="megaphone"></i></span> Voice campaigns (play audio, capture 1 / 2)</summary>
@@ -1063,6 +1109,97 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
       </div>
     </section>
 
+    <!-- AI VOICE AGENT -->
+    <section class="view" id="v-ai">
+      <div class="wiz" style="max-width:1150px">
+        <div class="card aihero">
+          <div class="aiflow">
+            <span class="fnode"><i data-lucide="smartphone"></i><b>Caller</b><small>GSM / VoLTE</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
+            <span class="fnode"><i data-lucide="cpu"></i><b>A7672S</b><small>SPK / MIC pads</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
+            <span class="fnode"><i data-lucide="usb"></i><b>USB sound card</b><small>audio bridge</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
+            <span class="fnode accent"><i data-lucide="radio"></i><b>LiveKit</b><small>real-time room</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
+            <span class="fnode accent"><i data-lucide="bot"></i><b>AI agent</b><small>OpenAI voice</small></span>
+          </div>
+          <ul class="checks" id="aiChecks" style="margin:16px 0 0"></ul>
+        </div>
+
+        <div class="grid2 top">
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="key-round"></i></span><div style="flex:1"><h3>1 · LiveKit &amp; AI keys</h3><small>Free LiveKit Cloud project + OpenAI key</small></div><span class="rs" id="aiState">Not set up</span></div>
+            <label>LiveKit URL</label><input id="aiUrl" placeholder="wss://your-project.livekit.cloud">
+            <div class="grid2">
+              <div><label>API key</label><input id="aiKey" placeholder="APIxxxxxxxx" autocomplete="off"></div>
+              <div><label>API secret</label><div class="pw"><input id="aiSecret" type="password" placeholder="secret" autocomplete="new-password"><button class="iconbtn" type="button" data-eye="aiSecret"><i data-lucide="eye"></i></button></div></div>
+            </div>
+            <div class="grid2">
+              <div><label>OpenAI API key</label><div class="pw"><input id="aiOpenai" type="password" placeholder="sk-..." autocomplete="new-password"><button class="iconbtn" type="button" data-eye="aiOpenai"><i data-lucide="eye"></i></button></div></div>
+              <div><label>Agent name</label><input id="aiAgent" placeholder="b2wave-agent"></div>
+            </div>
+            <div class="note" style="margin-top:12px;display:flex;gap:10px"><i data-lucide="info"></i><div>Create a project at <a href="https://cloud.livekit.io" target="_blank" rel="noopener">cloud.livekit.io</a>, then go to <b>Settings &gt; API keys</b>. Get an OpenAI key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>. Keys stay on this PC (<code>agent/.env</code>).</div></div>
+            <div class="actions"><button class="btn" id="aiSave"><i data-lucide="save"></i> Save</button><button class="btn ghost" id="aiTest"><i data-lucide="plug-zap"></i> Test LiveKit</button></div>
+            <div class="agentrun">
+              <div><b>Start the AI agent worker</b><small>Run this once and keep the window open while making AI calls</small></div>
+              <code id="aiCmd">agent\run_agent.bat</code><button class="btn ghost sm" id="aiCopy"><i data-lucide="copy"></i> Copy</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="sparkles"></i></span><div><h3>2 · Agent persona</h3><small>What the AI says and how it behaves</small></div></div>
+            <label>Template</label>
+            <select id="aiPreset">
+              <option value="custom">Custom</option>
+              <option value="receptionist">Receptionist / enquiry</option>
+              <option value="appointment">Appointment reminder</option>
+              <option value="survey">Customer feedback survey</option>
+              <option value="payment">Payment reminder</option>
+              <option value="lead">Lead qualification</option>
+            </select>
+            <label>Instructions</label>
+            <textarea id="aiInstr" rows="6" placeholder="You are Riya from B2 Clinic. Confirm tomorrow's appointment at 11 am..."></textarea>
+            <label>Opening line</label><input id="aiGreet" placeholder="Hello! This is Riya calling from B2 Clinic.">
+            <div class="grid2">
+              <div><label>Voice</label><select id="aiVoice"><option>alloy</option><option>ash</option><option>ballad</option><option>coral</option><option>echo</option><option>sage</option><option>shimmer</option><option>verse</option></select></div>
+              <div><label>Language</label><select id="aiLang"><option value="">Auto (match the caller)</option><option>English (Indian accent)</option><option>Hindi</option><option>Gujarati</option><option>Hinglish</option><option>Marathi</option><option>Tamil</option><option>Telugu</option><option>Bengali</option></select></div>
+            </div>
+            <div class="actions"><button class="btn ghost" id="aiSavePersona"><i data-lucide="save"></i> Save persona</button></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardhead"><span class="cicon"><i data-lucide="phone-call"></i></span><div style="flex:1"><h3>3 · Talk to the agent</h3><small>Try it from this PC first, then call a phone</small></div><span class="rs" id="aiLive">Idle</span></div>
+          <div class="seg" id="aiMode"><button data-m="test" class="on"><i data-lucide="laptop"></i> Test with PC mic</button><button data-m="call"><i data-lucide="phone-outgoing"></i> Call a phone number</button></div>
+          <div class="grid2" style="margin-top:12px">
+            <div id="aiCallBox" hidden>
+              <label>Phone number</label><input id="aiNum" placeholder="+91 98xxxxxxxx" inputmode="tel">
+              <div class="grid2">
+                <div><label>Call audio in (from board SPK)</label><select id="aiIn"></select></div>
+                <div><label>Into call (to board MIC)</label><select id="aiOut"></select></div>
+              </div>
+              <p class="hint">Needs the USB sound card wiring (Talk on calls &gt; option B). Without it the agent can't hear or speak to the person.</p>
+            </div>
+            <div id="aiTestBox">
+              <div class="grid2">
+                <div><label>Your microphone</label><select id="aiMic"></select></div>
+                <div><label>Your speaker / headphones</label><select id="aiSpk"></select></div>
+              </div>
+              <p class="hint">Talk to the agent from this PC to check keys, persona and voice. No phone call is made.</p>
+            </div>
+            <div class="aimeter">
+              <div class="meters" style="margin-top:0"><span>Person</span><div class="meter"><i id="aiMIn"></i></div><span>Agent</span><div class="meter"><i id="aiMOut"></i></div></div>
+              <ol class="aisteps" id="aiSteps"></ol>
+            </div>
+          </div>
+          <div class="actions"><button class="btn green" id="aiGo"><i data-lucide="play"></i> Start test conversation</button><button class="btn red" id="aiHang" disabled><i data-lucide="phone-off"></i> End</button><span class="muted" id="aiTimer" style="font-variant-numeric:tabular-nums"></span></div>
+          <div class="transcript" id="aiTranscript"><div class="empty" style="padding:14px">The live transcript appears here during the conversation.</div></div>
+        </div>
+
+        <div class="card">
+          <div class="cardhead"><span class="cicon"><i data-lucide="history"></i></span><div><h3>4 · AI call history</h3><small>Every AI conversation with its transcript</small></div></div>
+          <div id="aiHistory"><div class="empty">No AI calls yet</div></div>
+        </div>
+      </div>
+    </section>
+
     <!-- SETTINGS -->
     <section class="view" id="v-settings">
       <div class="settings">
@@ -1207,7 +1344,8 @@ function show(v){
   S.view=v;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS'}[v];
+  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS',ai:'AI voice agent'}[v];
+  if(v==='ai') loadAi();
   if(v==='bulk') loadBulk(); if(v==='settings'||v==='campaigns') loadSmtp();
   if(v==='home') renderHome();
   if(location.hash!=='#'+v) history.replaceState(null,'','#'+v);
@@ -2044,7 +2182,7 @@ document.querySelectorAll('#helpBody [data-go]').forEach(a=>a.onclick=ev=>{ ev.p
 // ================================================================ v2 shell: theme, drawer, toasts, dialogs, charts
 const SUBTITLES={home:'Overview of your board, SIM and activity',messages:'Send and receive SMS in any language',phone:'Dial, answer and review calls',
   campaigns:'Batch calls with audio prompts and key-press capture',setup:'Detect, flash and test the board layer by layer',audio:'Wiring options and the PC audio bridge',
-  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, email, device info and notifications',bulk:'Send one personalised message to many numbers'};
+  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, email, device info and notifications',bulk:'Send one personalised message to many numbers',ai:'Let a LiveKit AI agent talk to the person on the call'};
 function applyTheme(t){
   const sys=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
   const th=t||lsGet('theme')||sys;
@@ -2315,6 +2453,183 @@ function busy(delta){
 }
 const _apiRaw=api;
 api=function(op,data){ busy(1); return _apiRaw(op,data).finally(()=>busy(-1)); };
+
+// ================================================================ AI voice agent (LiveKit)
+const AI_PRESETS={
+  receptionist:{greet:'Hello! Thank you for calling. How can I help you today?',instr:'You are a polite receptionist for our business. Answer questions about timings, location and services. If you do not know something, offer to have a team member call back and collect the person\'s name and best time to call.'},
+  appointment:{greet:'Hello! I am calling to confirm your appointment for tomorrow.',instr:'You are calling to confirm an appointment tomorrow at 11 am. Ask the person to confirm, or to reschedule. If they reschedule, ask for a preferred day and time. Confirm the final answer clearly before ending.'},
+  survey:{greet:'Hello! Do you have one minute for a quick feedback survey?',instr:'You run a short customer feedback survey. Ask: 1) How satisfied were you, from 1 to 5? 2) What did you like? 3) What can we improve? Thank the person and end the call. If they are busy, apologise and end politely.'},
+  payment:{greet:'Hello! This is a friendly reminder about your pending payment.',instr:'You remind the customer politely about a pending payment of Rs 2,500 due this week. Ask when they plan to pay. Never threaten or be rude. If they already paid, apologise and thank them.'},
+  lead:{greet:'Hello! I am calling about the enquiry you made on our website.',instr:'You qualify a sales lead. Ask what they are looking for, their budget range, and when they want to start. Be warm and brief. Offer a callback from a specialist at a time they choose.'},
+};
+const AIS={ cfg:{}, room:null, mode:'test', t0:0, timer:0, transcript:[], segs:{}, agentJoined:false, myTrackSid:'', meters:[], raf:0, number:'', stopping:false, gotStream:false };
+const LK=()=>window.LivekitClient;
+
+async function loadAi(){
+  try{
+    const r=await api('ai_get'); const a=r.ai||{}; AIS.cfg=r;
+    $('#aiUrl').value=a.url||''; $('#aiKey').value=a.api_key||''; $('#aiAgent').value=a.agent_name||'b2wave-agent';
+    $('#aiSecret').value=''; $('#aiSecret').placeholder=r.has_secret?'Saved (leave empty to keep)':'secret';
+    $('#aiOpenai').value=''; $('#aiOpenai').placeholder=r.openai_set?'Saved (leave empty to keep)':'sk-...';
+    $('#aiPreset').value=a.preset||'custom'; $('#aiInstr').value=a.instructions||''; $('#aiGreet').value=a.greeting||'';
+    $('#aiVoice').value=a.voice||'alloy'; $('#aiLang').value=a.language||'';
+    $('#aiCmd').textContent=(r.agent_dir||'agent')+'\\run_agent.bat';
+    aiChecks(); aiDevices(); aiHistory();
+  }catch(e){ toast(e.message); }
+}
+function aiChecks(extra={}){
+  const r=AIS.cfg, row=(ok,title,sub)=>`<li><span class="ic ${ok===true?'ok':ok===false?'bad':ok==='warn'?'warn':''}">${ok===true?ICON('check'):ok===false?ICON('x'):ok==='warn'?'!':''}</span><div><b>${title}</b><small>${sub}</small></div></li>`;
+  const s=$('#aiState'); s.className='rs '+(r.configured&&r.openai_set?'ok':'warn'); s.innerHTML=r.configured&&r.openai_set?ICON('circle-check')+' Keys saved':ICON('circle-alert')+' Not set up';
+  $('#aiChecks').innerHTML=[
+    row(!!r.configured,'LiveKit keys',r.configured?'Saved. Use "Test LiveKit" to verify':'Enter URL, API key and secret below'),
+    row(!!r.openai_set,'OpenAI key (for the agent voice)',r.openai_set?'Saved in agent/.env':'Needed by the AI agent'),
+    row(extra.agent===true?true:extra.agent===false?false:'warn','Agent worker running',extra.agent===true?'The agent joined the last conversation':extra.agent===false?'Agent did not join. Start agent\\run_agent.bat':'Start agent\\run_agent.bat and keep it open'),
+    row(S.status.connected?true:'warn','B2Wave board (for phone calls)',S.status.connected?'Connected: '+esc(S.status.operator||''):'Offline: test mode still works'),
+    row('warn','USB sound card wiring (for phone calls)','Talk on calls > option B. Not needed for PC test mode'),
+  ].join('');
+}
+document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{ const i=$('#'+b.dataset.eye); i.type=i.type==='password'?'text':'password'; b.innerHTML=ICON(i.type==='password'?'eye':'eye-off'); });
+$('#aiPreset').onchange=e=>{ const p=AI_PRESETS[e.target.value]; if(p){ $('#aiInstr').value=p.instr; $('#aiGreet').value=p.greet; } };
+async function aiSave(silent){
+  const d={url:$('#aiUrl').value,api_key:$('#aiKey').value,agent_name:$('#aiAgent').value||'b2wave-agent',preset:$('#aiPreset').value,
+    instructions:$('#aiInstr').value,greeting:$('#aiGreet').value,voice:$('#aiVoice').value,language:$('#aiLang').value};
+  if($('#aiSecret').value.trim()) d.api_secret=$('#aiSecret').value.trim();
+  if($('#aiOpenai').value.trim()) d.openai_key=$('#aiOpenai').value.trim();
+  if(d.url && !/^wss?:\/\//.test(d.url)){ toast('The LiveKit URL starts with wss://'); return false; }
+  const r=await api('ai_save',d); AIS.cfg.configured=r.configured; AIS.cfg.openai_set=r.openai_set; aiChecks();
+  if(!silent) toast('AI settings saved'); return true;
+}
+$('#aiSave').onclick=()=>aiSave(false).catch(e=>toast(e.message));
+$('#aiSavePersona').onclick=()=>aiSave(false).catch(e=>toast(e.message));
+$('#aiTest').onclick=async()=>{ const b=$('#aiTest'); b.disabled=true; b.innerHTML=ICON('loader-circle','spin')+' Testing…';
+  try{ if(!await aiSave(true)) return; const r=await api('ai_test'); Swal.fire({...swalBase,icon:'success',title:'LiveKit connected',html:`Your project answered (${r.rooms} active room${r.rooms===1?'':'s'}). Now start <b>agent\\run_agent.bat</b> and try a test conversation.`}); }
+  catch(e){ Swal.fire({...swalBase,icon:'error',title:'LiveKit test failed',html:esc(e.message)}); }
+  finally{ b.disabled=false; b.innerHTML=ICON('plug-zap')+' Test LiveKit'; } };
+$('#aiCopy').onclick=()=>{ navigator.clipboard.writeText($('#aiCmd').textContent).then(()=>toast('Command copied')); };
+document.querySelectorAll('#aiMode button').forEach(b=>b.onclick=()=>{ if(AIS.room) return; AIS.mode=b.dataset.m;
+  document.querySelectorAll('#aiMode button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#aiCallBox').hidden=AIS.mode!=='call'; $('#aiTestBox').hidden=AIS.mode!=='test';
+  $('#aiGo').innerHTML=ICON(AIS.mode==='call'?'phone-outgoing':'play')+(AIS.mode==='call'?' Call with AI agent':' Start test conversation'); });
+
+async function aiDevices(){
+  try{ const tmp=await navigator.mediaDevices.getUserMedia({audio:true}); tmp.getTracks().forEach(t=>t.stop()); }catch{ return; }
+  const ds=await navigator.mediaDevices.enumerateDevices(), ins=ds.filter(d=>d.kind==='audioinput'), outs=ds.filter(d=>d.kind==='audiooutput');
+  const opt=(list,key)=>{ const saved=lsGet(key); return list.map(d=>`<option value="${esc(d.deviceId)}" ${d.deviceId===saved?'selected':''}>${esc(d.label||d.deviceId.slice(0,8))}</option>`).join(''); };
+  $('#aiIn').innerHTML=opt(ins,'bCallIn'); $('#aiOut').innerHTML=opt(outs,'bCallOut'); $('#aiMic').innerHTML=opt(ins,'aiMic'); $('#aiSpk').innerHTML=opt(outs,'aiSpk');
+  const usb=d=>/usb|c-media|generic|external/i.test(d.label);
+  if(!lsGet('bCallIn')){ const u=ins.find(usb); if(u) $('#aiIn').value=u.deviceId; }
+  if(!lsGet('bCallOut')){ const u=outs.find(usb); if(u) $('#aiOut').value=u.deviceId; }
+}
+function aiStep(text,state='run'){
+  const ol=$('#aiSteps'); [...ol.querySelectorAll('li.run')].forEach(li=>{ li.className='ok'; li.querySelector('.ic').innerHTML=ICON('check'); });
+  ol.insertAdjacentHTML('beforeend',`<li class="${state}"><span class="ic">${state==='run'?ICON('loader-circle','spin'):state==='ok'?ICON('check'):ICON('x')}</span>${esc(text)}<small>${fmtDur(Math.floor((Date.now()-AIS.t0)/1000))}</small></li>`);
+}
+function aiLive(text,cls){ const s=$('#aiLive'); s.className='rs '+(cls||''); s.innerHTML=text; }
+function aiSay(who,text,id,final=true){
+  if(!text||!text.trim()) return;
+  const key=id||(who+Date.now());
+  const ex=AIS.transcript.find(x=>x.id===key);
+  if(ex){ ex.text=text; ex.final=final; } else AIS.transcript.push({id:key,who,text,final,t:Math.floor((Date.now()-AIS.t0)/1000)});
+  const box=$('#aiTranscript');
+  box.innerHTML=AIS.transcript.map(x=>`<div class="tline ${x.who}"><span class="tw">${x.who==='agent'?ICON('bot')+' Agent':ICON('user')+' Person'}</span><div class="tb ${x.final?'':'partial'}">${esc(x.text)}</div><small>${fmtDur(x.t)}</small></div>`).join('');
+  box.scrollTop=1e9;
+}
+
+async function aiStart(){
+  if(!LK()){ toast('LiveKit library failed to load'); return; }
+  if(AIS.room) return;
+  const mode=AIS.mode, number=($('#aiNum').value||'').trim();
+  if(mode==='call'){
+    if(!number){ toast('Enter the phone number'); return; }
+    if(!S.status.connected){ toast('Board is offline'); return; }
+    if(S.call.state!=='idle'){ toast('Another call is in progress'); return; }
+    if(!await ask('Call with the AI agent?',`B2Wave dials <b>${esc(number)}</b>. When the person answers, the AI agent talks to them through the USB sound card.`,{confirm:'Call now'})) return;
+  }
+  lsSet('aiMic',$('#aiMic').value); lsSet('aiSpk',$('#aiSpk').value); lsSet('bCallIn',$('#aiIn').value); lsSet('bCallOut',$('#aiOut').value);
+  Object.assign(AIS,{t0:Date.now(),transcript:[],segs:{},agentJoined:false,number,stopping:false,gotStream:false,outcome:'',error:''});
+  $('#aiSteps').innerHTML=''; $('#aiTranscript').innerHTML='<div class="empty" style="padding:14px">Waiting for the conversation…</div>';
+  $('#aiGo').disabled=true; $('#aiHang').disabled=false;
+  clearInterval(AIS.timer); AIS.timer=setInterval(()=>$('#aiTimer').textContent=fmtDur(Math.floor((Date.now()-AIS.t0)/1000)),500);
+  try{
+    aiStep('Getting a LiveKit room'); aiLive(ICON('loader-circle','spin')+' Starting','run');
+    const tk=await api('ai_token',{mode,number});
+    if(mode==='call'){
+      aiStep('Dialing '+number);
+      await api('dial',{number});
+      const t1=Date.now();
+      while(S.call.state!=='active'){
+        if(AIS.stopping) return;
+        if(S.call.state==='idle' && Date.now()-t1>3000){ throw new Error('The call was not answered'); }
+        if(Date.now()-t1>60000) throw new Error('No answer after 60 s');
+        await new Promise(r=>setTimeout(r,250));
+      }
+      aiStep('Answered');
+    }
+    aiStep('Joining LiveKit room');
+    const L=LK(), room=new L.Room({adaptiveStream:false,dynacast:false});
+    AIS.room=room;
+    room.on(L.RoomEvent.ParticipantConnected,p=>{ if(p.identity!==tk.identity){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); aiChecks({agent:true}); } });
+    room.on(L.RoomEvent.TrackSubscribed,(track,pub,p)=>{ if(track.kind!=='audio') return;
+      const el=track.attach(); el.autoplay=true; document.body.appendChild(el); el.style.display='none';
+      const sink=mode==='call'?$('#aiOut').value:$('#aiSpk').value; if(el.setSinkId&&sink) el.setSinkId(sink).catch(()=>{});
+      aiMeter(track.mediaStreamTrack,'#aiMOut'); });
+    room.on(L.RoomEvent.TranscriptionReceived,(segs,p)=>{ if(AIS.gotStream) return;
+      const who=(p&&p.identity===tk.identity)?'person':'agent'; segs.forEach(s=>aiSay(who,s.text,'s'+s.id,s.final)); });
+    if(typeof room.registerTextStreamHandler==='function'){
+      room.registerTextStreamHandler('lk.transcription',async(reader,info)=>{ AIS.gotStream=true;
+        const attrs=reader.info&&reader.info.attributes||{}; const who=(attrs['lk.transcribed_track_id']&&attrs['lk.transcribed_track_id']===AIS.myTrackSid)||info.identity===tk.identity?'person':'agent';
+        const id='t'+(reader.info&&reader.info.id||Date.now()); let txt='';
+        for await (const chunk of reader){ txt+=chunk; aiSay(who,txt,id,false); }
+        aiSay(who,txt,id,true); });
+    }
+    room.on(L.RoomEvent.Disconnected,()=>{ if(!AIS.stopping) aiStop('LiveKit disconnected'); });
+    await room.connect(tk.url,tk.token);
+    aiStep('Sending audio');
+    const dev=mode==='call'?$('#aiIn').value:$('#aiMic').value;
+    const track=await L.createLocalAudioTrack({deviceId:dev,echoCancellation:mode!=='call',noiseSuppression:mode!=='call',autoGainControl:mode!=='call'});
+    const pub=await room.localParticipant.publishTrack(track); AIS.myTrackSid=(pub&&pub.trackSid)||track.sid||'';
+    aiMeter(track.mediaStreamTrack,'#aiMIn');
+    aiStep('Waiting for the AI agent');
+    if(room.remoteParticipants.size){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); }
+    setTimeout(()=>{ if(AIS.room===room && !AIS.agentJoined){ aiStep('Agent did not join: is agent\\run_agent.bat running with the same agent name?','bad'); aiChecks({agent:false}); aiLive(ICON('circle-alert')+' No agent','bad'); } },15000);
+    if(mode==='call'){ AIS.watch=setInterval(()=>{ if(S.call.state==='idle') aiStop('Call ended'); },500); }
+  }catch(e){ AIS.error=e.message; aiStep(e.message,'bad'); toast(e.message); aiStop(e.message); }
+}
+function aiMeter(mst,id){
+  try{ const ac=AIS.ac||(AIS.ac=new AudioContext()); const an=ac.createAnalyser(); an.fftSize=512; ac.createMediaStreamSource(new MediaStream([mst])).connect(an); AIS.meters.push([an,id]);
+    if(!AIS.raf){ const buf=new Uint8Array(256); const draw=()=>{ AIS.meters.forEach(([a,i])=>{ a.getByteTimeDomainData(buf); let p=0; for(const v of buf) p=Math.max(p,Math.abs(v-128)); $(i).style.width=Math.min(100,p/1.28)+'%'; }); AIS.raf=requestAnimationFrame(draw); }; draw(); } }catch{}
+}
+async function aiStop(reason){
+  if(AIS.stopping) return; AIS.stopping=true;
+  clearInterval(AIS.watch); clearInterval(AIS.timer); cancelAnimationFrame(AIS.raf); AIS.raf=0; AIS.meters=[];
+  ['#aiMIn','#aiMOut'].forEach(i=>$(i).style.width='0');
+  if(AIS.mode==='call' && S.call.state!=='idle'){ try{ await api('hangup'); }catch{} }
+  const room=AIS.room; AIS.room=null;
+  if(room){ try{ await room.disconnect(); }catch{} }
+  document.querySelectorAll('body > audio').forEach(a=>a.remove());
+  try{ AIS.ac&&AIS.ac.close(); }catch{} AIS.ac=null;
+  const dur=Math.floor((Date.now()-AIS.t0)/1000);
+  if(reason) aiStep(reason, AIS.error?'bad':'ok');
+  aiLive('Idle',''); $('#aiGo').disabled=false; $('#aiHang').disabled=true;
+  if(AIS.t0){ try{ const r=await api('ai_log_save',{room:'',number:AIS.number,mode:AIS.mode,started:new Date(AIS.t0).toISOString(),ended:new Date().toISOString(),duration:dur,
+    agent_joined:AIS.agentJoined,transcript:AIS.transcript.filter(x=>x.final!==false||x.text).map(x=>({who:x.who,text:x.text,t:x.t})),outcome:reason||'ended',error:AIS.error||''}); renderAiHistory(r.calls); }catch{} }
+  AIS.t0=0;
+}
+$('#aiGo').onclick=aiStart;
+$('#aiHang').onclick=()=>aiStop('Ended by you');
+async function aiHistory(){ try{ const r=await api('ai_calls'); renderAiHistory(r.calls); }catch{} }
+function renderAiHistory(calls){
+  if(!calls||!calls.length){ $('#aiHistory').innerHTML='<div class="empty">No AI calls yet</div>'; return; }
+  $('#aiHistory').innerHTML=calls.map(c=>`<details class="camp"><summary><span class="ctitle">${ICON(c.mode==='call'?'phone-outgoing':'laptop')} <b>${esc(c.mode==='call'?c.number:'PC test')}</b></span>
+      <span class="rs ${c.agent_joined?'ok':'bad'}">${c.agent_joined?ICON('bot')+' agent joined':ICON('circle-x')+' no agent'}</span>
+      <span class="muted" style="font-size:13px">${fmtDur(c.duration||0)} · ${c.started?new Date(c.started).toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''} · ${esc(c.outcome||'')}</span></summary>
+      <div class="transcript" style="max-height:300px">${(c.transcript||[]).map(x=>`<div class="tline ${x.who}"><span class="tw">${x.who==='agent'?ICON('bot')+' Agent':ICON('user')+' Person'}</span><div class="tb">${esc(x.text)}</div><small>${fmtDur(x.t||0)}</small></div>`).join('')||'<div class="empty" style="padding:10px">No transcript</div>'}</div>
+      <div class="actions"><button class="btn ghost sm" data-aidl="${c.id}">${ICON('download')} Transcript</button><button class="btn ghost sm" data-aidel="${c.id}">${ICON('trash-2')} Delete</button></div></details>`).join('');
+  $('#aiHistory').querySelectorAll('[data-aidel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete this AI call?','Its transcript is removed.',{danger:true,confirm:'Delete'})){ const r=await api('ai_call_delete',{id:b.dataset.aidel}); renderAiHistory(r.calls); } });
+  $('#aiHistory').querySelectorAll('[data-aidl]').forEach(b=>b.onclick=()=>{ const c=calls.find(x=>x.id===b.dataset.aidl); if(!c) return;
+    const txt=`B2Wave AI call ${c.mode==='call'?c.number:'(PC test)'} ${c.started||''}\n\n`+(c.transcript||[]).map(x=>`[${fmtDur(x.t||0)}] ${x.who==='agent'?'Agent':'Person'}: ${x.text}`).join('\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=`ai-call-${(c.number||'test').replace(/\D/g,'')}-${(c.started||'').slice(0,10)}.txt`; a.click(); });
+}
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();

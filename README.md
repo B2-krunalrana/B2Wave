@@ -25,6 +25,7 @@ PC. There is no cloud and no account.
 | **Phone** | Dialer, answer/decline, in-call keypad (DTMF), call log with network end reason |
 | **Voice campaigns** | Upload any audio (converted to 8 kHz in the browser, kept on the PC, auto-copied to the module), batch calls, **key-press capture (1 / 2 …)**, per-call analytics |
 | **Call analytics** | Outcome (Responded, Listened no response, Hung up during prompt, No answer, Busy, Rejected, Unreachable, Invalid number, Network error), who ended the call, ring/talk time, prompt played fully/partly/stopped by key, key timestamps, hold/resume, network cause (AT+CEER), full timeline, CSV |
+| **AI voice agent** | LiveKit + OpenAI realtime agent talks to the person on a B2Wave call; persona templates, PC test mode, live transcript, call history |
 | **Email reports** | Gmail / Outlook / Zoho / Yahoo / custom SMTP. Campaign and bulk reports are emailed automatically when finished (HTML summary + CSV) |
 | **Setup wizard** | Detects the board, flashes the prebuilt ESP32 firmware (no Arduino IDE), layered tests (Wi-Fi → module → SIM → network), driver guidance, diagnostics report |
 | **Talk on calls** | Wiring guides: speaker+mic, USB sound card with built-in PC audio bridge, I2S codec |
@@ -59,6 +60,18 @@ The first run creates `app/.venv` and installs the dependencies; after that the 
 **Settings → Email (SMTP)** → choose Gmail → enter your address and a **Gmail App Password**
 (turn on 2-Step Verification, then create one at <https://myaccount.google.com/apppasswords>) → **Send test email**.
 
+### 5. AI voice agent (optional)
+1. Create a free project at <https://cloud.livekit.io> (copy the URL, API key, secret) and get an OpenAI API key.
+2. **AI voice agent** page → paste the keys → **Save** → **Test LiveKit**.
+3. Double-click **`agentun_agent.bat`** (first run installs LiveKit Agents into `agent/.venv`) and keep it open.
+4. **Test with PC mic** to talk to the agent from your PC, or **Call a phone number** to let it talk on a real call.
+   Phone calls need the USB sound card wiring (Talk on calls → option B) because the module can't stream call audio over USB.
+
+```
+Caller ⇄ A7672S (SPK/MIC) ⇄ USB sound card ⇄ B2Wave page (livekit-client) ⇄ LiveKit room ⇄ agent/agent.py (OpenAI Realtime)
+```
+`agent/requirements.txt` pins LiveKit Agents **1.0.23**: newer releases load native DLLs that Windows Smart App Control blocks on some PCs.
+
 ---
 
 ## Using it
@@ -78,14 +91,19 @@ app/
   campaign.py       voice campaigns + per-call analytics
   bulksms.py        bulk SMS runner with templates and retry
   mailer.py         SMTP email + HTML report templates
+  livekit_api.py    LiveKit access tokens (with agent dispatch) + connection test
   flasher.py        board detection, esptool flashing, USB diagnostics
   static/index.html single-page UI
-  static/vendor/    pinned libraries: Lucide, Chart.js, SweetAlert2, Notyf
+  static/vendor/    pinned libraries: Lucide, Chart.js, SweetAlert2, Notyf, livekit-client
   data/             YOUR data: messages, calls, campaigns, audio, settings (git-ignored)
 firmware/
   gsm_bridge/       ESP32-S3 Arduino firmware (Wi-Fi bridge, diagnostics, auto reset-level detection)
   bin/              prebuilt firmware flashed by the Setup page
   platformio.ini
+agent/
+  agent.py          LiveKit AI phone agent (persona arrives as dispatch metadata from B2Wave)
+  run_agent.bat     one-click worker launcher (creates agent/.venv)
+  .env              LiveKit + OpenAI keys written by B2Wave (git-ignored)
 tools/
   board_debug.py    CLI: diag / log / at / reset4g / flash / sms (USB or Wi-Fi)
   build_firmware.py rebuild firmware/bin/gsm_bridge.bin with PlatformIO

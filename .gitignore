@@ -17,3 +17,7 @@ Thumbs.db
 
 # photo shows the module IMEI
 doc/image.png
+
+# AI agent secrets / environment
+agent/.env
+agent/.venv/

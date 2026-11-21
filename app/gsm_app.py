@@ -22,6 +22,7 @@ from collections import deque
 from dataclasses import asdict
 from pathlib import Path
 
+import aiohttp
 from aiohttp import web, WSMsgType
 
 import modem as m
@@ -29,6 +30,7 @@ import flasher
 import campaign as camp_mod
 import bulksms
 import mailer
+import livekit_api as lk
 import base64
 
 ROOT = Path(__file__).parent
@@ -62,6 +64,8 @@ messages = Store(DATA / "messages.json", [])
 calls = Store(DATA / "calls.json", [])
 campaigns = Store(DATA / "campaigns.json", [])
 bulk = Store(DATA / "bulk.json", [])
+ai_calls = Store(DATA / "ai_calls.json", [])
+AGENT_DIR = ROOT.parent / "agent"
 dtmf_log = deque(maxlen=200)
 console = deque(maxlen=400)
 clients: set[web.WebSocketResponse] = set()
@@ -608,6 +612,76 @@ async def handle_op(op: str, d: dict):
             raise RuntimeError(obj["email_status"])
         await broadcast({"type": "campaign" if kind == "campaign" else "bulk", ("campaign" if kind == "campaign" else "job"): obj})
         return {"status": obj["email_status"]}
+    # ---------------- AI voice agent (LiveKit)
+    if op == "ai_get":
+        a = dict(config.data.get("ai") or {})
+        has_secret = bool(a.pop("api_secret", ""))
+        env = AGENT_DIR / ".env"
+        env_txt = env.read_text("utf-8") if env.exists() else ""
+        return {"ai": a, "has_secret": has_secret, "configured": lk.configured(config.data.get("ai")),
+                "openai_set": any(l.startswith("OPENAI_API_KEY=") and l.strip() != "OPENAI_API_KEY="
+                                  for l in env_txt.splitlines()),
+                "agent_env": env.exists(), "agent_venv": (AGENT_DIR / ".venv" / "Scripts" / "python.exe").exists(),
+                "agent_dir": str(AGENT_DIR)}
+    if op == "ai_save":
+        a = dict(config.data.get("ai") or {})
+        for k in ("url", "api_key", "agent_name", "instructions", "greeting", "voice", "language", "preset"):
+            if k in d:
+                a[k] = d[k].strip() if isinstance(d[k], str) else d[k]
+        if d.get("api_secret"):
+            a["api_secret"] = d["api_secret"].strip()
+        a["agent_name"] = a.get("agent_name") or "b2wave-agent"
+        config.data["ai"] = a
+        config.save()
+        # agent/.env for the LiveKit worker (secrets stay on this PC, git-ignored)
+        env = AGENT_DIR / ".env"
+        old = {}
+        if env.exists():
+            for line in env.read_text("utf-8").splitlines():
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.split("=", 1)
+                    old[k.strip()] = v.strip()
+        vals = {**old, "LIVEKIT_URL": a.get("url", ""), "LIVEKIT_API_KEY": a.get("api_key", ""),
+                "B2W_AGENT_NAME": a["agent_name"]}
+        if a.get("api_secret"):
+            vals["LIVEKIT_API_SECRET"] = a["api_secret"]
+        if d.get("openai_key"):
+            vals["OPENAI_API_KEY"] = d["openai_key"].strip()
+        AGENT_DIR.mkdir(exist_ok=True)
+        env.write_text("# written by B2Wave - keep private\n" + "".join(f"{k}={v}\n" for k, v in vals.items()), "utf-8")
+        return {"configured": lk.configured(a), "openai_set": bool(vals.get("OPENAI_API_KEY"))}
+    if op == "ai_test":
+        a = config.data.get("ai") or {}
+        if not lk.configured(a):
+            raise RuntimeError("Enter the LiveKit URL, API key and API secret first.")
+        try:
+            rooms = await lk.list_rooms(a)
+        except aiohttp.ClientError as e:
+            raise RuntimeError(f"Could not reach LiveKit at {a.get('url')}: {e}")
+        return {"rooms": len(rooms)}
+    if op == "ai_token":
+        a = config.data.get("ai") or {}
+        if not lk.configured(a):
+            raise RuntimeError("LiveKit is not set up. Fill in the keys on the AI Agent page.")
+        room = f"b2w-{d.get('mode', 'test')}-{uuid.uuid4().hex[:8]}"
+        meta = {k: a.get(k, "") for k in ("instructions", "greeting", "voice", "language")}
+        meta.update(mode=d.get("mode", "test"), number=d.get("number", ""))
+        return {"url": a["url"], "room": room, "identity": "b2wave-bridge",
+                "token": lk.call_token(a, room, "b2wave-bridge", meta), "agent_name": a.get("agent_name") or "b2wave-agent"}
+    if op == "ai_log_save":
+        rec = {k: d.get(k) for k in ("room", "number", "mode", "started", "ended", "duration", "agent_joined",
+                                     "transcript", "outcome", "error")}
+        rec["id"] = uuid.uuid4().hex[:10]
+        ai_calls.data.insert(0, rec)
+        ai_calls.data[:] = ai_calls.data[:200]
+        ai_calls.save()
+        return {"calls": ai_calls.data}
+    if op == "ai_calls":
+        return {"calls": ai_calls.data}
+    if op == "ai_call_delete":
+        ai_calls.data[:] = [c for c in ai_calls.data if c["id"] != d["id"]]
+        ai_calls.save()
+        return {"calls": ai_calls.data}
     # ---------------- bulk SMS
     if op == "bulk_list":
         return {"jobs": bulk.data, "running": bulk_runner.running}
