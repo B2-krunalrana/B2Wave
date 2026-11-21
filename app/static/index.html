@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
+<script>try{var t=localStorage.getItem("b2w_theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -8,6 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="/static/vendor/lucide.min.js"></script>
+<script src="/static/vendor/chart.umd.min.js"></script>
+<script src="/static/vendor/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="/static/vendor/notyf.min.css">
+<script src="/static/vendor/notyf.min.js"></script>
 <style>
 :root{
   --bg:#f4f5f7;--panel:#fff;--panel2:#f0f2f5;--line:#e3e6eb;--text:#14171c;--muted:#6b7280;
@@ -266,28 +271,225 @@ svg.lucide{width:1.1em;height:1.1em;vertical-align:-0.18em;stroke-width:2;flex:n
   .phone,.settings,.consolev{padding:14px}
   .b{max-width:85%}
 }
+
+/* ================================================================ B2Wave v2 design system */
+:root[data-theme=light]{
+  --bg:#f4f6fb;--panel:#ffffff;--panel2:#f1f4f9;--line:#e4e8f0;--text:#0f172a;--muted:#64748b;
+  --accent:#4f46e5;--accent2:#7c3aed;--accent-soft:rgba(79,70,229,.10);--accent-ink:#fff;
+  --ok:#16a34a;--ok-soft:#dcfce7;--ok-ink:#166534;--warn:#d97706;--warn-soft:#fef3c7;--warn-ink:#92400e;
+  --bad:#dc2626;--bad-soft:#fee2e2;--bad-ink:#991b1b;--info-soft:#e0e7ff;--info-ink:#3730a3;
+  --bubble-out:#4f46e5;--bubble-in:#eef1f6;--radius:16px;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px -12px rgba(15,23,42,.10);
+  --side-bg:#ffffff;--side-line:#e8ebf2;--side-text:#475569;--side-hover:#f1f4f9;--side-active:#eef0ff;--side-active-ink:#4338ca;
+}
+:root[data-theme=dark]{
+  --bg:#0a0c11;--panel:#11141b;--panel2:#171b24;--line:#222735;--text:#e7eaf0;--muted:#8b94a8;
+  --accent:#6366f1;--accent2:#8b5cf6;--accent-soft:rgba(99,102,241,.16);--accent-ink:#fff;
+  --ok:#22c55e;--ok-soft:#0f2e1a;--ok-ink:#86efac;--warn:#f59e0b;--warn-soft:#3a2a0a;--warn-ink:#fcd34d;
+  --bad:#ef4444;--bad-soft:#3b1212;--bad-ink:#fca5a5;--info-soft:#1e1b4b;--info-ink:#c7d2fe;
+  --bubble-out:#5458e8;--bubble-in:#1d2230;--radius:16px;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+  --side-bg:#0d1016;--side-line:#1c2130;--side-text:#9aa3b6;--side-hover:#161a24;--side-active:#1e1f3d;--side-active-ink:#c7caff;
+}
+html,body{background:var(--bg);color:var(--text);font:14.5px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+::selection{background:var(--accent-soft)}
+*{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+
+/* ---------- layout + sidebar */
+.app{grid-template-columns:252px 1fr}
+aside.side{background:var(--side-bg);border-right:1px solid var(--side-line);display:flex;flex-direction:column;min-height:0;z-index:40}
+.brand{display:flex;align-items:center;gap:12px;padding:18px 18px 14px}
+.brand .logo svg{display:block}
+.brand b{display:block;font-size:17px;letter-spacing:-.2px}
+.brand small{display:block;color:var(--muted);font-size:12px;margin-top:-1px}
+.side-close{display:none;margin-left:auto;color:var(--muted);padding:6px;border-radius:8px}
+aside.side nav{all:unset;display:flex;flex-direction:column;gap:2px;padding:6px 12px;overflow-y:auto;flex:1}
+.ngroup{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);opacity:.8;padding:14px 10px 6px}
+aside.side nav button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;border-radius:10px;color:var(--side-text);font-weight:500;font-size:14px;cursor:pointer;position:relative;transition:background .12s,color .12s}
+aside.side nav button svg.lucide{width:18px;height:18px}
+aside.side nav button:hover{background:var(--side-hover);color:var(--text)}
+aside.side nav button.on{background:var(--side-active);color:var(--side-active-ink);font-weight:600}
+aside.side nav button.on::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+aside.side nav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+aside.side nav .badge{position:static;margin-left:auto;background:var(--bad);color:#fff;font-size:11px;font-weight:600;border-radius:10px;padding:1px 7px;min-width:20px;text-align:center}
+.side-status{margin:12px;padding:12px 14px;border:1px solid var(--side-line);border-radius:14px;background:var(--panel2);display:flex;flex-direction:column;gap:6px;font-size:13px}
+.side-status .row{display:flex;align-items:center;gap:8px}
+.side-status .row b{font-weight:600}
+.side-status small{color:var(--muted)}
+.side-status .bars i{width:3px}
+.side-backdrop{display:none}
+
+/* ---------- header */
+main{background:var(--bg)}
+header{position:sticky;top:0;z-index:20;height:64px;padding:0 24px;gap:12px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-wrap:nowrap}
+header .htitle{margin-right:auto;min-width:0}
+header h1{font-size:18px;font-weight:700;letter-spacing:-.2px;margin:0;white-space:nowrap}
+header .htitle small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hamb{display:none!important}
+.iconbtn{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line);background:var(--panel);transition:.12s}
+.iconbtn:hover{color:var(--text);border-color:var(--accent)}
+.chip{background:var(--panel);border:1px solid var(--line);color:var(--text);font-weight:500;height:34px;padding:0 12px}
+.banner{margin:12px 24px 0;border-radius:12px;padding:10px 14px;background:var(--warn-soft);color:var(--warn-ink);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+
+/* ---------- components */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.wiz{padding:24px;gap:18px}
+.wiz h2{font-size:20px;letter-spacing:-.3px}
+.card h3{font-size:15.5px;font-weight:650;letter-spacing:-.1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 16px;border-radius:10px;font-weight:600;font-size:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.12);transition:filter .12s,transform .06s,box-shadow .12s;border:0}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{background:var(--panel);color:var(--text);border:1px solid var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent);filter:none}
+.btn.green{background:var(--ok)}.btn.red{background:var(--bad)}
+.btn.sm{height:32px;padding:0 11px;font-size:13px;border-radius:9px}
+.round.btn{width:62px;height:62px;padding:0;border-radius:50%}
+input,textarea,select{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;color:var(--text);transition:border-color .12s,box-shadow .12s}
+input,select{height:40px}
+input[type=checkbox]{height:auto;accent-color:var(--accent)}
+input[type=range]{accent-color:var(--accent);padding:0;border:0;height:auto}
+input[type=file]{height:auto;padding:8px}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
+.seg{background:var(--panel2);border:1px solid var(--line)}
+.seg button.on{background:var(--panel);color:var(--accent);box-shadow:var(--shadow);font-weight:600}
+.empty{color:var(--muted)}
+.note{background:var(--panel2);border:1px solid var(--line)}
+.note.bad{background:var(--bad-soft);color:var(--bad-ink);border-color:transparent}
+.note.good{background:var(--ok-soft);color:var(--ok-ink);border-color:transparent}
+.rs.ok,.fb.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.rs.bad{background:var(--bad-soft);color:var(--bad-ink)}
+.rs.run{background:var(--info-soft);color:var(--info-ink)}
+.rs.warn{background:var(--warn-soft);color:var(--warn-ink)}
+.tbl th{background:var(--panel2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;font-size:11px}
+.tbl tr:hover td{background:color-mix(in srgb,var(--panel2) 60%,transparent)}
+.threads{background:var(--panel)}
+.thread.on{background:var(--accent-soft)}
+.avatar{box-shadow:inset 0 0 0 2px rgba(255,255,255,.15)}
+.b{box-shadow:0 1px 1px rgba(0,0,0,.04)}
+.composer,.conv .head,.counter{background:var(--panel)}
+.keys button{background:var(--panel2);border:1px solid var(--line);transition:.1s}
+.keys button:hover{border-color:var(--accent)}
+.hero{background:linear-gradient(120deg,var(--accent-soft),transparent 60%),var(--panel)}
+.stat{position:relative;overflow:hidden}
+.stat .sic{position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.stat .sic svg.lucide{width:18px;height:18px}
+.tip{background:var(--panel2);border:1px solid var(--line);border-left-width:4px}
+.qa{border-radius:var(--radius)}
+.qa span{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);margin-bottom:6px}
+.qa span svg.lucide{width:22px!important;height:22px!important}
+.chartbox{position:relative;height:240px}
+.hsec{box-shadow:var(--shadow)}
+.log{border:1px solid var(--line)}
+.toast{display:none!important}
+
+/* ---------- third-party themes */
+.notyf__toast{border-radius:12px!important;box-shadow:0 10px 30px -10px rgba(0,0,0,.35)!important;font:500 14px Inter,system-ui,sans-serif!important;max-width:420px!important}
+.notyf__toast--info{background:var(--panel)!important;color:var(--text)!important;border:1px solid var(--line)}
+.notyf__toast--info .notyf__ripple{background:var(--panel)!important}
+.notyf__toast--info .notyf__dismiss-btn{background:transparent!important}
+.swal2-popup{background:var(--panel)!important;color:var(--text)!important;border-radius:18px!important;border:1px solid var(--line);font-family:Inter,system-ui,sans-serif!important;padding:24px!important}
+.swal2-title{color:var(--text)!important;font-size:20px!important}
+.swal2-html-container{color:var(--muted)!important;font-size:14.5px!important}
+.swal2-input{background:var(--panel)!important;color:var(--text)!important;border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:none!important}
+.swal2-actions .btn{margin:0 5px}
+div:where(.swal2-container).swal2-backdrop-show{background:rgba(10,12,20,.55)!important;backdrop-filter:blur(3px)}
+
+/* ---------- responsive */
+@media (max-width:1180px){
+  .app{grid-template-columns:76px 1fr}
+  .brand{justify-content:center;padding:16px 8px}
+  .brand>div,.ngroup,aside.side nav button span,.side-status .hide-sm{display:none}
+  aside.side nav{padding:6px 10px}
+  aside.side nav button{justify-content:center;padding:11px 0}
+  aside.side nav button.on::before{left:-10px}
+  aside.side nav .badge{position:absolute;top:3px;right:6px;padding:0 5px;font-size:10px;min-width:16px}
+  .side-status{margin:10px 8px;padding:10px 6px;align-items:center}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;grid-template-rows:1fr}
+  aside.side{position:fixed;inset:0 auto 0 0;width:270px;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  body.side-open aside.side{transform:none}
+  body.side-open .side-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:35}
+  .brand{justify-content:flex-start;padding:16px 18px}
+  .brand>div,.ngroup,aside.side nav button span,.side-status .hide-sm{display:revert}
+  aside.side nav button{justify-content:flex-start;padding:10px 12px}
+  aside.side nav .badge{position:static;margin-left:auto}
+  .side-close{display:grid}.hamb{display:grid!important}
+  header{padding:0 14px;height:58px}
+  header .chip{display:none}
+  .wiz{padding:14px}
+}
+
+/* campaign report */
+.camp{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.camp summary{list-style:none}.camp summary::-webkit-details-marker{display:none}
+.ctitle{display:flex;align-items:center;gap:8px}.ctitle svg.lucide{color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+.kpi{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column}
+.kpi small{color:var(--muted);font-size:12px}.kpi b{font-size:20px;letter-spacing:-.3px}.kpi em{font-style:normal;color:var(--muted);font-size:12px}
+.kpi .sic{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.kpi .sic svg.lucide{width:16px;height:16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ochip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line)}
+.ochip.ok{background:var(--ok-soft);color:var(--ok-ink);border-color:transparent}.ochip.bad{background:var(--bad-soft);color:var(--bad-ink);border-color:transparent}
+.ochip.warn{background:var(--warn-soft);color:var(--warn-ink);border-color:transparent}
+.rtbl td{vertical-align:top}.rtbl td:nth-child(4),.rtbl td:nth-child(5){white-space:nowrap}
+.rtbl .rs{display:inline-flex;align-items:center;gap:5px}
+.kt{display:inline-flex;align-items:baseline;gap:2px;background:var(--accent-soft);color:var(--accent);border-radius:7px;padding:1px 7px;margin:0 3px 3px 0;font:700 14px ui-monospace,Consolas,monospace}
+.kt small{font:500 10px Inter,system-ui;color:var(--muted)}
+.muted{color:var(--muted)}.warnTxt{color:var(--warn)}
+tr.tl td{background:var(--panel2)!important}
+.timeline{list-style:none;margin:4px 0;padding:0 0 0 6px;display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--line)}
+.timeline li{display:flex;align-items:center;gap:8px;font-size:13px;padding-left:10px;position:relative}
+.timeline li svg.lucide{color:var(--accent);width:15px;height:15px}
+.timeline .tt{min-width:46px;color:var(--muted);font:12px ui-monospace,Consolas,monospace}
+@keyframes spin{to{transform:rotate(360deg)}}
+svg.lucide.spin{animation:spin 1s linear infinite}
+@media (max-width:860px){.kpis{grid-template-columns:1fr 1fr}}
+
+/* never let content push the layout wider than the screen */
+main{min-width:0;overflow-x:hidden}
+.view,.wiz,.grid2>*,.grid3>*,.stats>*,.quickacts>*,.kpis>*,.wiz>*{min-width:0}
+input[type=file]{max-width:100%}
+.frow{flex-wrap:wrap}
+@media (max-width:760px){.frow>div{flex-basis:100%}.grid3{grid-template-columns:1fr 1fr}.boardimg img{width:100%}}
 </style>
 </head>
 <body>
 <div class="app">
-  <nav>
-    <div class="logo" title="B2Wave">B2W</div>
-    <button data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
-    <button data-v="setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Setup</button>
-    <button data-v="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="badge" id="unreadBadge" hidden></span></button>
-    <button data-v="phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Phone</button>
-    <button data-v="campaigns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Campaigns</button>
-    <button data-v="audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Audio</button>
-    <button data-v="console"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 17 6-6-6-6M12 19h8"/></svg>Console</button>
-    <button data-v="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Help</button>
-    <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
-  </nav>
+  <div class="side-backdrop" id="sideBackdrop"></div>
+  <aside class="side" id="side">
+    <div class="brand"><span class="logo"></span><div><b>B2Wave</b><small>4G voice &amp; SMS console</small></div><button class="side-close" id="sideClose" aria-label="Close menu"><i data-lucide="x"></i></button></div>
+    <nav aria-label="Main">
+      <div class="ngroup">Overview</div>
+      <button data-v="home" title="Home"><i data-lucide="layout-dashboard"></i><span>Home</span></button>
+      <div class="ngroup">Communicate</div>
+      <button data-v="messages" title="Messages"><i data-lucide="message-square-text"></i><span>Messages</span><em class="badge" id="unreadBadge" hidden></em></button>
+      <button data-v="phone" title="Phone"><i data-lucide="phone"></i><span>Phone</span></button>
+      <button data-v="campaigns" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></button>
+      <div class="ngroup">Device</div>
+      <button data-v="setup" title="Setup"><i data-lucide="cpu"></i><span>Setup &amp; tests</span></button>
+      <button data-v="audio" title="Audio"><i data-lucide="headphones"></i><span>Talk on calls</span></button>
+      <button data-v="console" title="Console"><i data-lucide="square-terminal"></i><span>AT console</span></button>
+      <div class="ngroup">Support</div>
+      <button data-v="help" title="Help"><i data-lucide="life-buoy"></i><span>Help &amp; guide</span></button>
+      <button data-v="settings" title="Settings"><i data-lucide="settings"></i><span>Settings</span></button>
+    </nav>
+    <div class="side-status" id="sideStatus">
+      <div class="row"><span class="dot" id="sDot"></span><b id="sLink">Offline</b></div>
+      <div class="row hide-sm"><span class="bars" id="sBars"><i style="height:3px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i></span><small id="sOp">No network</small></div>
+    </div>
+  </aside>
 
   <main>
     <header>
-      <h1 id="title">Messages</h1>
+      <button class="iconbtn hamb" id="hamb" aria-label="Open menu"><i data-lucide="menu"></i></button>
+      <div class="htitle"><h1 id="title">Home</h1><small id="subtitle"></small></div>
       <span class="chip"><span class="dot" id="connDot"></span><span id="connText">Offline</span></span>
       <span class="chip" title="Signal"><span class="bars" id="bars"><i style="height:3px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i></span><span id="opText">No network</span></span>
+      <button class="iconbtn" id="themeBtn" title="Light / dark theme" aria-label="Toggle theme"></button>
     </header>
     <div class="banner" id="banner"></div>
 
@@ -353,10 +555,10 @@ svg.lucide{width:1.1em;height:1.1em;vertical-align:-0.18em;stroke-width:2;flex:n
         </div>
 
         <div class="stats">
-          <div class="card stat"><span class="sl">Board link</span><b id="stLink">—</b><small id="stLinkS"></small></div>
-          <div class="card stat"><span class="sl">SIM</span><b id="stSim">—</b><small id="stSimS"></small></div>
-          <div class="card stat"><span class="sl">Network</span><b id="stNet">—</b><small id="stNetS"></small></div>
-          <div class="card stat"><span class="sl">Today</span><b id="stToday">—</b><small id="stTodayS"></small></div>
+          <div class="card stat"><span class="sic"><i data-lucide="usb"></i></span><span class="sl">Board link</span><b id="stLink">—</b><small id="stLinkS"></small></div>
+          <div class="card stat"><span class="sic"><i data-lucide="smartphone"></i></span><span class="sl">SIM</span><b id="stSim">—</b><small id="stSimS"></small></div>
+          <div class="card stat"><span class="sic"><i data-lucide="signal"></i></span><span class="sl">Network</span><b id="stNet">—</b><small id="stNetS"></small></div>
+          <div class="card stat"><span class="sic"><i data-lucide="activity"></i></span><span class="sl">Today</span><b id="stToday">—</b><small id="stTodayS"></small></div>
         </div>
 
         <div class="card">
@@ -371,6 +573,10 @@ svg.lucide{width:1.1em;height:1.1em;vertical-align:-0.18em;stroke-width:2;flex:n
           <button class="qa" data-go="audio"><span><i data-lucide="headphones"></i></span><b>Talk from PC</b><small>Wiring + audio bridge</small></button>
         </div>
 
+        <div class="grid2 top">
+          <div class="card"><h3 style="margin-top:0">Activity · last 7 days</h3><div class="chartbox"><canvas id="chActivity"></canvas></div></div>
+          <div class="card"><h3 style="margin-top:0">Campaign call outcomes</h3><div class="chartbox"><canvas id="chOutcome"></canvas></div></div>
+        </div>
         <div class="grid2 top">
           <div class="card"><h3 style="margin-top:0">Latest messages</h3><div id="homeMsgs"></div></div>
           <div class="card"><h3 style="margin-top:0">Latest calls</h3><div id="homeCalls"></div></div>
@@ -834,7 +1040,7 @@ function fmtTime(iso, full){
   return full? t : today? t : d.toLocaleDateString([], {day:'numeric',month:'short'});
 }
 const fmtDur = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-let toastT; function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),3200); }
+
 const normNum = n => String(n).replace(/[^\d+]/g,'').replace(/^00/,'+');
 const sameNum = (a,b) => { const x=normNum(a), y=normNum(b); if(!x||!y) return a===b; return x===y || x.slice(-10)===y.slice(-10); };
 
@@ -847,6 +1053,8 @@ function show(v){
   $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide'}[v];
   if(v==='home') renderHome();
   if(location.hash!=='#'+v) history.replaceState(null,'','#'+v);
+  $('#subtitle').textContent=SUBTITLES[v]||'';
+  if(v==='home'){ loadCampaignsQuiet(); setTimeout(()=>renderCharts(),30); }
   if(v==='campaigns'){ loadFiles(); loadCampaigns(); }
   document.title='B2Wave · '+$('#title').textContent;
   if(v==='console') $('#log').scrollTop=1e9;
@@ -941,7 +1149,7 @@ $('#search').oninput=renderThreads;
 $('#newMsg').onclick=()=>{ S.newMode=true; S.thread=null; $('#v-messages').classList.add('in-thread'); renderThreads(); renderConv(); };
 $('#backBtn').onclick=()=>{ $('#v-messages').classList.remove('in-thread'); S.thread=null; S.newMode=false; renderThreads(); renderConv(); };
 $('#convCall').onclick=()=>dial(S.thread);
-$('#convDel').onclick=()=>{ if(confirm('Delete this whole conversation (also from SIM)?')) api('delete_thread',{number:S.thread}).then(()=>{S.thread=null;renderConv();}).catch(e=>toast(e.message)); };
+$('#convDel').onclick=async()=>{ if(await ask('Delete conversation?','All messages with this number are removed from this PC and the SIM.',{danger:true,confirm:'Delete'})) api('delete_thread',{number:S.thread}).then(()=>{S.thread=null;renderConv();}).catch(e=>toast(e.message)); };
 
 const GSM=/^[A-Za-z0-9 \r\n.,!?'"@#%&*()\-+=/:;<>_$]*$/;
 function updateCounter(){
@@ -1480,13 +1688,13 @@ $('#ttsCall').onclick=()=>{ if(S.call.state!=='active'){ toast('Start a call fir
 
 const parseNums=()=>$('#cNums').value.split(/[\s,;]+/).map(x=>x.trim()).filter(x=>x.replace(/\D/g,'').length>=5);
 $('#cNums').oninput=()=>{ const n=parseNums().length; $('#cCount').textContent=n?`${n} number${n>1?'s':''}`:''; };
-$('#cMine').onclick=()=>{ const n=prompt('Number to test with (your own phone):',''); if(n){ $('#cNums').value=n; $('#cNums').oninput(); } };
+$('#cMine').onclick=async()=>{ const n=await askText('Test with one number','Your own mobile number','+91 98xxxxxxxx','tel'); if(n){ $('#cNums').value=n; $('#cNums').oninput(); } };
 $('#cStart').onclick=async()=>{
   const nums=parseNums(); const a=$('#cAudio').value;
   if(!nums.length){ toast('Add phone numbers'); return; }
   if(!a){ toast('Choose what the person hears'); return; }
   if(a==='tts' && !$('#ttsText').value.trim()){ toast('Type the text-to-speech message'); return; }
-  if(!confirm(`Start calling ${nums.length} number${nums.length>1?'s':''} now?`)) return;
+  if(!await ask('Start campaign?',`B2Wave will call <b>${nums.length}</b> number${nums.length>1?'s':''} one after another.`,{confirm:'Start calling'})) return;
   const size=+($('#cAudio').selectedOptions[0].dataset.size||0);
   try{
     await api('campaign_start',{name:$('#cName').value.trim(),numbers:nums,audio:a.startsWith('file:')?a.slice(5):'',audio_size:size,
@@ -1498,25 +1706,60 @@ $('#cStop').onclick=()=>api('campaign_stop').then(()=>toast('Stopping…')).catc
 
 async function loadCampaigns(){ try{ const r=await api('campaigns_list'); C.campaigns=r.campaigns; C.running=r.running; C.dtmf=r.dtmf||[]; renderCampaigns(); renderDtmf(); }catch{} }
 function onCampaign(c){ const i=C.campaigns.findIndex(x=>x.id===c.id); if(i>=0) C.campaigns[i]=c; else C.campaigns.unshift(c); C.running=c.status==='running'||C.campaigns.some(x=>x.status==='running'); renderCampaigns(); }
+const OUTCOME_STYLE={'Responded':'ok','Listened, no response':'warn','No response':'warn','Hung up during prompt':'bad','No answer':'',
+  'Busy':'bad','Rejected':'bad','Unreachable':'bad','Invalid number':'bad','Network error':'bad','Failed':'bad','Not answered':'','Skipped':''};
+const OUTCOME_ICON={'Responded':'circle-check','Listened, no response':'ear','No response':'circle-minus','Hung up during prompt':'phone-off','No answer':'phone-missed',
+  'Busy':'phone-forwarded','Rejected':'ban','Unreachable':'signal-zero','Invalid number':'hash','Network error':'triangle-alert','Failed':'circle-x','Not answered':'phone-missed','Skipped':'skip-forward'};
+const EV_ICON={'dialing':'phone-outgoing','answered':'phone-call','prompt started':'play','prompt finished':'square','prompt stopped':'square','key pressed':'grid-3x3',
+  'put on hold':'pause','resumed':'play','other side hung up':'phone-off','end reason':'info','network said':'radio-tower','no answer':'phone-missed','dial failed':'circle-x','network info':'info','state':'activity'};
+function liveSummary(c){
+  const res=c.results.filter(r=>r.status==='done'), ans=res.filter(r=>r.ring_s!=null);
+  const outcomes={}, keys={}; res.forEach(r=>{ outcomes[r.outcome]=(outcomes[r.outcome]||0)+1; if(r.keys) keys[r.keys[0]]=(keys[r.keys[0]]||0)+1; });
+  const avg=(a,f)=>a.length?(a.reduce((s,x)=>s+(+f(x)||0),0)/a.length).toFixed(1):'0';
+  return {called:res.length,answered:ans.length,answer_rate:res.length?Math.round(100*ans.length/res.length):0,responded:res.filter(r=>r.keys).length,
+    avg_ring_s:avg(ans,r=>r.ring_s),avg_talk_s:avg(ans,r=>r.talk_s),outcomes,keys};
+}
 function renderCampaigns(){
   $('#cStart').disabled=C.running; $('#cStop').disabled=!C.running;
-  if(!C.campaigns.length){ $('#campList').innerHTML='<div class="empty">No campaigns yet</div>'; return; }
-  $('#campList').innerHTML=C.campaigns.map(c=>{
-    const done=c.results.filter(r=>!['pending','dialing','ringing'].includes(r.status)).length;
-    const ans=c.results.filter(r=>r.status.startsWith('answered')).length;
-    const keys={}; c.results.forEach(r=>{ if(r.keys) keys[r.keys[0]]=(keys[r.keys[0]]||0)+1; });
-    const keySum=Object.keys(keys).sort().map(k=>`<span class="kchip">Pressed <b>${esc(k)}</b> · ${keys[k]}</span>`).join('')||'<span style="color:var(--muted);font-size:13px">No keys pressed yet</span>';
-    return `<details class="camp" ${c.status==='running'||c===C.campaigns[0]?'open':''}><summary><b>${esc(c.name)}</b> <span class="cst ${c.status==='running'?'run':''}">${esc(c.status)}</span>
-      <span style="color:var(--muted);font-size:13px">${done}/${c.results.length} called · ${ans} answered</span></summary>
-      <div class="prog"><i style="width:${c.results.length?done*100/c.results.length:0}%"></i></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${keySum}</div>
-      <div class="tblwrap"><table class="tbl"><thead><tr><th>Number</th><th>Status</th><th>Keys</th><th>Talk</th><th>Time</th></tr></thead><tbody>
-      ${c.results.map(r=>`<tr><td>${esc(r.number)}</td><td><span class="rs ${r.status.startsWith('answered')?'ok':['dialing','ringing'].includes(r.status)?'run':r.status==='pending'?'':'bad'}">${esc(r.status)}</span>${r.error?`<br><small style="color:var(--bad)">${esc(r.error)}</small>`:''}</td><td class="keys">${esc(r.keys||'—')}</td><td>${r.duration?r.duration+' s':''}</td><td>${r.time?fmtTime(r.time,true):''}</td></tr>`).join('')}
-      </tbody></table></div>
-      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">Download CSV</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">Delete</button>`:''}</div></details>`;
+  if(!C.campaigns.length){ $('#campList').innerHTML='<div class="empty">No campaigns yet. Results with a full call-by-call analysis appear here.</div>'; return; }
+  const openIds=new Set([...document.querySelectorAll('#campList details.camp[open]')].map(d=>d.dataset.id));
+  const openRows=new Set([...document.querySelectorAll('#campList tr.tl:not([hidden])')].map(r=>r.dataset.k));
+  $('#campList').innerHTML=C.campaigns.map((c,ci)=>{
+    const sm=liveSummary(c), total=c.results.length;
+    const inFlight=c.results.filter(r=>['dialing','ringing','answered'].includes(r.status)).length;
+    const kpi=(icon,label,val,sub='')=>`<div class="kpi"><span class="sic"><i data-lucide="${icon}"></i></span><small>${label}</small><b>${val}</b>${sub?`<em>${sub}</em>`:''}</div>`;
+    const chips=Object.entries(sm.outcomes).sort((a,b)=>b[1]-a[1]).map(([o,n])=>`<span class="ochip ${OUTCOME_STYLE[o]||''}">${ICON(OUTCOME_ICON[o]||'circle')} ${esc(o)} <b>${n}</b></span>`).join('');
+    const kchips=Object.keys(sm.keys).sort().map(k=>`<span class="ochip ok">${ICON('grid-3x3')} Pressed <b>${esc(k)}</b> × ${sm.keys[k]}</span>`).join('');
+    const rows=c.results.map((r,ri)=>{
+      const k=c.id+':'+ri, live=['dialing','ringing','answered'].includes(r.status);
+      const out=r.outcome||(live?r.status:r.status==='pending'?'Waiting':r.status);
+      const cls=live?'run':(OUTCOME_STYLE[r.outcome]??'');
+      const keysT=(r.key_times||[]).map(x=>`<span class="kt">${esc(x.key)}<small>${x.t}s</small></span>`).join('')||(r.keys?esc(r.keys):'<span class="muted">—</span>');
+      const tl=(r.events||[]).map(e=>`<li><span class="tt">${e.t}s</span>${ICON(EV_ICON[e.ev]||'dot')}<b>${esc(e.ev)}</b><span class="muted">${esc(e.detail||'')}</span></li>`).join('');
+      return `<tr class="rrow" data-k="${k}"><td><b>${esc(r.number)}</b><br><small class="muted">${r.time?fmtTime(r.time,true):''}</small></td>
+        <td><span class="rs ${cls}">${live?ICON('loader-circle','spin'):ICON(OUTCOME_ICON[r.outcome]||'circle')} ${esc(out)}</span>${r.error?`<br><small style="color:var(--bad)">${esc(r.error)}</small>`:''}</td>
+        <td class="keys">${keysT}</td><td>${r.ring_s!=null?r.ring_s+' s':'—'}</td><td>${r.talk_s?r.talk_s+' s':'—'}</td>
+        <td><small>${esc(r.prompt||'—')}</small></td><td><small>${esc(r.ended_by||'—')}</small>${r.holds?`<br><small class="warnTxt">${ICON('pause')} held ×${r.holds}</small>`:''}</td>
+        <td><small class="muted">${esc(r.cause||'')}</small></td>
+        <td>${tl?`<button class="btn ghost sm tlbtn" data-k="${k}" title="Show timeline">${ICON('list-tree')}</button>`:''}</td></tr>
+        ${tl?`<tr class="tl" data-k="${k}" ${openRows.has(k)?'':'hidden'}><td colspan="9"><ol class="timeline">${tl}</ol></td></tr>`:''}`;
+    }).join('');
+    const isOpen=openIds.size?openIds.has(c.id):ci===0;
+    return `<details class="camp" data-id="${c.id}" ${isOpen||c.status==='running'?'open':''}>
+      <summary><span class="ctitle">${ICON('megaphone')} <b>${esc(c.name)}</b></span><span class="cst ${c.status==='running'?'run':''}">${c.status==='running'?ICON('loader-circle','spin')+' ':''}${esc(c.status)}</span>
+        <span class="muted" style="font-size:13px">${sm.called}/${total} called${inFlight?' · calling now':''} · ${new Date(c.created).toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></summary>
+      <div class="prog"><i style="width:${total?sm.called*100/total:0}%"></i></div>
+      <div class="kpis">${kpi('phone-call','Answered',`${sm.answered}/${sm.called}`,`${sm.answer_rate}%`)}${kpi('grid-3x3','Responded',sm.responded,sm.answered?Math.round(100*sm.responded/sm.answered)+'% of answered':'')}
+        ${kpi('timer','Avg ring',sm.avg_ring_s+' s')}${kpi('clock','Avg talk',sm.avg_talk_s+' s')}</div>
+      <div class="chips">${chips}${kchips}${!chips&&!kchips?'<span class="muted" style="font-size:13px">Results appear as calls complete</span>':''}</div>
+      <div class="tblwrap"><table class="tbl rtbl"><thead><tr><th>Number</th><th>Outcome</th><th>Keys (time)</th><th>Ring</th><th>Talk</th><th>Prompt</th><th>Ended by</th><th>Network reason</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">${ICON('download')} Download CSV</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">${ICON('trash-2')} Delete</button>`:''}</div></details>`;
   }).join('');
-  $('#campList').querySelectorAll('[data-csv]').forEach(b=>b.onclick=async()=>{ const r=await api('campaign_csv',{id:b.dataset.csv}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([r.csv],{type:'text/csv'})); a.download=r.name.replace(/[^\w-]+/g,'_')+'.csv'; a.click(); });
-  $('#campList').querySelectorAll('[data-cdel]').forEach(b=>b.onclick=()=>{ if(confirm('Delete this campaign and its results?')) api('campaign_delete',{id:b.dataset.cdel}).then(r=>{ C.campaigns=r.campaigns; renderCampaigns(); }); });
+  const L=$('#campList');
+  L.querySelectorAll('.tlbtn').forEach(b=>b.onclick=()=>{ const r=L.querySelector(`tr.tl[data-k="${b.dataset.k}"]`); if(r) r.hidden=!r.hidden; });
+  L.querySelectorAll('[data-csv]').forEach(b=>b.onclick=async()=>{ const r=await api('campaign_csv',{id:b.dataset.csv}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+r.csv],{type:'text/csv'})); a.download=r.name.replace(/[^\w-]+/g,'_')+'.csv'; a.click(); toast('CSV downloaded'); });
+  L.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete campaign?','Its results are removed permanently.',{danger:true,confirm:'Delete'})){ const r=await api('campaign_delete',{id:b.dataset.cdel}); C.campaigns=r.campaigns; renderCampaigns(); } });
+  if(S.view==='home') renderCharts();
 }
 function renderDtmf(){
   if(!C.dtmf.length) return;
@@ -1532,13 +1775,14 @@ const LOGO_SVG=(size=40)=>`<svg width="${size}" height="${size}" viewBox="0 0 64
   <path d="M15 44 q3.5 -6 7 0 t7 0" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
   <circle cx="51" cy="17" r="5" fill="#22d3ee"/><circle cx="51" cy="17" r="9" fill="none" stroke="#22d3ee" stroke-opacity=".5" stroke-width="2"/>
 </svg>`;
-document.querySelector('nav .logo').innerHTML=LOGO_SVG(40);
+document.querySelector('.brand .logo').innerHTML=LOGO_SVG(38);
 $('#heroLogo').innerHTML=LOGO_SVG(56);
 (()=>{ const l=document.createElement('link'); l.rel='icon'; l.href='data:image/svg+xml,'+encodeURIComponent(LOGO_SVG(64).replace('url(#b2wg)','#4f46e5')); document.head.appendChild(l); })();
 document.querySelectorAll('.qa').forEach(b=>b.onclick=()=>show(b.dataset.go));
 
 // ---------------------------------------------------------------- home dashboard
 function renderHome(){
+  renderSide(); if(S.view==='home') renderCharts();
   const s=S.status||{}, on=!!s.connected;
   const simOk=(s.sim||'').includes('READY'), reg=['registered','roaming'].includes(s.network);
   const usb=(s.transport||'').startsWith('USB'), wifi=(s.transport||'').startsWith('Wi-Fi');
@@ -1606,7 +1850,7 @@ function renderFiles(r){
   L.querySelectorAll('[data-prev]').forEach(b=>b.onclick=()=>new Audio('/audio/'+encodeURIComponent(b.dataset.prev)).play());
   L.querySelectorAll('[data-call]').forEach(b=>b.onclick=()=>{ if(S.call.state!=='active'){ toast('Start a call first, then press Call'); return; } api('file_play',{name:b.dataset.call,remote:true}).then(()=>toast('Playing into the call')).catch(e=>toast(e.message)); });
   L.querySelectorAll('[data-push]').forEach(b=>b.onclick=async()=>{ b.disabled=true; b.textContent='Copying…'; try{ renderFiles(await api('file_push',{name:b.dataset.push})); toast('Copied to the module'); }catch(e){ toast(e.message); b.disabled=false; b.innerHTML=ICON('upload')+' Module'; } });
-  L.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(!confirm(`Delete "${b.dataset.del}" from the PC and the module? This can't be undone.`)) return; try{ renderFiles(await api('file_delete',{name:b.dataset.del})); }catch(e){ toast(e.message); } });
+  L.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(!await ask('Delete audio?',`<b>${esc(b.dataset.del)}</b> is removed from this PC and the 4G module. This can't be undone.`,{danger:true,confirm:'Delete'})) return; try{ renderFiles(await api('file_delete',{name:b.dataset.del})); }catch(e){ toast(e.message); } });
   const sel=$('#cAudio'), prev=sel.value;
   sel.innerHTML='<option value="">Choose…</option>'+r.files.map(f=>`<option value="file:${esc(f.name)}" data-size="${f.size}">${esc(f.name)}${f.on_module?'':' (will be copied to the module)'}</option>`).join('')+'<option value="tts">Text-to-speech (from the box on the left)</option>';
   if(prev) sel.value=prev;
@@ -1620,6 +1864,94 @@ $('#helpSearch').oninput=e=>{ const q=e.target.value.toLowerCase().trim();
   document.querySelectorAll('.hsec').forEach(d=>{ const hit=!q||d.textContent.toLowerCase().includes(q); d.hidden=!hit; if(q&&hit) d.open=true; }); };
 document.querySelectorAll('#helpBody [data-go]').forEach(a=>a.onclick=ev=>{ ev.preventDefault(); show(a.dataset.go); });
 
+// ================================================================ v2 shell: theme, drawer, toasts, dialogs, charts
+const SUBTITLES={home:'Overview of your board, SIM and activity',messages:'Send and receive SMS in any language',phone:'Dial, answer and review calls',
+  campaigns:'Batch calls with audio prompts and key-press capture',setup:'Detect, flash and test the board layer by layer',audio:'Wiring options and the PC audio bridge',
+  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, device info and notifications'};
+function applyTheme(t){
+  const sys=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  const th=t||lsGet('theme')||sys;
+  document.documentElement.dataset.theme=th;
+  const b=$('#themeBtn'); if(b) b.innerHTML=ICON(th==='dark'?'sun':'moon');
+  if(window.Chart){ Chart.defaults.color=getComputedStyle(document.documentElement).getPropertyValue('--muted').trim(); Chart.defaults.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--line').trim(); }
+  if(window._charts) renderCharts(true);
+}
+applyTheme();
+$('#themeBtn').onclick=()=>{ const n=document.documentElement.dataset.theme==='dark'?'light':'dark'; lsSet('theme',n); applyTheme(n); };
+$('#hamb').onclick=()=>document.body.classList.add('side-open');
+$('#sideClose').onclick=$('#sideBackdrop').onclick=()=>document.body.classList.remove('side-open');
+document.querySelectorAll('aside.side nav button').forEach(b=>b.addEventListener('click',()=>document.body.classList.remove('side-open')));
+
+// ---- toasts (Notyf)
+const notyf=window.Notyf?new Notyf({duration:3800,dismissible:true,ripple:false,position:{x:'right',y:'bottom'},
+  types:[{type:'info',background:'transparent',icon:false},{type:'success',background:'#16a34a'},{type:'error',background:'#dc2626',duration:6000}]}):null;
+function toast(msg){
+  const t=String(msg||''); if(!notyf){ console.log(t); return; }
+  const type=/fail|error|could not|can't|cannot|not enough|refused|offline|busy/i.test(t)?'error':/sent|saved|complete|copied|uploaded|started|deleted|on$/i.test(t)?'success':'info';
+  notyf.open({type,message:esc(t)});
+}
+// ---- dialogs (SweetAlert2)
+const swalBase={buttonsStyling:false,customClass:{confirmButton:'btn',cancelButton:'btn ghost',denyButton:'btn red'},reverseButtons:true,focusCancel:false};
+async function ask(title,text,{danger=false,confirm='Yes, continue'}={}){
+  if(!window.Swal) return window.confirm(title+'\n\n'+text);
+  const r=await Swal.fire({...swalBase,title,html:text,icon:danger?'warning':'question',showCancelButton:true,confirmButtonText:confirm,cancelButtonText:'Cancel',
+    customClass:{...swalBase.customClass,confirmButton:danger?'btn red':'btn'}});
+  return r.isConfirmed;
+}
+async function askText(title,label,placeholder,type='text'){
+  if(!window.Swal) return window.prompt(title,'');
+  const r=await Swal.fire({...swalBase,title,input:type,inputLabel:label,inputPlaceholder:placeholder,showCancelButton:true,confirmButtonText:'OK'});
+  return r.isConfirmed?(r.value||'').trim():'';
+}
+
+// ---- sidebar device card
+function renderSide(){
+  const s=S.status||{}, on=!!s.connected, simOk=(s.sim||'').includes('READY');
+  $('#sDot').className='dot'+(on&&simOk?' ok':on?' warn':'');
+  $('#sLink').textContent=on?((s.transport||'').startsWith('USB')?'USB · '+(s.transport||'').split(' ').pop():'Wi-Fi'):'Offline';
+  $('#sOp').textContent=on?(s.operator||s.network||'—'):'Waiting for board';
+  const lvl=s.signal<0||s.signal===99?0:s.signal>=20?4:s.signal>=15?3:s.signal>=10?2:s.signal>=2?1:0;
+  document.querySelectorAll('#sBars i').forEach((b,i)=>b.classList.toggle('on',i<lvl));
+}
+
+// ---- dashboard charts (Chart.js)
+window._charts=null;
+function OUTCOME_COLOR(k){ const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();
+  return ({'Responded':v('--ok'),'Listened, no response':'#06b6d4','No response':'#a855f7','Hung up during prompt':v('--warn'),'No answer':'#64748b',
+    'Busy':'#f97316','Rejected':v('--bad'),'Unreachable':'#be123c','Invalid number':'#7f1d1d','Network error':'#facc15','Failed':'#991b1b'})[k]||v('--accent'); }
+function renderCharts(force){
+  if(!window.Chart || S.view!=='home') return;
+  const days=[...Array(7)].map((_,i)=>{ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-6+i); return d; });
+  const key=d=>d.toDateString();
+  const cnt=(arr,f)=>days.map(d=>arr.filter(x=>new Date(x.time).toDateString()===key(d)&&f(x)).length);
+  const smsIn=cnt(S.messages,m=>m.dir==='in'), smsOut=cnt(S.messages,m=>m.dir==='out'), calls=cnt(S.calls,()=>true);
+  const labels=days.map(d=>d.toLocaleDateString([], {weekday:'short'}));
+  const cs=getComputedStyle(document.documentElement), col=v=>cs.getPropertyValue(v).trim();
+  const outc={}; (C.campaigns||[]).forEach(c=>c.results.forEach(r=>{ const k=r.outcome||r.status; if(k&&k!=='pending') outc[k]=(outc[k]||0)+1; }));
+  const okeys=Object.keys(outc);
+  if(window._charts && !force){
+    const [a,b]=window._charts;
+    a.data.labels=labels; a.data.datasets[0].data=smsIn; a.data.datasets[1].data=smsOut; a.data.datasets[2].data=calls; a.update('none');
+    b.data.labels=okeys.length?okeys:['No campaign calls yet']; b.data.datasets[0].data=okeys.length?okeys.map(k=>outc[k]):[1];
+    b.data.datasets[0].backgroundColor=okeys.length?okeys.map(k=>OUTCOME_COLOR(k)):[col('--line')]; b.update();
+    return;
+  }
+  if(window._charts) window._charts.forEach(c=>c.destroy());
+  Chart.defaults.font.family='Inter, system-ui, sans-serif'; Chart.defaults.color=col('--muted'); Chart.defaults.borderColor=col('--line');
+  const a=new Chart($('#chActivity'),{type:'bar',data:{labels,datasets:[
+      {label:'SMS in',data:smsIn,backgroundColor:col('--ok'),borderRadius:6,maxBarThickness:22},
+      {label:'SMS out',data:smsOut,backgroundColor:col('--accent'),borderRadius:6,maxBarThickness:22},
+      {label:'Calls',data:calls,backgroundColor:col('--warn'),borderRadius:6,maxBarThickness:22}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,usePointStyle:true}}},
+      scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}});
+  const palette=[col('--ok'),col('--accent'),col('--warn'),col('--bad'),'#06b6d4','#a855f7','#64748b','#f97316'];
+  const b=new Chart($('#chOutcome'),{type:'doughnut',data:{labels:okeys.length?okeys:['No campaign calls yet'],
+      datasets:[{data:okeys.length?okeys.map(k=>outc[k]):[1],backgroundColor:okeys.length?okeys.map(k=>OUTCOME_COLOR(k)):[col('--line')],borderWidth:0}]},
+    options:{maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,usePointStyle:true}}}}});
+  window._charts=[a,b];
+}
+
+async function loadCampaignsQuiet(){ try{ const r=await api('campaigns_list'); C.campaigns=r.campaigns; C.running=r.running; C.dtmf=r.dtmf||[]; renderCharts(); }catch{} }
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();
 </script>

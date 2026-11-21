@@ -98,6 +98,14 @@ async def on_modem_event(evt: dict):
     elif t == "dtmf":
         runner.on_dtmf(evt["key"])
         dtmf_log.append(evt)
+    elif t in ("call_event", "audio_event"):
+        runner.on_event(evt)
+        if evt.get("ev") == "cause" and calls.data:          # enrich the manual call log
+            last = calls.data[-1]
+            if not last.get("cause"):
+                last["cause"], last["ended_by"] = evt.get("detail", ""), evt.get("ended_by", "")
+                calls.save()
+                await broadcast({"type": "calls", "calls": calls.data})
     elif t == "sms_in":
         raw = evt["msg"]
         for x in messages.data:                     # SIM slot reused -> unlink old entry

@@ -37,7 +37,14 @@ FINAL_ERR = ("ERROR", "+CME ERROR", "+CMS ERROR", "NO CARRIER", "BUSY", "NO ANSW
 URC_PREFIXES = ("RING", "+CLIP:", "+CMTI:", "+CRING:", "VOICE CALL:", "MISSED_CALL:", "*ATREADY",
                 "SMS DONE", "PB DONE", "+CPIN: NOT READY", "+CLCC:", "+CDS", "+CMT:",
                 "+RXDTMF", "+DTMF", "RXDTMF", "+CCMXPLAY", "+CCMXSTOP", "+AUDIOSTATE",
-                "+CTTS:", "+CGEV:")
+                "+CTTS:", "+CGEV:", "+CSSI:", "+CSSU:")
+CSSU_TEXT = {0: "call forwarded", 1: "closed user group call", 2: "other side put the call on hold",
+             3: "other side resumed the call", 4: "joined a conference", 5: "held call was released",
+             6: "forward check", 7: "call transfer alerting", 8: "call transferred", 9: "call deflected",
+             10: "incoming call forwarded"}
+CSSI_TEXT = {0: "unconditional forwarding active", 1: "conditional forwarding active", 2: "call was forwarded",
+             3: "call is waiting", 4: "closed user group call", 5: "outgoing calls barred",
+             6: "incoming calls barred", 7: "caller ID restriction rejected", 8: "call was deflected"}
 # received key-press (DTMF) reports - different firmwares use different spellings
 DTMF_RE = re.compile(r"^\+?(?:RX)?DTMF:\s*\"?([0-9A-D*#])\"?", re.I)
 
@@ -280,6 +287,8 @@ class Modem:
         self._pending: Optional[dict] = None
         self._buf = b""
         self._connected_evt = asyncio.Event()
+        self.local_hangup = False
+        self.last_end: dict = {}
 
     # ------------------------------------------------------------ low level
     async def _log(self, direction: str, line: str):
@@ -318,7 +327,7 @@ class Modem:
         is_urc = line.startswith(URC_PREFIXES)
         if line.startswith("+CLCC:") and p and p["cmd"].upper() == "AT+CLCC":
             is_urc = False
-        if line == "NO CARRIER" and not (p and p["cmd"].upper().startswith("ATD")):
+        if line in ("NO CARRIER", "BUSY", "NO ANSWER", "NO DIALTONE") and not (p and p["cmd"].upper().startswith("ATD")):
             is_urc = True
         if is_urc:
             asyncio.create_task(self._urc(line))
@@ -459,9 +468,19 @@ class Modem:
         elif line in ("RING",) or line.startswith("+CRING"):
             if c.state == "idle":
                 await self._set_call("incoming", c.number, "in")
+        elif line.startswith(("+CSSU:", "+CSSI:")):
+            try:
+                code = int(line.split(":")[1].split(",")[0])
+            except ValueError:
+                code = -1
+            mt = line.startswith("+CSSU")
+            text = (CSSU_TEXT if mt else CSSI_TEXT).get(code, line)
+            ev = {2: "remote_hold", 3: "remote_resume"}.get(code, "service") if mt else "service"
+            await self.emit({"type": "call_event", "ev": ev, "detail": text, "line": line, "time": now_iso()})
         elif line.startswith("VOICE CALL: BEGIN"):
             await self._set_call("active", c.number, c.direction)
-        elif line.startswith(("VOICE CALL: END", "NO CARRIER", "BUSY", "NO ANSWER")):
+        elif line.startswith(("VOICE CALL: END", "NO CARRIER", "BUSY", "NO ANSWER", "NO DIALTONE")):
+            await self.emit({"type": "call_event", "ev": "end_code", "detail": line, "line": line, "time": now_iso()})
             await self._set_call("idle", c.number, c.direction)
         elif line.startswith("MISSED_CALL"):
             await self._set_call("idle", c.number, "in")
@@ -494,6 +513,13 @@ class Modem:
         prev = c.state
         if state == prev and number == c.number:
             return
+        if state != prev:
+            await self.emit({"type": "call_event", "ev": "state", "detail": state, "prev": prev,
+                             "number": number or c.number, "time": now_iso()})
+            if state == "idle" and prev != "idle":
+                ended_by = "B2Wave" if self.local_hangup else ("other side" if prev in ("active", "held") else "network/other side")
+                self.local_hangup = False
+                asyncio.create_task(self._report_cause(ended_by))
         if state == "active" and prev != "active":
             c.started = time.time()
         if state == "idle" and prev != "idle":
@@ -607,7 +633,24 @@ class Modem:
         await self.cmd_ok("ATA", 10)
         await self._set_call("active", self.call.number, "in")
 
+    async def _report_cause(self, ended_by: str):
+        """Ask the network why the last call ended (AT+CEER) and publish it."""
+        await asyncio.sleep(0.3)
+        cause, code = "", None
+        try:
+            for l in await self._q("AT+CEER"):
+                if l.startswith("+CEER:"):
+                    cause = l.split(":", 1)[1].strip().strip('"')
+                    mm = re.match(r"(\d+)", cause)
+                    code = int(mm.group(1)) if mm else None
+        except Exception:
+            pass
+        self.last_end = {"ended_by": ended_by, "cause": cause, "cause_code": code}
+        await self.emit({"type": "call_event", "ev": "cause", "detail": cause, "cause_code": code,
+                         "ended_by": ended_by, "time": now_iso()})
+
     async def hangup(self):
+        self.local_hangup = True
         ok, _, _ = await self.cmd("AT+CHUP", 8)
         if not ok:
             await self.cmd("ATH", 8)
