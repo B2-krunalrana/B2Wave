@@ -1401,10 +1401,11 @@ a.iconbtn{text-decoration:none}
 
           <!-- step 2: audience -->
           <div class="card cwp" data-p="2" hidden>
-            <div class="cardhead"><span class="cicon"><i data-lucide="users"></i></span><div style="flex:1"><h3>Who should we contact?</h3><small>Paste numbers or upload a CSV. Extra columns become variables like {name} or {order}.</small></div><span class="pill" id="cwCount">0 people</span></div>
+            <div class="cardhead"><span class="cicon"><i data-lucide="users"></i></span><div style="flex:1"><h3>Who should we contact?</h3><small>Paste numbers or upload a CSV. The first row can be column names: <b>number</b> is required, every other column (name, order, amount…) becomes an <b>SMS variable</b> like {name}.</small></div><span class="pill" id="cwCount">0 people</span></div>
             <textarea id="cNums" rows="7" placeholder="9800000001, Ravi&#10;9800000002, Priya&#10;+919800000003"></textarea>
             <div class="actions" style="margin-top:8px">
               <label class="btn ghost sm filebtn"><i data-lucide="file-spreadsheet"></i> Upload CSV<input type="file" id="cwCsv" accept=".csv,.txt,text/csv" hidden></label>
+              <button class="btn ghost sm" id="cwSample"><i data-lucide="file-down"></i> Download sample CSV</button>
               <button class="btn ghost sm" id="cwClear"><i data-lucide="eraser"></i> Clear</button>
               <span class="muted" id="cwWarn" style="font-size:13px"></span>
             </div>
@@ -1416,8 +1417,9 @@ a.iconbtn{text-decoration:none}
           <div class="card cwp" data-p="3" hidden>
             <div class="cardhead"><span class="cicon"><i data-lucide="phone-call"></i></span><div><h3>Call setup</h3><small>What the person hears and what their keys mean</small></div></div>
             <label>What the person hears</label>
+            <div class="note" style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><i data-lucide="info"></i><span>The <b>voice is the same for everyone</b>: an uploaded audio file or one text-to-speech message. Variables like {name} work <b>only in SMS</b>, so put personal details in the SMS step.</span></div>
             <div class="grid2c"><select id="cAudio"></select><button class="btn ghost sm" data-ctab="audio"><i data-lucide="upload"></i> Upload audio</button></div>
-            <textarea id="cwTts" rows="2" placeholder="Text-to-speech (English): Hello {name}, press 1 to confirm, press 2 to cancel." hidden style="margin-top:8px"></textarea>
+            <textarea id="cwTts" rows="2" placeholder="Text-to-speech (English, same for everyone): Hello, press 1 to confirm, press 2 to cancel." hidden style="margin-top:8px"></textarea>
             <label>What each key means <span class="muted">(shown in reports and usable in SMS as {choice})</span></label>
             <div class="keymap" id="cwKeymap"></div>
             <div class="grid4">
@@ -1427,7 +1429,7 @@ a.iconbtn{text-decoration:none}
               <div><label>Gap between people (s)</label><input id="cGap" type="number" value="5" min="2" max="120"></div>
             </div>
             <label class="chk"><input type="checkbox" id="cStopKey" checked> Hang up after the first key press</label>
-            <label class="chk recchk"><input type="checkbox" id="cwRecord"> <span><b>Record calls</b><small>Each answered call is recorded on the module, then saved to this PC and playable in Reports. Small AMR files, about 100 KB per minute. Let people know calls may be recorded.</small></span></label>
+            <label class="chk recchk"><input type="checkbox" id="cwRecord"> <span><b>Record calls</b><small>Recordings are <b>stored on this PC</b> (app/data/recordings), not on the board. The board only holds each recording for a moment during the call, then B2Wave moves it to the PC and deletes it from the board. About 100 KB per minute. Let people know calls may be recorded.</small></span></label>
             <div class="actions"><button class="btn ghost" data-cwprev="3"><i data-lucide="arrow-left"></i> Back</button><span class="spacer"></span><button class="btn" data-cwnext="3">Next <i data-lucide="arrow-right"></i></button></div>
           </div>
 
@@ -1474,6 +1476,7 @@ a.iconbtn{text-decoration:none}
           </div>
           <div class="card">
             <div class="cardhead"><span class="cicon"><i data-lucide="chart-column"></i></span><div style="flex:1"><h3>Campaign reports</h3><small>Outcomes, key presses, SMS delivery and a call-by-call timeline</small></div>
+              <button class="btn ghost sm" onclick="openRecFolder()" title="Recordings are stored on this PC"><i data-lucide="folder-open"></i> Recordings folder</button>
               <select id="cFilter" style="max-width:190px"><option value="">All types</option><option value="call">Call only</option><option value="sms">SMS only</option><option value="call_sms">Call → SMS</option><option value="sms_call">SMS → call</option></select></div>
             <div id="campList"><div class="empty">No campaigns yet</div></div>
             <div class="hint" id="cLegacy" style="margin-top:10px"></div>
@@ -1888,6 +1891,7 @@ function handle(e){
     case 'bulk': onBulk(e.job); break;
     case 'sim_changed': onSimChanged(e); break;
     case 'agent_worker': onAgentWorker(e); break;
+    case 'campaigns_refresh': if(S.view==='campaigns') loadCampaigns(); break;
     case 'restored': if(!BKP.restoring) bkDone(e.result,false); break;
     case 'message': upsertMsg(e.msg); if(e.notify) notifySms(e.msg); renderHome(); break;
     case 'messages': S.messages=e.messages; renderThreads(); renderConv(); break;
@@ -3201,13 +3205,17 @@ function aiReady(){
 
 // ---------- devices, transcript, call engine (unchanged behaviour)
 async function aiDevices(){
-  try{ const tmp=await navigator.mediaDevices.getUserMedia({audio:true}); tmp.getTracks().forEach(t=>t.stop()); }catch{ return; }
-  const ds=await navigator.mediaDevices.enumerateDevices(), ins=ds.filter(d=>d.kind==='audioinput'), outs=ds.filter(d=>d.kind==='audiooutput');
+  let ds=await navigator.mediaDevices.enumerateDevices();
+  if(!ds.some(d=>d.label)){                      // labels need permission once; afterwards never touch the mic here
+    try{ const tmp=await navigator.mediaDevices.getUserMedia({audio:true}); tmp.getTracks().forEach(t=>t.stop()); }catch{ return; }
+    ds=await navigator.mediaDevices.enumerateDevices();
+  }
+  const ins=ds.filter(d=>d.kind==='audioinput'), outs=ds.filter(d=>d.kind==='audiooutput');
   const opt=(list,key)=>{ const saved=lsGet(key); return list.map(d=>`<option value="${esc(d.deviceId)}" ${d.deviceId===saved?'selected':''}>${esc(d.label||d.deviceId.slice(0,8))}</option>`).join(''); };
   $('#aiIn').innerHTML=opt(ins,'bCallIn'); $('#aiOut').innerHTML=opt(outs,'bCallOut'); $('#aiMic').innerHTML=opt(ins,'aiMic'); $('#aiSpk').innerHTML=opt(outs,'aiSpk');
   const usb=d=>/usb|c-media|generic|external/i.test(d.label);
-  if(!lsGet('bCallIn')){ const u=ins.find(usb); if(u) $('#aiIn').value=u.deviceId; }
-  if(!lsGet('bCallOut')){ const u=outs.find(usb); if(u) $('#aiOut').value=u.deviceId; }
+  if(!lsGet('bCallIn')||aiLooksLikePcMic($('#aiIn').value,aiOptLabel($('#aiIn')))){ const u=ins.find(usb); if(u) $('#aiIn').value=u.deviceId; }
+  if(!lsGet('bCallOut')||aiLooksLikePcSpeaker($('#aiOut').value,aiOptLabel($('#aiOut')))){ const u=outs.find(usb); if(u) $('#aiOut').value=u.deviceId; }
   aiRouteCheck();
 }
 function aiStep(text,state='run'){
@@ -3239,10 +3247,10 @@ async function aiStart(){
     if(S.call.state!=='idle'){ toast('Another call is in progress'); return; }
     const rc=aiRouteCheck();
     if(!rc.ok){
-      const r=await Swal.fire({...swalBase,icon:'warning',title:'The caller would not hear the AI',html:`${rc.msg}<br><br>The AI voice must go into the <b>USB audio adapter</b> that is wired to the board's MIC, not to your PC speakers.`,
-        showCancelButton:true,showDenyButton:true,confirmButtonText:'Open wiring guide',denyButtonText:'Call anyway',cancelButtonText:'Cancel',customClass:{...swalBase.customClass,denyButton:'btn ghost'}});
-      if(r.isConfirmed){ show('audio'); setTimeout(()=>$('#audRoute')&&$('#audRoute').scrollIntoView({behavior:'smooth'}),300); return; }
-      if(!r.isDenied) return;
+      const r=await Swal.fire({...swalBase,icon:'warning',title:'Pick the USB audio adapter',html:`${rc.msg}<br><br>In call mode B2Wave only uses the <b>USB audio adapter</b> wired to the board, never the PC microphone or speakers, so there is no noise or echo on the call.`,
+        showCancelButton:true,confirmButtonText:'Open wiring guide',cancelButtonText:'Close'});
+      if(r.isConfirmed){ show('audio'); setTimeout(()=>$('#audRoute')&&$('#audRoute').scrollIntoView({behavior:'smooth'}),300); }
+      return;
     }
     if(!await ask('Call with the AI agent?',`B2Wave dials <b>${esc(number)}</b>. When the person answers, the AI agent talks to them. The AI voice goes into the call through <b>${esc(rc.outLabel)}</b>${$('#aiListen').checked?', and you can listen in on this PC':''}.`,{confirm:'Call now'})) return;
   }
@@ -3278,7 +3286,9 @@ async function aiStart(){
     await room.connect(tk.url,tk.token);
     aiStep('Sending audio');
     const dev=mode==='call'?$('#aiIn').value:$('#aiMic').value;
-    const track=await L.createLocalAudioTrack({deviceId:dev,echoCancellation:mode!=='call',noiseSuppression:mode!=='call',autoGainControl:mode!=='call'});
+    if(mode==='call' && aiLooksLikePcMic(dev,aiOptLabel($('#aiIn')))) throw new Error('refusing to use the PC microphone in call mode');
+    // exact: never let the browser fall back to the default (PC) microphone
+    const track=await L.createLocalAudioTrack({deviceId:mode==='call'?{exact:dev}:dev,echoCancellation:mode!=='call',noiseSuppression:mode!=='call',autoGainControl:mode!=='call'});
     const pub=await room.localParticipant.publishTrack(track); AIS.myTrackSid=(pub&&pub.trackSid)||track.sid||'';
     aiMeter(track.mediaStreamTrack,'#aiMIn');
     if(mode==='call' && $('#aiListen').checked) aiMonitor(track.mediaStreamTrack);       // hear the caller on this PC
@@ -3513,12 +3523,20 @@ function aiLooksLikePcSpeaker(id,label){
   const pc=/speaker|realtek|high definition|hdmi|display|nvidia|intel|amd|smart sound|laptop/i.test(label);
   return pc && !usb;
 }
+function aiLooksLikePcMic(id,label){
+  if(!id||id==='default'||id==='communications') return true;
+  const usb=/usb|c-media|generic|external|adapter|uac|audio device|cm108|cm119/i.test(label);
+  const pc=/microphone array|realtek|intel|smart sound|internal|built-in|integrated|webcam|camera|laptop|amd/i.test(label);
+  return pc && !usb;
+}
 function aiRouteCheck(){
   const out=$('#aiOut'), inn=$('#aiIn'), oL=aiOptLabel(out), iL=aiOptLabel(inn);
   let ok=true, msg='';
-  if(!('setSinkId' in HTMLMediaElement.prototype)){ ok=false; msg='This browser cannot choose an output device. Use <b>Chrome</b> or <b>Edge</b>.'; }
-  else if(!out.value){ ok=false; msg='No output device is selected for the AI voice.'; }
-  else if(aiLooksLikePcSpeaker(out.value,oL)){ ok=false; msg=`"<b>${esc(oL||out.value)}</b>" looks like your PC speakers. The AI would talk out of this PC and the caller would hear silence.`; }
+  if(!inn.value){ ok=false; msg='No input device is selected for the caller\'s voice.'; }
+  else if(aiLooksLikePcMic(inn.value,iL)){ ok=false; msg=`"<b>${esc(iL||inn.value)}</b>" looks like your PC microphone. It would pick up room noise and your voice, not the caller.`; }
+  if(ok && !('setSinkId' in HTMLMediaElement.prototype)){ ok=false; msg='This browser cannot choose an output device. Use <b>Chrome</b> or <b>Edge</b>.'; }
+  else if(ok && !out.value){ ok=false; msg='No output device is selected for the AI voice.'; }
+  else if(ok && aiLooksLikePcSpeaker(out.value,oL)){ ok=false; msg=`"<b>${esc(oL||out.value)}</b>" looks like your PC speakers. The AI would talk out of this PC and the caller would hear silence.`; }
   const st=$('#aiRouteState');
   if(st) st.innerHTML=ok?`<div class="note good" style="display:flex;gap:8px;align-items:center">${ICON('circle-check')}<span>The AI voice goes into the call through <b>${esc(oL)}</b>. The caller's voice comes in from <b>${esc(iL)}</b>.</span></div>`
     :`<div class="note bad" style="display:flex;gap:8px;align-items:flex-start">${ICON('circle-alert')}<span>${msg} Connect the USB audio adapter (see the <a href="#" data-gotoaudio>wiring guide</a>), then pick it in both boxes.</span></div>`;
@@ -3526,7 +3544,7 @@ function aiRouteCheck(){
   return {ok,msg,outLabel:oL||'the selected device'};
 }
 ['#aiIn','#aiOut'].forEach(id=>$(id).addEventListener('change',aiRouteCheck));
-$('#aiListen').checked=lsGet('aiListen')==='1'; $('#aiListen').onchange=e=>lsSet('aiListen',e.target.checked?'1':'0');
+$('#aiListen').checked=lsGet('aiListen')==='1';   // off by default: no PC speaker unless asked $('#aiListen').onchange=e=>lsSet('aiListen',e.target.checked?'1':'0');
 async function aiRouteAgent(track,mode){
   const el=track.attach(); el.autoplay=true; el.style.display='none'; document.body.appendChild(el);
   aiMeter(track.mediaStreamTrack,'#aiMOut');
@@ -3699,6 +3717,7 @@ function cwReview(){
   const smsMax=p.mode==='sms'||p.mode==='sms_call'?n:p.mode==='call_sms'?n:0;
   const row=(icon,label,val)=>`<div class="rv"><span>${ICON(icon)}</span><small>${label}</small><b>${val}</b></div>`;
   $('#cwReview').innerHTML=`<div class="rvgrid">${row(mi.icon,'Type',mi.label)}${row('users','People',n)}${mi.call?row('phone-call','Calls',n):''}${smsMax?row('message-square-text','SMS (up to)',smsMax):''}${row('timer','Estimated time',secs<90?Math.round(secs)+' s':Math.ceil(secs/60)+' min')}${mi.call?row('disc-3','Recording',p.record?'On':'Off'):''}</div>
+    ${mi.call&&/\{[^}]*\}/.test(p.tts)?`<div class="note" style="margin-top:10px">${ICON('info')} Text-to-speech is the same for everyone: {variables} in it are skipped. Use them in SMS.</div>`:''}
     ${mi.call?`<div class="rvline">${ICON('volume-2')} <b>Plays:</b> ${esc(p.audio||('Text-to-speech: '+p.tts.slice(0,80)))} ×${p.repeat} · ring ${p.ring_timeout}s · wait ${p.key_wait}s for a key${Object.keys(p.keymap).length?` · keys: ${Object.entries(p.keymap).map(([k,v])=>`<b>${esc(k)}</b> = ${esc(v)}`).join(', ')}`:''}</div>`:''}
     ${p.sms.pre&&(p.mode==='sms'||p.mode==='sms_call')?`<div class="rvline">${ICON('message-square-text')} <b>SMS:</b> ${esc(cwRenderPreview(p.sms.pre))}</div>`:''}
     ${p.mode==='call_sms'?p.sms.rules.map((r,i)=>`<div class="rvline">${ICON('git-branch')} <b>${i+1}. ${esc((RULE_WHEN.find(w=>w[0]===r.when)||[0,r.when])[1])}</b> → ${esc(cwRenderPreview(r.text))}</div>`).join(''):''}
@@ -3783,6 +3802,18 @@ async function loadCampaignsAll(){ await loadCampaigns(); try{ const b=await api
 cwMode('call_sms'); cwKeymapRender(); cwParse();
 $('#cAudio').innerHTML='<option value="">Choose…</option><option value="tts">Text-to-speech (type the message below)</option>';
 api && setTimeout(async()=>{ try{ renderDraftCount((await api('drafts_list')).drafts); }catch{} },1500);
+
+
+// ---------------- sample CSV, voice-variable warning, recordings folder
+$('#cwSample').onclick=()=>{
+  const csv='number,name,order,amount\n+919800000001,Ravi,A1001,2500\n9800000002,Priya,A1002,1200\n9800000003,,A1003,800\n';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'})); a.download='b2wave-sample-contacts.csv'; a.click();
+  toast('Sample CSV downloaded. Fill it in Excel and upload it here');
+};
+$('#cwTts').addEventListener('input',()=>{ const t=$('#cwTts'), bad=/\{[^}]*\}/.test(t.value);
+  let w=$('#cwTtsWarn'); if(!w){ t.insertAdjacentHTML('afterend','<div class="hint" id="cwTtsWarn"></div>'); w=$('#cwTtsWarn'); }
+  w.innerHTML=bad?'<span style="color:var(--warn)">Variables like {name} are skipped in voice. They are removed before speaking. Use them in the SMS step.</span>':''; });
+function openRecFolder(){ api('open_folder',{what:'recordings'}).then(r=>toast('Opened '+r.path)).catch(e=>toast(e.message)); }
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();

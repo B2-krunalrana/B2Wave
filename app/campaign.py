@@ -320,22 +320,62 @@ class CampaignRunner:
                 if l.startswith("+FSATTRI:"):
                     size = int(l.split(":")[1].strip() or 0)
             data = await self.modem.download_file(name, size)
+            if not data.startswith(b"#!AMR"):
+                raise RuntimeError("downloaded file is not a valid AMR recording")
             folder = self.rec_dir / camp["id"]
             folder.mkdir(parents=True, exist_ok=True)
             fname = f"{re.sub(r'[^0-9]', '', r['number'])}_{name}"
-            (folder / fname).write_bytes(data)
+            tmp = folder / (fname + ".part")
+            tmp.write_bytes(data)
+            tmp.replace(folder / fname)                     # atomic: never a half-written file
             r["recording"] = f"{camp['id']}/{fname}"
             r["rec_bytes"] = len(data)
             r["rec_s"] = round(max(0, len(data) - 6) / 1600, 1)
-            self._ev("recording saved", f"{len(data) // 1024} KB")
-        except Exception as e:
-            r["rec_error"] = f"recording not saved: {e}"
-            self._ev("recording failed", str(e))
-        finally:
+            self._ev("recording saved", f"on this PC, {len(data) // 1024} KB")
             try:
-                await self.modem.delete_file(name)
+                await self.modem.delete_file(name)          # only now remove it from the board
             except Exception:
                 pass
+        except Exception as e:
+            r["rec_error"] = f"kept on the board, will be moved to the PC automatically: {e}"
+            r["_rec_pending"] = name
+            self._ev("recording kept on board", str(e))
+
+    async def sweep_recordings(self, campaigns: list) -> int:
+        """Move any recording still on the board (failed earlier download, crash, restart) to the PC."""
+        if self.running or self.modem.call.state != "idle" or not self.rec_dir:
+            return 0
+        moved = 0
+        try:
+            files = (await self.modem.list_files())["files"]
+        except Exception:
+            return 0
+        for f in files:
+            mm = re.fullmatch(r"r([0-9a-f]{6})(\d+)\.amr", f["name"])
+            if not mm:
+                continue
+            try:
+                data = await self.modem.download_file(f["name"], f["size"])
+                if not data.startswith(b"#!AMR"):
+                    continue
+                camp = next((c for c in campaigns if c["id"].startswith(mm.group(1))), None)
+                idx = int(mm.group(2))
+                folder = self.rec_dir / (camp["id"] if camp else "recovered")
+                folder.mkdir(parents=True, exist_ok=True)
+                num = camp["results"][idx]["number"] if camp and idx < len(camp["results"]) else "unknown"
+                fname = f"{re.sub(r'[^0-9]', '', num)}_{f['name']}"
+                (folder / fname).write_bytes(data)
+                if camp and idx < len(camp["results"]):
+                    r = camp["results"][idx]
+                    r["recording"], r["rec_bytes"] = f"{camp['id']}/{fname}", len(data)
+                    r["rec_s"] = round(max(0, len(data) - 6) / 1600, 1)
+                    r.pop("rec_error", None)
+                    r.pop("_rec_pending", None)
+                await self.modem.delete_file(f["name"])
+                moved += 1
+            except Exception:
+                continue
+        return moved
 
     async def _finish(self, r, answered_at: float | None):
         """Wait briefly for the network's end reason, then classify the call."""

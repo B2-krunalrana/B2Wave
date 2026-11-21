@@ -875,7 +875,11 @@ class Modem:
         await self.cmd("AT+CCMXSTOP")
 
     async def speak(self, text: str, remote: bool = True):
-        """Text-to-speech (English) into the call."""
-        text = re.sub(r'[^A-Za-z0-9 .,?!\'-]', " ", text)[:250]
+        """Text-to-speech (English) into the call. Voice is the same for everyone:
+        {variables} are SMS-only, so any {...} token is removed instead of being read aloud."""
+        text = re.sub(r"\{[^}]*\}", "", text)
+        text = re.sub(r'[^A-Za-z0-9 .,?!\'-]', " ", text)
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\s+([,.?!])", r"\1", text).strip(" ,")[:250]
         await self.cmd(f"AT+CDTAM={1 if remote else 0}")
         await self.cmd_ok(f'AT+CTTS=2,"{text}"', 10)

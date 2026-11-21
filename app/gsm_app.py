@@ -509,6 +509,18 @@ async def supervisor():
             reader = await modem.connect(transport)
             await modem.initialize()
             await sync_inbox()
+
+            async def _sweep():
+                await asyncio.sleep(5)
+                try:
+                    moved = await runner.sweep_recordings(campaigns.data)
+                    if moved:
+                        campaigns.save()
+                        log.info("moved %d leftover recording(s) from the board to the PC", moved)
+                        await broadcast({"type": "campaigns_refresh"})
+                except Exception:
+                    pass
+            asyncio.create_task(_sweep())
             while not reader.done():
                 done, _ = await asyncio.wait({reader}, timeout=15)
                 if reconnect_evt.is_set():
@@ -722,6 +734,18 @@ async def handle_op(op: str, d: dict):
     # ---------------- campaigns
     if op == "campaigns_list":
         return {"campaigns": campaigns.data, "running": runner.running, "dtmf": list(dtmf_log)}
+    if op == "recordings_sweep":
+        moved = await runner.sweep_recordings(campaigns.data)
+        if moved:
+            campaigns.save()
+            await broadcast({"type": "campaigns_refresh"})
+        return {"moved": moved}
+    if op == "open_folder":
+        target = {"recordings": REC_DIR, "audio": AUDIO, "data": DATA}.get(d.get("what"), REC_DIR)
+        target.mkdir(exist_ok=True)
+        if sys.platform == "win32":
+            os.startfile(str(target))                      # local app: opens Explorer on this PC
+        return {"path": str(target)}
     if op == "campaign_start":
         if bulk_runner.running:
             raise RuntimeError("A bulk SMS job is running. Wait for it or stop it first.")
