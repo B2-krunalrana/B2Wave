@@ -68,7 +68,7 @@ The first run creates `app/.venv` and installs the dependencies; after that the 
 3. Double-click **`agent
 un_agent.bat`** (first run installs LiveKit Agents into `agent/.venv`) and keep it open.
 4. **Test with PC mic** to talk to the agent from your PC, or **Call a phone number** to let it talk on a real call.
-   Phone calls need the USB sound card wiring (Talk on calls → option B) because the module can't stream call audio over USB.
+   In call mode the AI voice goes **into the call** (the caller hears it) through a USB audio adapter connected to the board's headset socket with a Y-splitter and two aux cables (Talk on calls → *Let the PC or the AI agent talk on calls*). B2Wave refuses to route it to PC speakers; optional listen-in.
 
 ```
 Caller ⇄ A7672S (SPK/MIC) ⇄ USB sound card ⇄ B2Wave page (livekit-client) ⇄ LiveKit room ⇄ agent/agent.py (OpenAI Realtime)

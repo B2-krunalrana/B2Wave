@@ -706,6 +706,12 @@ ul.buy small{display:block;color:var(--muted);font-size:12.5px}
 .hstest b{display:inline}.hstest>div>b{display:block}
 .hstest small{display:block;line-height:1.5}
 input[type=checkbox],input[type=radio]{width:auto}
+
+.route{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.routeflow{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.routeflow span{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.routeflow svg.lucide{width:15px;height:15px;color:var(--accent)}
+.routeflow.big{margin-top:6px;padding:12px;border-radius:12px;background:var(--accent-soft);color:var(--text);font-size:14px}
 </style>
 </head>
 <body>
@@ -954,7 +960,7 @@ input[type=checkbox],input[type=radio]{width:auto}
             <li>Double-click <code>agent\run_agent.bat</code> and keep the window open. It sets itself up the first time.</li>
             <li>Pick a template or write instructions, an opening line, voice and language.</li>
             <li><b>Test with PC mic</b>: talk to the agent from this PC, with a live transcript.</li>
-            <li><b>Call a phone number</b>: B2Wave dials, and when the person answers the agent talks to them. This needs the USB sound card wiring (Talk on calls, option B), because this module can't stream call audio over USB.</li>
+            <li><b>Call a phone number</b>: B2Wave dials, and when the person answers the agent talks to them. The AI voice goes <b>into the call</b> (the caller hears it) through a USB audio adapter connected to the board's headset socket. See Talk on calls &gt; <i>Let the PC or the AI agent talk on calls</i>. B2Wave never sends it to your PC speakers in call mode.</li>
           </ol>
           <div class="note" style="margin-top:10px">The agent uses LiveKit Agents 1.0.23. Newer releases load native DLLs that Windows Smart App Control blocks on some PCs.</div>
         </details>
@@ -1218,6 +1224,35 @@ input[type=checkbox],input[type=radio]{width:auto}
                 <tr><td>Too loud or distorted</td><td>Lower volume, or use a 33–47 Ω resistor instead of 22 Ω</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+        <div class="card" id="audRoute">
+          <div class="cardhead"><span class="cicon"><i data-lucide="bot"></i></span><div style="flex:1"><h3>Let the PC or the AI agent talk on calls</h3><small>Uses the headset socket above, no extra soldering. Needed for AI calls so the caller hears the AI.</small></div><span class="tag">~₹450</span></div>
+          <div class="routeflow big"><span><i data-lucide="bot"></i> AI / PC voice <i data-lucide="arrow-right"></i> USB adapter <b>headphone out</b> <i data-lucide="arrow-right"></i> board <b>MIC</b> <i data-lucide="arrow-right"></i> caller hears it</span>
+            <span><i data-lucide="smartphone"></i> Caller's voice <i data-lucide="arrow-right"></i> board <b>SPK</b> <i data-lucide="arrow-right"></i> USB adapter <b>mic in</b> <i data-lucide="arrow-right"></i> AI hears it</span></div>
+          <div class="hsrow" style="margin-top:12px">
+            <div class="hsbox">
+              <h4><span class="num">1</span> What you need</h4>
+              <ul class="buy">
+                <li><i data-lucide="usb"></i><div><b>USB audio adapter</b> with separate <b>mic</b> (pink) and <b>headphone</b> (green) sockets<small>The common "USB sound card 7.1" dongle. ~₹250</small></div></li>
+                <li><i data-lucide="split"></i><div><b>Headset Y-splitter</b>: one 4-pole plug to two sockets (headphone + mic)<small>Search "3.5 mm headset splitter CTIA". ~₹100</small></div></li>
+                <li><i data-lucide="cable"></i><div><b>2 × 3.5 mm aux cables</b> (male to male)<small>~₹100</small></div></li>
+              </ul>
+            </div>
+            <div class="hsbox">
+              <h4><span class="num">2</span> Connect (the cables cross over)</h4>
+              <ol class="plain">
+                <li>Plug the <b>Y-splitter</b> into the board's headset socket.</li>
+                <li>Splitter <b>headphone</b> socket <i data-lucide="arrow-right" style="width:14px;height:14px"></i> aux cable <i data-lucide="arrow-right" style="width:14px;height:14px"></i> USB adapter <b>MIC</b> (pink).</li>
+                <li>Splitter <b>mic</b> socket <i data-lucide="arrow-right" style="width:14px;height:14px"></i> aux cable <i data-lucide="arrow-right" style="width:14px;height:14px"></i> USB adapter <b>HEADPHONE</b> (green).</li>
+                <li>Plug the USB adapter into the PC.</li>
+                <li>In Windows sound settings, set the adapter's <b>output volume to about 10–20 %</b>. The board's mic input is sensitive, and too loud sounds distorted to the caller.</li>
+              </ol>
+            </div>
+          </div>
+          <div class="hsbox" style="margin-top:12px">
+            <h4><span class="num">3</span> Choose it in B2Wave</h4>
+            <p class="hint" style="margin:0">AI voice agent &gt; Talk &amp; call &gt; <b>Call a phone number</b>: pick the USB adapter in <b>both</b> boxes ("Caller's voice comes in from" and "AI voice goes into the call through"). B2Wave refuses to send the AI voice to your PC speakers in call mode. Tick <i>Also let me listen on this PC</i> to monitor the conversation.</p>
           </div>
         </div>
         <div class="card" id="audCtl">
@@ -1508,11 +1543,19 @@ input[type=checkbox],input[type=radio]{width:auto}
             <div class="grid2" style="margin-top:12px">
               <div id="aiCallBox" hidden>
                 <label>Phone number</label><input id="aiNum" placeholder="+91 98xxxxxxxx" inputmode="tel">
-                <div class="grid2">
-                  <div><label>Call audio in (from board SPK)</label><select id="aiIn"></select></div>
-                  <div><label>Into call (to board MIC)</label><select id="aiOut"></select></div>
+                <div class="route">
+                  <div class="routeflow"><span><i data-lucide="bot"></i> AI voice <i data-lucide="arrow-right"></i> USB audio adapter <i data-lucide="arrow-right"></i> board MIC <i data-lucide="arrow-right"></i> <b>caller hears it</b></span></div>
+                  <div class="grid2">
+                    <div><label>Caller's voice comes in from</label><select id="aiIn"></select></div>
+                    <div><label>AI voice goes into the call through</label><select id="aiOut"></select></div>
+                  </div>
+                  <div id="aiRouteState"></div>
+                  <div class="actions" style="margin-top:8px">
+                    <label class="chk" style="margin:0"><input type="checkbox" id="aiListen"> Also let me listen on this PC</label><span class="spacer"></span>
+                    <button class="btn ghost sm" id="aiTone"><i data-lucide="audio-waveform"></i> Test: send a beep into the call</button>
+                    <button class="btn ghost sm" data-gotoaudio><i data-lucide="cable"></i> Wiring guide</button>
+                  </div>
                 </div>
-                <p class="hint">Needs the USB sound card wiring (Talk on calls &gt; option B). Without it the agent can't hear or speak to the person.</p>
               </div>
               <div id="aiTestBox">
                 <div class="grid2">
@@ -3008,6 +3051,7 @@ async function aiDevices(){
   const usb=d=>/usb|c-media|generic|external/i.test(d.label);
   if(!lsGet('bCallIn')){ const u=ins.find(usb); if(u) $('#aiIn').value=u.deviceId; }
   if(!lsGet('bCallOut')){ const u=outs.find(usb); if(u) $('#aiOut').value=u.deviceId; }
+  aiRouteCheck();
 }
 function aiStep(text,state='run'){
   const ol=$('#aiStepsLog'); [...ol.querySelectorAll('li.run')].forEach(li=>{ li.className='ok'; li.querySelector('.ic').innerHTML=ICON('check'); });
@@ -3024,7 +3068,7 @@ function aiSay(who,text,id,final=true){
 }
 document.querySelectorAll('#aiMode button').forEach(b=>b.onclick=()=>{ if(AIS.room) return; AIS.mode=b.dataset.m;
   document.querySelectorAll('#aiMode button').forEach(x=>x.classList.toggle('on',x===b));
-  $('#aiCallBox').hidden=AIS.mode!=='call'; $('#aiTestBox').hidden=AIS.mode!=='test';
+  $('#aiCallBox').hidden=AIS.mode!=='call'; $('#aiTestBox').hidden=AIS.mode!=='test'; if(AIS.mode==='call') aiRouteCheck();
   $('#aiGo').innerHTML=ICON(AIS.mode==='call'?'phone-outgoing':'play')+(AIS.mode==='call'?' Call with AI agent':' Start test conversation'); });
 async function aiStart(){
   if(!LK()){ toast('LiveKit library failed to load'); return; }
@@ -3036,7 +3080,14 @@ async function aiStart(){
     if(!number){ toast('Enter the phone number'); return; }
     if(!S.status.connected){ toast('Board is offline'); return; }
     if(S.call.state!=='idle'){ toast('Another call is in progress'); return; }
-    if(!await ask('Call with the AI agent?',`B2Wave dials <b>${esc(number)}</b>. When the person answers, the AI agent talks to them through the USB sound card.`,{confirm:'Call now'})) return;
+    const rc=aiRouteCheck();
+    if(!rc.ok){
+      const r=await Swal.fire({...swalBase,icon:'warning',title:'The caller would not hear the AI',html:`${rc.msg}<br><br>The AI voice must go into the <b>USB audio adapter</b> that is wired to the board's MIC, not to your PC speakers.`,
+        showCancelButton:true,showDenyButton:true,confirmButtonText:'Open wiring guide',denyButtonText:'Call anyway',cancelButtonText:'Cancel',customClass:{...swalBase.customClass,denyButton:'btn ghost'}});
+      if(r.isConfirmed){ show('audio'); setTimeout(()=>$('#audRoute')&&$('#audRoute').scrollIntoView({behavior:'smooth'}),300); return; }
+      if(!r.isDenied) return;
+    }
+    if(!await ask('Call with the AI agent?',`B2Wave dials <b>${esc(number)}</b>. When the person answers, the AI agent talks to them. The AI voice goes into the call through <b>${esc(rc.outLabel)}</b>${$('#aiListen').checked?', and you can listen in on this PC':''}.`,{confirm:'Call now'})) return;
   }
   lsSet('aiMic',$('#aiMic').value); lsSet('aiSpk',$('#aiSpk').value); lsSet('bCallIn',$('#aiIn').value); lsSet('bCallOut',$('#aiOut').value);
   Object.assign(AIS,{t0:Date.now(),transcript:[],agentJoined:false,number,stopping:false,gotStream:false,error:''});
@@ -3058,9 +3109,7 @@ async function aiStart(){
     const L=LK(), room=new L.Room({adaptiveStream:false,dynacast:false}); AIS.room=room;
     room.on(L.RoomEvent.ParticipantConnected,p=>{ if(p.identity!==tk.identity){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); } });
     room.on(L.RoomEvent.TrackSubscribed,(track)=>{ if(track.kind!=='audio') return;
-      const el=track.attach(); el.autoplay=true; el.style.display='none'; document.body.appendChild(el);
-      const sink=mode==='call'?$('#aiOut').value:$('#aiSpk').value; if(el.setSinkId&&sink) el.setSinkId(sink).catch(()=>{});
-      aiMeter(track.mediaStreamTrack,'#aiMOut'); });
+      aiRouteAgent(track,mode); });
     room.on(L.RoomEvent.TranscriptionReceived,(segs,p)=>{ if(AIS.gotStream) return; const who=(p&&p.identity===tk.identity)?'person':'agent'; segs.forEach(s=>aiSay(who,s.text,'s'+s.id,s.final)); });
     if(typeof room.registerTextStreamHandler==='function'){
       room.registerTextStreamHandler('lk.transcription',async(reader,info)=>{ AIS.gotStream=true;
@@ -3075,6 +3124,7 @@ async function aiStart(){
     const track=await L.createLocalAudioTrack({deviceId:dev,echoCancellation:mode!=='call',noiseSuppression:mode!=='call',autoGainControl:mode!=='call'});
     const pub=await room.localParticipant.publishTrack(track); AIS.myTrackSid=(pub&&pub.trackSid)||track.sid||'';
     aiMeter(track.mediaStreamTrack,'#aiMIn');
+    if(mode==='call' && $('#aiListen').checked) aiMonitor(track.mediaStreamTrack);       // hear the caller on this PC
     aiStep('Waiting for the AI agent');
     if(room.remoteParticipants.size){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); }
     setTimeout(()=>{ if(AIS.room===room&&!AIS.agentJoined){ aiStep(AIS.engine==='cloud'?'Agent did not join: check the agent name in LiveKit Cloud':'Agent did not join: is the agent worker running (step 2)?','bad'); aiLive(ICON('circle-alert')+' No agent','bad'); } },15000);
@@ -3296,6 +3346,64 @@ function hsLoad(){ let done={}; try{ done=JSON.parse(lsGet('hsSteps')||'{}'); }c
     cb.onchange=()=>{ done[li.dataset.k]=cb.checked; li.classList.toggle('done',cb.checked); lsSet('hsSteps',JSON.stringify(done)); hsProg(); }; }); hsProg(); }
 function hsProg(){ const all=document.querySelectorAll('#hsSteps li').length, n=document.querySelectorAll('#hsSteps li.done').length; $('#hsProg').textContent=n?`${n}/${all} done`:''; }
 hsLoad();
+
+
+// ---------------- AI audio routing (call mode must never fall back to PC speakers)
+function aiOptLabel(sel){ const o=sel.selectedOptions&&sel.selectedOptions[0]; return o?o.textContent:''; }
+function aiLooksLikePcSpeaker(id,label){
+  if(!id||id==='default'||id==='communications') return true;
+  const usb=/usb|c-media|generic|external|adapter|uac|audio device|headset adapter|cm108|cm119/i.test(label);
+  const pc=/speaker|realtek|high definition|hdmi|display|nvidia|intel|amd|smart sound|laptop/i.test(label);
+  return pc && !usb;
+}
+function aiRouteCheck(){
+  const out=$('#aiOut'), inn=$('#aiIn'), oL=aiOptLabel(out), iL=aiOptLabel(inn);
+  let ok=true, msg='';
+  if(!('setSinkId' in HTMLMediaElement.prototype)){ ok=false; msg='This browser cannot choose an output device. Use <b>Chrome</b> or <b>Edge</b>.'; }
+  else if(!out.value){ ok=false; msg='No output device is selected for the AI voice.'; }
+  else if(aiLooksLikePcSpeaker(out.value,oL)){ ok=false; msg=`"<b>${esc(oL||out.value)}</b>" looks like your PC speakers. The AI would talk out of this PC and the caller would hear silence.`; }
+  const st=$('#aiRouteState');
+  if(st) st.innerHTML=ok?`<div class="note good" style="display:flex;gap:8px;align-items:center">${ICON('circle-check')}<span>The AI voice goes into the call through <b>${esc(oL)}</b>. The caller's voice comes in from <b>${esc(iL)}</b>.</span></div>`
+    :`<div class="note bad" style="display:flex;gap:8px;align-items:flex-start">${ICON('circle-alert')}<span>${msg} Connect the USB audio adapter (see the <a href="#" data-gotoaudio>wiring guide</a>), then pick it in both boxes.</span></div>`;
+  document.querySelectorAll('[data-gotoaudio]').forEach(a=>a.onclick=ev=>{ ev.preventDefault(); show('audio'); setTimeout(()=>$('#audRoute')&&$('#audRoute').scrollIntoView({behavior:'smooth'}),300); });
+  return {ok,msg,outLabel:oL||'the selected device'};
+}
+['#aiIn','#aiOut'].forEach(id=>$(id).addEventListener('change',aiRouteCheck));
+$('#aiListen').checked=lsGet('aiListen')==='1'; $('#aiListen').onchange=e=>lsSet('aiListen',e.target.checked?'1':'0');
+async function aiRouteAgent(track,mode){
+  const el=track.attach(); el.autoplay=true; el.style.display='none'; document.body.appendChild(el);
+  aiMeter(track.mediaStreamTrack,'#aiMOut');
+  if(mode!=='call'){                                     // PC test: play on the chosen PC speaker
+    const sink=$('#aiSpk').value; if(el.setSinkId&&sink) el.setSinkId(sink).catch(()=>{}); return;
+  }
+  el.muted=true;                                         // fail closed: silent until routed to the call device
+  const sink=$('#aiOut').value;
+  try{
+    if(!el.setSinkId) throw new Error('this browser cannot choose an output device');
+    if(!sink) throw new Error('no "into call" device selected');
+    await el.setSinkId(sink);
+    el.muted=false; el.play().catch(()=>{});
+    aiStep('AI voice routed into the call ('+aiOptLabel($('#aiOut'))+')');
+  }catch(e){
+    el.pause(); el.muted=true;
+    aiStep('Could not send the AI voice into the call: '+e.message+'. Muted so it does not play on the PC speakers.','bad');
+    toast('AI voice not routed into the call: '+e.message);
+  }
+  if($('#aiListen').checked) aiMonitor(track.mediaStreamTrack);
+}
+function aiMonitor(mst){                                  // optional listen-in on the PC default speaker
+  try{ const a=new Audio(); a.srcObject=new MediaStream([mst]); a.volume=0.6; a.dataset.monitor='1'; a.style.display='none'; document.body.appendChild(a); a.play().catch(()=>{}); }catch{}
+}
+$('#aiTone').onclick=async()=>{
+  const r=aiRouteCheck(); if(!r.ok){ toast('Pick the USB audio adapter as the AI output first'); return; }
+  try{
+    const ac=new AudioContext(), osc=ac.createOscillator(), g=ac.createGain(), dst=ac.createMediaStreamDestination();
+    osc.frequency.value=1000; g.gain.value=0.25; osc.connect(g); g.connect(dst);
+    const a=new Audio(); a.srcObject=dst.stream; await a.setSinkId($('#aiOut').value); await a.play(); osc.start();
+    setTimeout(()=>{ osc.stop(); a.pause(); ac.close(); },1200);
+    toast(S.call.state==='active'?'Beep sent into the call: the other phone should hear it':'Beep sent to '+r.outLabel+'. Tip: start a normal call to your own phone first, then press this to hear it there.');
+  }catch(e){ toast('Could not play to that device: '+e.message); }
+};
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();
