@@ -194,7 +194,9 @@ def decode_text(body: str, length=None, dcs=None) -> str:
 
 
 def decode_addr(a: str) -> str:
-    if a and len(a) % 4 == 0 and re.fullmatch(r"[0-9A-Fa-f]{8,}", a):
+    """Sender numbers/names come as plain text in IRA mode. Only decode when it is
+    clearly UCS2 of ASCII ("002B0039..."), never a numeric short code like "57575701"."""
+    if a and re.fullmatch(r"(00[0-7][0-9A-Fa-f]){2,}", a):
         try:
             d = ucs2_decode(a)
             if d.isprintable():
@@ -256,6 +258,7 @@ class ModemStatus:
     connected: bool = False
     transport: str = ""
     error: str = ""
+    notice: str = ""
     model: str = ""
     imei: str = ""
     sim: str = ""
@@ -307,6 +310,10 @@ class Modem:
         await self._log("rx", line)
         p = self._pending
         if p and line == p["cmd"]:  # echo
+            return
+        if p and p.get("want_prompt") and line.startswith("CONNECT"):   # FSWRITE's "ready for data"
+            if not p["prompt"].done():
+                p["prompt"].set_result(True)
             return
         is_urc = line.startswith(URC_PREFIXES)
         if line.startswith("+CLCC:") and p and p["cmd"].upper() == "AT+CLCC":
@@ -390,6 +397,13 @@ class Modem:
             f = csv_fields(num[0][6:])
             self.status.phone = f[1] if len(f) > 1 else ""
         await self.poll_status()
+        await self.recover_call()
+
+    async def recover_call(self):
+        """After an app restart, pick up a call that is still running on the module."""
+        for l in await self._q("AT+CLCC"):
+            if l.startswith("+CLCC:"):
+                await self._urc(l)
 
     async def _q(self, c: str) -> list[str]:
         ok, lines, _ = await self.cmd(c)
@@ -626,13 +640,10 @@ class Modem:
                 free = total - used
         return {"files": files, "total": total, "free": free}
 
-    async def upload_file(self, name: str, data: bytes):
-        """Write a file into the module's C:/ flash (AT+CFTRANRX)."""
-        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,40}", name):
-            raise ValueError("file name: letters, digits, _ . - only")
+    async def _send_with_prompt(self, cmd: str, payload: bytes, timeout: float) -> tuple[bool, list[str], str]:
+        """Send a command that answers '>' then takes raw bytes (CFTRANRX / FSWRITE)."""
         async with self._lock:
             loop = asyncio.get_running_loop()
-            cmd = f'AT+CFTRANRX="c:/{name}",{len(data)}'
             self._pending = {"cmd": cmd, "lines": [], "future": loop.create_future(),
                              "want_prompt": True, "prompt": loop.create_future()}
             try:
@@ -641,20 +652,45 @@ class Modem:
                 done, _ = await asyncio.wait({self._pending["prompt"], self._pending["future"]},
                                              timeout=8, return_when=asyncio.FIRST_COMPLETED)
                 if self._pending["future"].done():
-                    raise RuntimeError(f"module refused upload: {self._pending['future'].result()[2]}")
+                    return self._pending["future"].result()
                 if not done:
-                    raise RuntimeError("no '>' prompt from module")
+                    return False, [], "no '>' prompt"
                 self._pending["want_prompt"] = False
-                for i in range(0, len(data), 4096):
-                    await self.transport.write(data[i:i + 4096])
-                await self._log("tx", f"<{len(data)} bytes of {name}>")
-                ok, _, final = await asyncio.wait_for(self._pending["future"], 30 + len(data) / 20000)
-                if not ok:
-                    raise RuntimeError(f"upload failed: {final}")
+                await self.transport.write(payload)
+                await self._log("tx", f"<{len(payload)} bytes>")
+                return await asyncio.wait_for(self._pending["future"], timeout)
             except asyncio.TimeoutError:
-                raise RuntimeError("upload timed out")
+                return False, self._pending["lines"], "TIMEOUT"
             finally:
                 self._pending = None
+
+    async def upload_file(self, name: str, data: bytes, progress=None):
+        """Write a file into the module's C:/ flash in 8 KB chunks.
+        (A single AT+CFTRANRX transfer fails above ~20-30 KB on this firmware.)"""
+        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,40}", name):
+            raise ValueError("file name: use letters, digits, _ . - only")
+        await self.cmd(f'AT+FSDEL="{name}"')                       # overwrite cleanly
+        lines = await self.cmd_ok(f'AT+FSOPEN="c:/{name}",1')
+        handle = next((l.split(":")[1].strip() for l in lines if l.startswith("+FSOPEN:")), None)
+        if handle is None:
+            raise RuntimeError("module did not open the file")
+        CH = 8192
+        try:
+            for i in range(0, len(data), CH):
+                part = data[i:i + CH]
+                ok, _, final = await self._send_with_prompt(f"AT+FSWRITE={handle},{len(part)},10", part, 20)
+                if not ok:
+                    raise RuntimeError(f"write failed at {i // 1024} KB: {final}")
+                if progress:
+                    await progress(min(len(data), i + CH), len(data))
+        finally:
+            await self.cmd(f"AT+FSCLOSE={handle}")
+        size = 0
+        for a in await self._q(f'AT+FSATTRI="{name}"'):
+            if a.startswith("+FSATTRI:"):
+                size = int(a.split(":")[1].strip() or 0)
+        if size != len(data):
+            raise RuntimeError(f"file check failed: wrote {len(data)} bytes, module has {size}")
 
     async def delete_file(self, name: str):
         await self.cmd_ok(f'AT+FSDEL="{name}"')

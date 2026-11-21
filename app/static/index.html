@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>B2Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/static/vendor/lucide.min.js"></script>
 <style>
 :root{
   --bg:#f4f5f7;--panel:#fff;--panel2:#f0f2f5;--line:#e3e6eb;--text:#14171c;--muted:#6b7280;
@@ -14,7 +18,7 @@
   --bg:#0d0f13;--panel:#151820;--panel2:#1b1f29;--line:#262b36;--text:#e8eaef;--muted:#8b93a7;
   --accent:#3b82f6;--bubble-out:#2f6fe4;--bubble-in:#222734;--shadow:none}}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 input,textarea,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%}
 input:focus,textarea:focus,select:focus{border-color:var(--accent)}
@@ -199,6 +203,54 @@ ul.plain,ol.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;
 nav .logo{background:linear-gradient(135deg,#2563eb,#7c3aed);font-size:13px;letter-spacing:-.5px}
 header h1 small{font-weight:500;color:var(--muted);font-size:13px;margin-left:8px}
 nav{overflow-y:auto}
+
+/* home dashboard */
+.hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(124,58,237,.10))}
+.hero-logo svg{display:block}
+.hero-state{display:flex;align-items:center;gap:8px;font-weight:600;padding:8px 14px;border-radius:20px;background:var(--panel)}
+.hero-state .dot{width:10px;height:10px}
+.hero-state.ok .dot{background:var(--ok)}.hero-state.warn .dot{background:var(--warn)}.hero-state.bad .dot{background:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .sl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.stat b{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tips{display:flex;flex-direction:column;gap:8px}
+.tip{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--panel2);border-left:4px solid var(--accent)}
+.tip.bad{border-left-color:var(--bad)}.tip.warn{border-left-color:var(--warn)}.tip.ok{border-left-color:var(--ok)}
+.tip .ti{font-size:20px;line-height:1}.tip>div{flex:1;min-width:0}.tip p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.quickacts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.qa{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:left;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.qa:hover{transform:translateY(-2px);border-color:var(--accent)}
+.qa{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;color:var(--text)}.qa b{font-size:15px}.qa span{font-size:24px}.qa small{color:var(--muted);font-size:12px}
+.hrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.hrow>div{flex:1;min-width:0}.hrow small{color:var(--muted);font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdir{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:var(--panel2);flex:none}
+.hdir.in{color:var(--ok)}.hdir.out{color:var(--accent)}.hdir.miss{color:var(--bad)}
+.fb{font-size:11px;padding:1px 6px;border-radius:8px;background:var(--panel2);color:var(--muted)}.fb.ok{background:#dcfce7;color:#166534}
+@media (prefers-color-scheme:dark){.fb.ok{background:#0f2e1a;color:#86efac}}
+/* help */
+.hsec{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;margin-bottom:10px}
+.hsec summary{cursor:pointer;font-weight:600;font-size:16px;display:flex;gap:10px;align-items:center;list-style:none}
+.hsec summary::-webkit-details-marker{display:none}
+.hsec summary::after{content:"›";margin-left:auto;color:var(--muted);transition:transform .15s;font-size:20px}
+.hsec[open] summary::after{transform:rotate(90deg)}
+.hsec[open] summary{margin-bottom:12px}
+.hsec code{background:var(--panel2);padding:1px 6px;border-radius:6px;font-size:13px}
+nav .logo{background:none;padding:0;width:40px;height:40px}
+@media (max-width:860px){.stats,.quickacts{grid-template-columns:1fr 1fr}}
+
+/* icons */
+svg.lucide{width:1.1em;height:1.1em;vertical-align:-0.18em;stroke-width:2;flex:none}
+.tip .ti svg.lucide{width:22px;height:22px;color:var(--accent)}
+.tip.bad .ti svg.lucide{color:var(--bad)}.tip.warn .ti svg.lucide{color:var(--warn)}
+.qa span svg.lucide{width:26px;height:26px;color:var(--accent)}
+.hsec summary span svg.lucide{width:20px;height:20px;color:var(--accent)}
+.checks .ic svg.lucide{width:14px;height:14px}
+.hdir svg.lucide{width:15px;height:15px}
+.fb svg.lucide{width:11px;height:11px;vertical-align:-1px}
+.note svg.lucide{color:inherit}
+.btn svg.lucide{margin-right:2px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;opacity:0;transition:.25s;pointer-events:none;max-width:90vw}
 .toast.on{opacity:1}
 .mobile-back{display:none}
@@ -220,12 +272,14 @@ nav{overflow-y:auto}
 <div class="app">
   <nav>
     <div class="logo" title="B2Wave">B2W</div>
+    <button data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <button data-v="setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Setup</button>
-    <button data-v="messages" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="badge" id="unreadBadge" hidden></span></button>
+    <button data-v="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="badge" id="unreadBadge" hidden></span></button>
     <button data-v="phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Phone</button>
     <button data-v="campaigns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Campaigns</button>
     <button data-v="audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Audio</button>
     <button data-v="console"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 17 6-6-6-6M12 19h8"/></svg>Console</button>
+    <button data-v="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Help</button>
     <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
   </nav>
 
@@ -238,7 +292,7 @@ nav{overflow-y:auto}
     <div class="banner" id="banner"></div>
 
     <!-- MESSAGES -->
-    <section class="view on" id="v-messages">
+    <section class="view" id="v-messages">
       <div class="threads">
         <div class="top"><input id="search" placeholder="Search"><button class="btn" id="newMsg">New</button></div>
         <div class="list" id="threadList"></div>
@@ -283,6 +337,177 @@ nav{overflow-y:auto}
         <div class="quick" id="quick"></div>
         <div class="log" id="log"></div>
         <form id="atForm"><input id="atCmd" placeholder="AT command, e.g. AT+CSQ" autocomplete="off" spellcheck="false"><button class="btn">Send</button></form>
+      </div>
+    </section>
+
+    <!-- HOME DASHBOARD -->
+    <section class="view" id="v-home">
+      <div class="wiz" style="max-width:1100px">
+        <div class="hero card">
+          <div class="hero-logo" id="heroLogo"></div>
+          <div style="flex:1;min-width:220px">
+            <h2 style="margin:0">B2Wave</h2>
+            <p class="sub" style="margin:2px 0 0">SMS, calls and voice campaigns from your browser</p>
+          </div>
+          <div class="hero-state" id="heroState"><span class="dot"></span><span>Connecting…</span></div>
+        </div>
+
+        <div class="stats">
+          <div class="card stat"><span class="sl">Board link</span><b id="stLink">—</b><small id="stLinkS"></small></div>
+          <div class="card stat"><span class="sl">SIM</span><b id="stSim">—</b><small id="stSimS"></small></div>
+          <div class="card stat"><span class="sl">Network</span><b id="stNet">—</b><small id="stNetS"></small></div>
+          <div class="card stat"><span class="sl">Today</span><b id="stToday">—</b><small id="stTodayS"></small></div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">What you should know right now</h3>
+          <div id="tips" class="tips"></div>
+        </div>
+
+        <div class="quickacts">
+          <button class="qa" data-go="messages"><span><i data-lucide="mail"></i></span><b>Send SMS</b><small>Chat-style messages, Unicode ok</small></button>
+          <button class="qa" data-go="phone"><span><i data-lucide="phone"></i></span><b>Make a call</b><small>Dial, answer, keypad</small></button>
+          <button class="qa" data-go="campaigns"><span><i data-lucide="megaphone"></i></span><b>Voice campaign</b><small>Play audio, capture 1 / 2</small></button>
+          <button class="qa" data-go="audio"><span><i data-lucide="headphones"></i></span><b>Talk from PC</b><small>Wiring + audio bridge</small></button>
+        </div>
+
+        <div class="grid2 top">
+          <div class="card"><h3 style="margin-top:0">Latest messages</h3><div id="homeMsgs"></div></div>
+          <div class="card"><h3 style="margin-top:0">Latest calls</h3><div id="homeCalls"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HELP / GUIDE -->
+    <section class="view" id="v-help">
+      <div class="wiz" style="max-width:900px">
+        <div class="card">
+          <h2>Help &amp; guide</h2>
+          <p class="sub" style="margin-bottom:10px">Everything about B2Wave in one place. Type to filter.</p>
+          <input id="helpSearch" placeholder="Search: driver, SIM, upload, switch, Jio, wiring…">
+        </div>
+        <div id="helpBody">
+
+        <details class="hsec" open><summary><span><i data-lucide="rocket"></i></span> Getting started (5 minutes)</summary>
+          <ol class="plain">
+            <li>Insert a <b>nano SIM</b> on the back of the board. Gold contacts face the board, and the SIM PIN lock must be off.</li>
+            <li>Screw the <b>LTE antenna</b> onto the small gold connector marked <b>LTE</b>.</li>
+            <li>Plug <b>cable 1</b> into the <b>ESP_UART</b> port (the USB-C nearer the SIMCom chip) and into the PC.</li>
+            <li>Double-click <b>run.bat</b>. The browser opens B2Wave.</li>
+            <li>Open <b>Setup</b>, click <b>Detect board</b>, then <b>Install firmware</b> (first time only).</li>
+            <li>For SMS, calls and voice campaigns, use the USB link (next section).</li>
+          </ol>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="plug"></i></span> Cables, ports and the USB_SELECT switch</summary>
+          <table class="tbl"><thead><tr><th>Port / switch</th><th>What it does</th><th>Recommended</th></tr></thead><tbody>
+            <tr><td><b>ESP_UART</b> (USB-C nearer the SIMCom chip)</td><td>Programs and tests the ESP32 (Setup page)</td><td>Cable 1 → PC</td></tr>
+            <tr><td><b>4G_USB</b> (USB-C nearer the ESP32 module)</td><td>Direct link to the 4G module: SMS, calls, audio upload</td><td>Cable 2 → PC</td></tr>
+            <tr><td><b>USB_SELECT</b> switch (between the two ports)</td><td>"4G" sends the module's USB to the 4G_USB port. "ESP" sends it to the ESP32 internally.</td><td><b>Keep on "4G"</b></td></tr>
+          </tbody></table>
+          <div class="note" style="margin-top:10px"><i data-lucide="lightbulb"></i> Don't move the switch to <b>ESP</b> while using B2Wave. The app would lose the 4G module, and uploads, SMS and calls would stop.</div>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="puzzle"></i></span> Drivers (Windows)</summary>
+          <table class="tbl"><thead><tr><th>Device Manager shows</th><th>Install</th></tr></thead><tbody>
+            <tr><td>"CP2102 USB to UART Bridge Controller" with <i data-lucide="triangle-alert"></i></td><td><a href="https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers" target="_blank">Silicon Labs CP210x driver</a>. Afterwards it shows as "Silicon Labs CP210x … (COMx)".</td></tr>
+            <tr><td>"Mobile AT Interface" / "Mobile Diag Interface" with <i data-lucide="triangle-alert"></i></td><td><a href="https://files.waveshare.com/wiki/ESP32-S3-A7670E-4G/A7600X-Windows-Driver.7z" target="_blank">SIMCom A76xx driver</a>. Extract it, then Device Manager → Update driver → Browse → pick the folder (tick Include subfolders). Afterwards it shows as "SimTech HS-USB AT Port 9011 (COMx)".</td></tr>
+          </tbody></table>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="mail"></i></span> SMS</summary>
+          <ul class="plain">
+            <li><b>Messages → New</b>, type the number and the text, press Enter.</li>
+            <li>Any language works (Gujarati, Hindi, emoji). Unicode SMS hold 70 characters per part, plain English 160. Long texts are split automatically.</li>
+            <li>Incoming SMS appear immediately, with a sound and a desktop notification (turn notifications on in Settings).</li>
+            <li>Everything is saved on this PC in <code>app/data/messages.json</code>. The SIM holds only about 10 messages, so delete old ones from the SIM when it's full.</li>
+          </ul>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="phone"></i></span> Calls</summary>
+          <ul class="plain">
+            <li><b>Phone</b>: dial with the keypad, then press the green button. Incoming calls pop up with Answer and Decline.</li>
+            <li>During a call, use the <b>#</b> keypad to send tones (for bank and IVR menus) and the slider for board speaker volume.</li>
+            <li><b>Voice audio goes to the board's SPK/MIC pads, not the PC.</b> See "Talk from your PC" below.</li>
+            <li><b>Jio</b>: calls use VoLTE, and they work on this module. Airtel and Vi also work.</li>
+          </ul>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="megaphone"></i></span> Voice campaigns (play audio, capture 1 / 2)</summary>
+          <ol class="plain">
+            <li><b>Campaigns → Upload</b> any audio (MP3, WAV, M4A). It's converted to telephone quality and <b>kept on this PC</b>.</li>
+            <li>It's copied to the 4G module automatically (8 KB chunks, size-checked). The module holds about 20 s of audio at a time, and older prompts are swapped out automatically.</li>
+            <li>Paste numbers, choose the prompt, click <b>Start campaign</b>. Each answered call hears the prompt.</li>
+            <li>When someone presses <b>1, 2…</b>, it appears under <b>Live key presses</b> and in the results table. Download the results as CSV.</li>
+            <li>Test with your own number first ("Test with one number").</li>
+          </ol>
+          <div class="note" style="margin-top:10px">Script tip: <i>"Hello from B2Wave. Press 1 to confirm. Press 2 to cancel."</i> Keep it under 15 seconds.</div>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="headphones"></i></span> Talk from your PC (wiring)</summary>
+          <ul class="plain">
+            <li>This module can't stream call audio over USB or Wi-Fi. We tested it (no AT+CPCMREG on firmware A131B01A7672M6).</li>
+            <li><b>A:</b> a speaker + electret mic on the SPK/MIC pads (~₹100).</li>
+            <li><b>B:</b> a USB sound card (~₹250) plus the built-in PC audio bridge (recommended).</li>
+            <li><b>C:</b> an ES8388/WM8960 I2S codec for voice over Wi-Fi (needs a firmware update).</li>
+            <li>Exact pins and diagrams are on the <a href="#" data-go="audio">Audio page</a>.</li>
+          </ul>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="wrench"></i></span> Troubleshooting</summary>
+          <table class="tbl"><thead><tr><th>Problem</th><th>Fix</th></tr></thead><tbody>
+            <tr><td>"Board not found" in Setup</td><td>Install the CP210x driver. Use a data cable (not charge-only). Check the red VIN LED.</td></tr>
+            <tr><td>"ESP32 to 4G serial link: no reply"</td><td>Use the 4G_USB cable (USB mode). It's fully supported, and it's how B2Wave runs today.</td></tr>
+            <tr><td>"Windows sees the 4G module but has no driver"</td><td>Install the SIMCom A76xx driver (Drivers section).</td></tr>
+            <tr><td>Upload failed</td><td>Board must be online (green on Home). Keep the switch on 4G. Big files are trimmed to fit, and the PC copy is always kept, so retry with "Module".</td></tr>
+            <tr><td>SIM: PIN / not inserted / failure</td><td>Remove the PIN lock in a phone, reseat the SIM, then Setup → Restart 4G module.</td></tr>
+            <tr><td>Network "searching" / "denied"</td><td>Attach the antenna. Check the SIM is active and has balance.</td></tr>
+            <tr><td>Hear ringing but can't talk</td><td>Expected: audio is on the SPK/MIC pads. See "Talk from your PC".</td></tr>
+            <tr><td>"Port 8080 busy"</td><td>Just run run.bat again. A new launch replaces the old one automatically.</td></tr>
+            <tr><td>Anything else</td><td>Setup → step 3 → <b>Diagnostics report</b>, then send the copied text to support.</td></tr>
+          </tbody></table>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="map-pin"></i></span> Board pin reference (KTRON ESP32-S3 + A7672S)</summary>
+          <table class="tbl"><thead><tr><th>Function</th><th>ESP32 pin</th><th>Header</th></tr></thead><tbody>
+            <tr><td>4G TX / RX (serial to module)</td><td>GPIO17 / GPIO18</td><td>J6 pin 19 / 21</td></tr>
+            <tr><td>4G RING / DTR / STATUS / RESET</td><td>GPIO16 / 9 / 10 / 13</td><td>J6 pin 17 / 29 / 31 / 37</td></tr>
+            <tr><td>LEDs: Wi-Fi / 4G / SYS</td><td>GPIO11 / 12 / 14</td><td>J6 pin 33 / 35 / 39</td></tr>
+            <tr><td>Free for audio codec (option C)</td><td>GPIO4, 5, 6, 7, 15, 1, 2</td><td>J6 7/9/11/13/15, J9 4/6</td></tr>
+            <tr><td>Power in</td><td>VIN 5–12 V, 2 A</td><td>J9 pin 42 (GND 44)</td></tr>
+            <tr><td>Speaker / Mic</td><td>A7672S SPK / MIC pads</td><td>Back side, near the SIM slot</td></tr>
+          </tbody></table>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="wifi-off"></i></span> Running without cables (standalone)</summary>
+          <table class="tbl"><thead><tr><th>Setup</th><th>What works today</th></tr></thead><tbody>
+            <tr><td><b>PC + 4G_USB cable</b> (switch on 4G)</td><td><i data-lucide="circle-check"></i> Everything: SMS, calls, campaigns, key capture, audio upload. <b>Use this.</b></td></tr>
+            <tr><td><b>Board on a phone charger + Wi-Fi only</b></td><td><i data-lucide="triangle-alert"></i> The board joins B2-ios and reports status and diagnostics. <b>SMS and calls don't work over Wi-Fi yet</b>, because on this board the ESP32 → 4G serial link doesn't answer.</td></tr>
+            <tr><td><b>Board alone, no PC</b></td><td><i data-lucide="circle-x"></i> Not yet. B2Wave runs on the PC. The board is the modem.</td></tr>
+          </tbody></table>
+          <h4>What B2Wave does automatically</h4>
+          <ul class="plain">
+            <li><b>Cable replugged?</b> Windows may give it a new COM number (COM9 → COM8). B2Wave finds the module again by itself.</li>
+            <li><b>Cable unplugged?</b> B2Wave shows a red alert, falls back to the Wi-Fi bridge if one is reachable, and reconnects to USB as soon as the cable is back.</li>
+            <li><b>Module restarted?</b> Settings are re-applied automatically when the module reports it's ready.</li>
+            <li><b>App restarted?</b> Running run.bat again replaces the old copy, so there's no "port busy" error.</li>
+          </ul>
+          <h4>Roadmap to true standalone</h4>
+          <ul class="plain">
+            <li>Move the switch to <b>ESP</b> and let the ESP32-S3 drive the module over USB (USB-host firmware). Then the PC connects to the board only over Wi-Fi. This is the "ESP32-Controlled LTE Mode" the board advertises.</li>
+            <li>Until then, keep the 4G_USB cable connected to the PC.</li>
+          </ul>
+        </details>
+
+        <details class="hsec"><summary><span><i data-lucide="circle-help"></i></span> FAQ</summary>
+          <ul class="plain">
+            <li><b>Does Jio work?</b> Yes: SMS and VoLTE calls were tested on Jio.</li>
+            <li><b>Where is my data?</b> Only on this PC, in <code>app/data/</code>: messages, calls, campaigns, audio. Nothing goes to the cloud.</li>
+            <li><b>Can I use it from my phone?</b> Start with <code>run.bat --lan</code>, then open <code>http://&lt;PC-IP&gt;:8080</code> on the same Wi-Fi.</li>
+            <li><b>Wi-Fi mode?</b> The board joins hotspot <b>B2-ios</b> (password 12345678). SMS and calls over Wi-Fi need the ESP32 to 4G serial link, which is still under investigation on this board, so use USB mode for now.</li>
+          </ul>
+        </details>
+        </div>
       </div>
     </section>
 
@@ -375,7 +600,7 @@ nav{overflow-y:auto}
 
         <!-- step 5 -->
         <div class="card wstep" data-s="5" hidden>
-          <h2>All set 🎉</h2>
+          <h2>All set <i data-lucide="party-popper"></i></h2>
           <p class="sub" id="wDoneSub">Connecting the app to your board…</p>
           <ul class="checks" id="wDoneChecks"></ul>
           <div class="actions"><button class="btn" id="wGoMsg">Open Messages</button><button class="btn ghost" id="wGoPhone">Open Phone</button><button class="btn ghost" id="wRestart">Run setup again</button></div>
@@ -543,6 +768,23 @@ nav{overflow-y:auto}
 
 <script>
 const $ = s => document.querySelector(s);
+// ---------------------------------------------------------------- icons (Lucide, vendored)
+const ICON=(n,c='')=>`<i data-lucide="${n}"${c?` class="${c}"`:''}></i>`;
+function renderIcons(root=document){
+  if(!window.lucide) return;
+  root.querySelectorAll('i[data-lucide]').forEach(el=>{
+    const pascal=el.dataset.lucide.replace(/(^|-)([a-z0-9])/g,(_,a,b)=>b.toUpperCase());
+    const node=lucide.icons[pascal]; if(!node) return;
+    const svg=lucide.createElement(node);
+    svg.setAttribute('class','lucide lucide-'+el.dataset.lucide+(el.className?' '+el.className:''));
+    svg.setAttribute('aria-hidden','true');
+    el.replaceWith(svg);
+  });
+}
+let _iconRaf=0;
+new MutationObserver(()=>{ if(!_iconRaf) _iconRaf=requestAnimationFrame(()=>{ _iconRaf=0; renderIcons(); }); })
+  .observe(document.body,{childList:true,subtree:true});
+
 const S = {status:{}, call:{state:'idle'}, messages:[], calls:[], config:{}, thread:null, newMode:false, view:'messages'};
 let ws, rid = 0; const waiting = {};
 
@@ -564,15 +806,16 @@ function handle(e){
       Object.assign(S,{status:e.status,call:e.call,messages:e.messages,calls:e.calls,config:e.config});
       $('#log').innerHTML=''; e.console.forEach(addLog);
       renderAll();
-      if(!S.booted){ S.booted=true; if(!S.config.setup_done) show('setup'); }
+      if(!S.booted){ S.booted=true; const hv=location.hash.slice(1); show(hv&&document.getElementById('v-'+hv)?hv:(S.config.setup_done?'home':'setup')); }
       break;
-    case 'status': S.status=e.status; const prev=S.call.state; S.call=e.call; renderStatus(); renderCall(prev); W.onStatus(); if(prev!==S.call.state) Bridge.onCall(S.call.state); break;
+    case 'status': S.status=e.status; const prev=S.call.state; S.call=e.call; renderStatus(); renderHome(); renderCall(prev); W.onStatus(); if(prev!==S.call.state) Bridge.onCall(S.call.state); break;
     case 'wizard': W.onEvent(e); break;
     case 'campaign': onCampaign(e.campaign); break;
     case 'dtmf': onDtmf(e); break;
-    case 'message': upsertMsg(e.msg); if(e.notify) notifySms(e.msg); break;
+    case 'upload_progress': onUploadProgress(e); break;
+    case 'message': upsertMsg(e.msg); if(e.notify) notifySms(e.msg); renderHome(); break;
     case 'messages': S.messages=e.messages; renderThreads(); renderConv(); break;
-    case 'call_log': S.calls.push(e.call); renderCalls(); break;
+    case 'call_log': S.calls.push(e.call); renderCalls(); renderHome(); break;
     case 'calls': S.calls=e.calls; renderCalls(); break;
     case 'config': S.config=e.config; renderSettings(); break;
     case 'log': addLog(e); break;
@@ -601,7 +844,9 @@ function show(v){
   S.view=v;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns'}[v];
+  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide'}[v];
+  if(v==='home') renderHome();
+  if(location.hash!=='#'+v) history.replaceState(null,'','#'+v);
   if(v==='campaigns'){ loadFiles(); loadCampaigns(); }
   document.title='B2Wave · '+$('#title').textContent;
   if(v==='console') $('#log').scrollTop=1e9;
@@ -626,6 +871,7 @@ function renderStatus(){
   if(!s.connected) msg = s.error || 'Connecting to board...';
   else if(s.sim && !s.sim.includes('READY')) msg='SIM problem: '+s.sim+'. Insert a nano SIM (no PIN lock) and reset the board.';
   else if(s.network && !['registered','roaming'].includes(s.network)) msg='Network: '+s.network+'. Check the LTE antenna is connected.';
+  if(!msg && s.notice) msg=s.notice;
   b.textContent=msg; b.style.display=msg?'block':'none';
   renderSettings();
 }
@@ -876,23 +1122,23 @@ const W = {
       const r=await api('wizard_detect');
       if(r.esp){
         this.port=r.esp.device; this.fwInstalled=r.esp.firmware;
-        this.note('#wDetectOut',`✅ Found <b>${esc(r.esp.chip)}</b> on <b>${esc(r.esp.device)}</b> (${esc(r.esp.description)})`+
+        this.note('#wDetectOut',`<i data-lucide="circle-check"></i> Found <b>${esc(r.esp.chip)}</b> on <b>${esc(r.esp.device)}</b> (${esc(r.esp.description)})`+
           (r.esp.firmware?`<br>GSM Bridge firmware v${esc(r.esp.firmware)} is already installed.`:'<br>No GSM Bridge firmware yet, so we will install it next.'),'good');
         setTimeout(()=>this.go(2),900);
       } else if(r.uart_driver_missing){
         const d=r.uart_driver_missing;
-        this.note('#wDetectOut',`⚠️ Your board is plugged in (<b>${esc(d.name)}</b>), but Windows has no <b>${esc(d.chip)}</b> driver yet, so no COM port appears.<br><br>
+        this.note('#wDetectOut',`<i data-lucide="triangle-alert"></i> Your board is plugged in (<b>${esc(d.name)}</b>), but Windows has no <b>${esc(d.chip)}</b> driver yet, so no COM port appears.<br><br>
           <b>Fix (about 1 minute):</b><br>
           1. Open <b>Device Manager</b>, right-click <i>${esc(d.name)}</i>, choose <b>Update driver</b>, then <b>Search automatically</b>.<br>
           2. If that finds nothing: download the driver from <a href="${esc(d.url)}" target="_blank">${esc(d.url)}</a>, unzip it, then right-click <b>${d.chip==='CP210x'?'silabser.inf':'the .inf file'}</b> and choose <b>Install</b>.<br>
           3. Unplug and replug the board, then click <b>Detect board</b> again.`,'bad');
       } else if(r.simcom.length){
-        this.note('#wDetectOut','⚠️ I can see the <b>4G module</b> USB port, so the cable is in <b>4G_USB</b>. For setup, move it to the <b>ESP_UART</b> port (nearer the SIMCom chip) and click Detect again.','bad');
+        this.note('#wDetectOut','<i data-lucide="triangle-alert"></i> I can see the <b>4G module</b> USB port, so the cable is in <b>4G_USB</b>. For setup, move it to the <b>ESP_UART</b> port (nearer the SIMCom chip) and click Detect again.','bad');
       } else {
-        this.note('#wDetectOut',`❌ Board not found.<br>• Try another USB-C cable (it must carry data)<br>• Check the red VIN LED is on<br>• If Windows shows an unknown device, install the <a href="https://www.wch-ic.com/downloads/CH343SER_EXE.html" target="_blank">CH343 USB driver</a>, then replug`+
+        this.note('#wDetectOut',`<i data-lucide="circle-x"></i> Board not found.<br>• Try another USB-C cable (it must carry data)<br>• Check the red VIN LED is on<br>• If Windows shows an unknown device, install the <a href="https://www.wch-ic.com/downloads/CH343SER_EXE.html" target="_blank">CH343 USB driver</a>, then replug`+
           (r.others.length?`<br><small>Serial ports seen: ${r.others.map(p=>esc(p.device+' '+p.description)).join(', ')}</small>`:''),'bad');
       }
-    }catch(e){ this.note('#wDetectOut','❌ '+esc(e.message),'bad'); }
+    }catch(e){ this.note('#wDetectOut','<i data-lucide="circle-x"></i> '+esc(e.message),'bad'); }
     b.disabled=false; b.textContent='Detect board';
   },
   async prepFlash(){
@@ -910,15 +1156,15 @@ const W = {
     $('#wFlashLog').textContent='';
     try{
       const r=await api('wizard_flash',{port:this.port});
-      this.fwInstalled=r.firmware; $('#wProg').style.width='100%'; $('#wFlashMsg').textContent='Installed ✔';
-      this.note('#wFlashOut',`✅ Firmware v${esc(r.firmware)} is running.`,'good');
+      this.fwInstalled=r.firmware; $('#wProg').style.width='100%'; $('#wFlashMsg').innerHTML='Installed '+ICON('check');
+      this.note('#wFlashOut',`<i data-lucide="circle-check"></i> Firmware v${esc(r.firmware)} is running.`,'good');
       setTimeout(()=>this.go(3),1000);
     }catch(e){
-      this.note('#wFlashOut','❌ '+esc(e.message)+'<br><small>Tip: hold the <b>BOOT</b> button, tap <b>RESET</b>, release BOOT, then click Install again.</small>','bad');
+      this.note('#wFlashOut','<i data-lucide="circle-x"></i> '+esc(e.message)+'<br><small>Tip: hold the <b>BOOT</b> button, tap <b>RESET</b>, release BOOT, then click Install again.</small>','bad');
     }
     $('#wFlash').disabled=false; $('#wBack2').disabled=false; $('#wFlashSkip').disabled=false;
   },
-  testRow(ic,title,sub){ return `<li><span class="ic ${ic}">${ic==='ok'?'✓':ic==='bad'?'✕':ic==='warn'?'!':''}</span><div>${title}${sub?`<small>${sub}</small>`:''}</div></li>`; },
+  testRow(ic,title,sub){ return `<li><span class="ic ${ic}">${ic==='ok'?ICON('check'):ic==='bad'?ICON('x'):ic==='warn'?'!':''}</span><div>${title}${sub?`<small>${sub}</small>`:''}</div></li>`; },
   head(t){ return `<li style="margin-top:6px"><b style="font-size:12px;letter-spacing:.5px;color:var(--muted)">${t}</b></li>`; },
   simInfo(sim){
     const s=(sim||'').toUpperCase();
@@ -980,7 +1226,7 @@ const W = {
       const c=this.cellRows(m,'ESP32');
       rows.push(...c.rows); R();
       $('#wTestNext').disabled=false;
-      if(c.ok) this.note('#wTestOut','✅ All layers pass. Ready for SMS and calls.','good');
+      if(c.ok) this.note('#wTestOut','<i data-lucide="circle-check"></i> All layers pass. Ready for SMS and calls.','good');
       else if(c.retry && attempt<20) setTimeout(()=>this.runTests(attempt+1),5000);
       return;
     }
@@ -991,7 +1237,7 @@ const W = {
     this.usbTestTimer=setInterval(()=>this.pollUsbTest(rows),2500); this.pollUsbTest(rows);
   },
   async pollUsbTest(rows){
-    const tick=(id,cls,txt)=>{ const e=$('#'+id); e.className='ic '+cls; e.textContent=cls==='ok'?'✓':cls==='bad'?'✕':cls==='warn'?'!':''; };
+    const tick=(id,cls,txt)=>{ const e=$('#'+id); e.className='ic '+cls; e.innerHTML=cls==='ok'?ICON('check'):cls==='bad'?ICON('x'):cls==='warn'?'!':''; };
     let fw=null; try{ fw=(await api('wizard_ping',{port:this.port})).firmware; }catch{}
     tick('uS1',fw?'ok':'bad'); $('#uS1t').textContent=fw?`Board answering on ${this.port}`:`Board not answering on ${this.port}. Is cable 1 still plugged in?`;
     let r; try{ r=await api('wizard_simcom_ports'); }catch{ return; }
@@ -1012,7 +1258,7 @@ const W = {
     extra.push(this.testRow('ok','Module over USB',esc(m.model||'A7672S')+' · fw '+esc((m.fwver||'').replace('+CGMR:','').trim())));
     const c=this.cellRows(m,'USB'); extra.push(...c.rows);
     $('#wTests').innerHTML=rows.concat(extra).join('');
-    el.innerHTML=c.ok?`✅ The module and SIM work over USB, so the problem is only the ESP32 serial link. <b>You can send SMS right now in USB mode.</b> <button class="btn" id="wUseUsbNow" style="margin-left:6px">Use USB mode &amp; open Messages</button>`
+    el.innerHTML=c.ok?`<i data-lucide="circle-check"></i> The module and SIM work over USB, so the problem is only the ESP32 serial link. <b>You can send SMS right now in USB mode.</b> <button class="btn" id="wUseUsbNow" style="margin-left:6px">Use USB mode &amp; open Messages</button>`
       :`The module answers over USB, so it is alive. Fix the SIM or network item above, then click Run tests again.`;
     const usePort=m.port||p.device; const b=$('#wUseUsbNow'); if(b) b.onclick=async()=>{ await api('wizard_use_serial',{port:usePort}); this.linkLabel='USB '+usePort; this.go(5); };
   },
@@ -1028,7 +1274,7 @@ const W = {
     try{
       const st=await api('wizard_status',{port:this.port});
       if(st && st.ip && st.ip!=='0.0.0.0'){
-        this.note('#wLinkOut',`✅ The board is already on <b>${esc(st.ssid)}</b> at <b>${esc(st.ip)}</b>. <button class="btn" id="wUseJoined" style="margin-left:8px">Use this</button>`,'good');
+        this.note('#wLinkOut',`<i data-lucide="circle-check"></i> The board is already on <b>${esc(st.ssid)}</b> at <b>${esc(st.ip)}</b>. <button class="btn" id="wUseJoined" style="margin-left:8px">Use this</button>`,'good');
         $('#wUseJoined').onclick=async()=>{ await api('set_config',{mode:'wifi',host:st.ip}); await api('wizard_skip'); this.linkLabel='Wi-Fi '+st.ssid+' · '+st.ip; this.go(5); };
       }
     }catch{}
@@ -1045,9 +1291,9 @@ const W = {
     const b=$('#wJoin'); b.disabled=true; b.textContent='Connecting… (up to 20 s)'; this.note('#wLinkOut','');
     try{
       const r=await api('wizard_wifi_join',{port:this.port,ssid,password:$('#wPass').value});
-      if(r.ok){ this.note('#wLinkOut',`✅ Board joined <b>${esc(ssid)}</b> at <b>${esc(r.ip)}</b>`,'good'); this.linkLabel='Wi-Fi '+ssid+' · '+r.ip; setTimeout(()=>this.go(5),900); }
-      else this.note('#wLinkOut','❌ Could not join: '+esc(r.error)+'. Check the password. The board only supports 2.4 GHz Wi-Fi.','bad');
-    }catch(e){ this.note('#wLinkOut','❌ '+esc(e.message),'bad'); }
+      if(r.ok){ this.note('#wLinkOut',`<i data-lucide="circle-check"></i> Board joined <b>${esc(ssid)}</b> at <b>${esc(r.ip)}</b>`,'good'); this.linkLabel='Wi-Fi '+ssid+' · '+r.ip; setTimeout(()=>this.go(5),900); }
+      else this.note('#wLinkOut','<i data-lucide="circle-x"></i> Could not join: '+esc(r.error)+'. Check the password. The board only supports 2.4 GHz Wi-Fi.','bad');
+    }catch(e){ this.note('#wLinkOut','<i data-lucide="circle-x"></i> '+esc(e.message),'bad'); }
     b.disabled=false; b.textContent='Connect board to Wi-Fi';
   },
   async pollUsb(){
@@ -1056,7 +1302,7 @@ const W = {
       if(r.ports.length){
         clearInterval(this.usbTimer);
         const p=r.ports[0];
-        $('#wUsbIc').className='ic ok'; $('#wUsbIc').textContent='✓';
+        $('#wUsbIc').className='ic ok'; $('#wUsbIc').innerHTML=ICON('check');
         $('#wUsbTxt').innerHTML=`4G module found on <b>${esc(p.device)}</b><small>${esc(p.description)}</small>`;
         await api('wizard_use_serial',{port:p.device}); this.linkLabel='USB '+p.device;
         setTimeout(()=>this.go(5),900);
@@ -1183,23 +1429,6 @@ const C={ files:[], free:0, wav:null, campaigns:[], running:false, dtmf:[] };
 const fmtKB=b=>b>=1024*1024?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';
 const wavSec=size=>Math.max(0,(size-44)/16000);
 
-async function loadFiles(){
-  try{
-    const r=await api('files_list'); C.files=r.files; C.free=r.free;
-    $('#fileList').innerHTML=r.files.length? r.files.map(f=>`<div class="frow"><div><b>${esc(f.name)}</b><small>${fmtKB(f.size)}${/\.wav$/i.test(f.name)?' · '+wavSec(f.size).toFixed(1)+' s':''}</small></div>
-      <button class="btn ghost sm" data-play="${esc(f.name)}" title="Play on the board speaker">▶ Board</button>
-      <button class="btn ghost sm" data-call="${esc(f.name)}" title="Play into the current call">▶ Call</button>
-      <button class="btn ghost sm" data-del="${esc(f.name)}" title="Delete">✕</button></div>`).join('') : '<div class="empty" style="padding:10px">No files on the module yet</div>';
-    $('#fileSpace').textContent=`Free space on module: ${fmtKB(r.free)} of ${fmtKB(r.total)} · about ${Math.floor(r.free/16000)} s of WAV`;
-    $('#fileList').querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>api('file_play',{name:b.dataset.play,remote:false}).then(()=>toast('Playing on the board speaker')).catch(e=>toast(e.message)));
-    $('#fileList').querySelectorAll('[data-call]').forEach(b=>b.onclick=()=>{ if(S.call.state!=='active'){ toast('Start a call first'); return; } api('file_play',{name:b.dataset.call,remote:true}).then(()=>toast('Playing into the call')).catch(e=>toast(e.message)); });
-    $('#fileList').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm(`Delete "${b.dataset.del}" from the module? This can't be undone.`)) api('file_delete',{name:b.dataset.del}).then(loadFiles).catch(e=>toast(e.message)); });
-    const sel=$('#cAudio'), prev=sel.value;
-    sel.innerHTML='<option value="">Choose…</option>'+r.files.map(f=>`<option value="file:${esc(f.name)}" data-size="${f.size}">🔊 ${esc(f.name)}</option>`).join('')+'<option value="tts">🗣 Text-to-speech (from the box on the left)</option>';
-    if(prev) sel.value=prev;
-  }catch(e){ $('#fileList').innerHTML=`<div class="note bad">${esc(e.message)}. Is the board connected? (Messages and calls need the module online.)</div>`; }
-}
-
 async function convertAudio(file, maxSec){
   const raw=await file.arrayBuffer();
   const ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -1237,8 +1466,13 @@ $('#upBtn').onclick=async()=>{
   let name=($('#upName').value||'prompt.wav').trim(); if(!/\.wav$/i.test(name)) name+='.wav';
   if(!/^[A-Za-z0-9_.-]{1,40}$/.test(name)){ toast('Name: letters, digits, _ . - only'); return; }
   const b=$('#upBtn'); b.disabled=true; b.textContent='Uploading…';
-  try{ await api('file_upload',{name,data:b64(C.wav.bytes)}); toast('Uploaded '+name); $('#upFile').value=''; C.wav=null; $('#upInfo').textContent=''; await loadFiles(); $('#cAudio').value='file:'+name; }
-  catch(e){ toast('Upload failed: '+e.message); b.disabled=false; }
+  try{
+    const r=await api('file_upload',{name,data:b64(C.wav.bytes)});
+    renderFiles(r); $('#cAudio').value='file:'+name;
+    if(r.warning){ $('#upInfo').innerHTML=`<div class="note bad"><i data-lucide="triangle-alert"></i> ${esc(r.warning)}</div>`; toast('Saved on PC. Module copy pending'); }
+    else { $('#upInfo').innerHTML=`<div class="note good"><i data-lucide="circle-check"></i> <b>${esc(name)}</b> saved on this PC and copied to the module.</div>`; toast('Upload complete'); }
+    $('#upFile').value=''; C.wav=null;
+  }catch(e){ $('#upInfo').innerHTML=`<div class="note bad"><i data-lucide="circle-x"></i> ${esc(e.message)}</div>`; b.disabled=false; }
   b.textContent='Upload to module';
 };
 $('#ttsLocal').onclick=()=>api('tts_play',{text:$('#ttsText').value,remote:false}).then(()=>toast('Speaking on the board')).catch(e=>toast(e.message));
@@ -1290,7 +1524,103 @@ function renderDtmf(){
 }
 function onDtmf(e){ C.dtmf.push(e); renderDtmf(); toast(`${e.number||'Caller'} pressed ${e.key}`); beep(e.key); }
 
-function renderAll(){ renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
+// ---------------------------------------------------------------- logo
+const LOGO_SVG=(size=40)=>`<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-label="B2Wave logo">
+  <defs><linearGradient id="b2wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+  <rect width="64" height="64" rx="16" fill="url(#b2wg)"/>
+  <path d="M10 34 q5 -12 10 0 t10 0 t10 0 t10 0" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15 44 q3.5 -6 7 0 t7 0" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="51" cy="17" r="5" fill="#22d3ee"/><circle cx="51" cy="17" r="9" fill="none" stroke="#22d3ee" stroke-opacity=".5" stroke-width="2"/>
+</svg>`;
+document.querySelector('nav .logo').innerHTML=LOGO_SVG(40);
+$('#heroLogo').innerHTML=LOGO_SVG(56);
+(()=>{ const l=document.createElement('link'); l.rel='icon'; l.href='data:image/svg+xml,'+encodeURIComponent(LOGO_SVG(64).replace('url(#b2wg)','#4f46e5')); document.head.appendChild(l); })();
+document.querySelectorAll('.qa').forEach(b=>b.onclick=()=>show(b.dataset.go));
+
+// ---------------------------------------------------------------- home dashboard
+function renderHome(){
+  const s=S.status||{}, on=!!s.connected;
+  const simOk=(s.sim||'').includes('READY'), reg=['registered','roaming'].includes(s.network);
+  const usb=(s.transport||'').startsWith('USB'), wifi=(s.transport||'').startsWith('Wi-Fi');
+  const hs=$('#heroState');
+  hs.className='hero-state '+(on&&simOk&&reg?'ok':on?'warn':'bad');
+  hs.innerHTML=`<span class="dot"></span><span>${on&&simOk&&reg?'Ready':on?'Needs attention':'Offline'}</span>`;
+  $('#stLink').textContent=on?(usb?'USB cable':wifi?'Wi-Fi':'Connected'):'Offline';
+  $('#stLinkS').textContent=on?(s.transport||'').replace(/^(USB serial|Wi-Fi bridge)\s*/,''):(s.error||'Waiting for the board…').slice(0,60);
+  $('#stSim').textContent=on?(simOk?'Ready':'Problem'):'—';
+  $('#stSimS').textContent=on?(simOk?(s.phone||'Number unknown'):(s.sim||'')):'';
+  const bars=s.signal>=0&&s.signal!==99?s.signal:null;
+  $('#stNet').textContent=on?(s.operator||s.network||'—'):'—';
+  $('#stNetS').textContent=on?(bars!=null?`Signal ${bars}/31 · ${bars>=20?'excellent':bars>=15?'good':bars>=10?'ok':'weak'}`:s.network):'';
+  const today=new Date().toDateString();
+  const msgsToday=S.messages.filter(m=>new Date(m.time).toDateString()===today).length;
+  const callsToday=S.calls.filter(c=>new Date(c.time).toDateString()===today).length;
+  $('#stToday').textContent=`${msgsToday} SMS · ${callsToday} calls`;
+  const unread=S.messages.filter(m=>m.dir==='in'&&!m.read).length;
+  $('#stTodayS').textContent=unread?`${unread} unread message${unread>1?'s':''}`:'No unread messages';
+
+  // contextual guidance
+  const T=[];
+  const tip=(kind,icon,title,text,go,label)=>T.push(`<div class="tip ${kind}"><span class="ti">${icon}</span><div><b>${title}</b><p>${text}</p></div>${go?`<button class="btn ghost sm" data-go="${go}">${label}</button>`:''}</div>`);
+  if(!on){
+    tip('bad','<i data-lucide="plug"></i>','The board is not connected',`${esc(s.error||'Searching…')} Check the USB cable (or Wi-Fi), then wait a few seconds.`,'setup','Open Setup');
+  } else {
+    if(!simOk) tip('bad','<i data-lucide="credit-card"></i>','SIM problem',`The module reports "${esc(s.sim)}". Insert a nano SIM with the PIN lock off, then restart the 4G module.`,'setup','Run tests');
+    else if(!reg) tip('warn','<i data-lucide="signal"></i>','Not on the mobile network yet',`Status: ${esc(s.network)}. Check the LTE antenna is attached. It can take up to a minute after power-on.`);
+    if(usb) tip('info','<i data-lucide="link"></i>','Connected through the 4G_USB cable',`Keep the <b>USB_SELECT switch on "4G"</b> and this cable plugged in. SMS, calls and voice-prompt uploads all go through it. Don't move the switch to ESP while using B2Wave.`);
+    if(wifi) tip('info','<i data-lucide="radio-tower"></i>','Connected over Wi-Fi',`The board talks to this PC over Wi-Fi. Keep the PC on the same network (B2-ios).`);
+    if(bars!=null&&bars<10) tip('warn','<i data-lucide="signal"></i>','Weak signal',`Signal ${bars}/31. Calls may drop. Move the antenna near a window.`);
+  }
+  tip('info','<i data-lucide="headphones"></i>','Where the call voice goes',`This module can't send call audio to the PC over USB. Voice uses the board's <b>SPK/MIC pads</b>. To talk from this PC, use a ₹250 USB sound card (Audio page).`,'audio','See wiring');
+  tip('info','<i data-lucide="megaphone"></i>','Voice campaigns',`Your audio prompts are kept on this PC and copied to the module automatically before each campaign. Keys people press (1, 2…) are captured live.`,'campaigns','Open');
+  if(unread) tip('warn','<i data-lucide="mail"></i>',`${unread} unread message${unread>1?'s':''}`,'New SMS arrived.','messages','Read');
+  $('#tips').innerHTML=T.join('');
+  $('#tips').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+
+  // recent lists
+  const lm=[...S.messages].sort((a,b)=>b.time.localeCompare(a.time)).slice(0,5);
+  $('#homeMsgs').innerHTML=lm.length?lm.map(m=>`<div class="hrow" data-n="${esc(m.number)}"><span class="hdir ${m.dir}">${m.dir==='in'?ICON('arrow-down-left'):ICON('arrow-up-right')}</span><div><b>${esc(m.number)}</b><small>${esc(m.text.slice(0,70))}</small></div><small>${fmtTime(m.time)}</small></div>`).join(''):'<div class="empty" style="padding:10px">No messages yet</div>';
+  $('#homeMsgs').querySelectorAll('[data-n]').forEach(r=>r.onclick=()=>{ show('messages'); openThread(r.dataset.n); });
+  const lc=[...S.calls].reverse().slice(0,5);
+  $('#homeCalls').innerHTML=lc.length?lc.map(c=>{ const miss=c.direction==='in'&&!c.answered; return `<div class="hrow"><span class="hdir ${miss?'miss':c.direction}">${miss?ICON('phone-missed'):c.direction==='in'?ICON('arrow-down-left'):ICON('arrow-up-right')}</span><div><b>${esc(c.number||'Unknown')}</b><small>${miss?'Missed':c.direction==='in'?'Incoming':'Outgoing'}${c.answered?' · '+fmtDur(c.duration):''}</small></div><small>${fmtTime(c.time)}</small></div>`; }).join(''):'<div class="empty" style="padding:10px">No calls yet</div>';
+}
+
+// ---------------------------------------------------------------- campaigns file list (PC library + module)
+async function loadFiles(){
+  let r; try{ r=await api('files_list'); }catch(e){ $('#fileList').innerHTML=`<div class="note bad">${esc(e.message)}</div>`; return; }
+  renderFiles(r);
+}
+function renderFiles(r){
+  C.files=r.files; C.free=r.free;
+  const badge=(ok,label)=>`<span class="fb ${ok?'ok':''}">${ok?ICON('check'):ICON('circle')} ${label}</span>`;
+  $('#fileList').innerHTML=r.files.length? r.files.map(f=>`<div class="frow">
+      <div><b>${esc(f.name)}</b><small>${fmtKB(f.size)}${/\.wav$/i.test(f.name)?' · '+wavSec(f.size).toFixed(1)+' s':''} &nbsp;${badge(f.on_pc,'PC')} ${badge(f.on_module,'Module')}</small></div>
+      ${f.on_pc?`<button class="btn ghost sm" data-prev="${esc(f.name)}" title="Listen on this PC"><i data-lucide="play"></i> PC</button>`:''}
+      ${f.on_module?`<button class="btn ghost sm" data-call="${esc(f.name)}" title="Play into the current call"><i data-lucide="phone-call"></i> Call</button>`:''}
+      ${f.on_pc&&!f.on_module?`<button class="btn ghost sm" data-push="${esc(f.name)}" title="Copy to the module"><i data-lucide="upload"></i> Module</button>`:''}
+      <button class="btn ghost sm" data-del="${esc(f.name)}" title="Delete"><i data-lucide="trash-2"></i></button></div>`).join('')
+    : '<div class="empty" style="padding:10px">No audio yet. Upload one below.</div>';
+  $('#fileSpace').innerHTML=r.module_error?`<span style="color:var(--warn)">Module: ${esc(r.module_error)}. Files are kept on the PC and copied when the board is back.</span>`
+    :`Module space: ${fmtKB(r.free)} free of ${fmtKB(r.total)} (about ${Math.floor(r.free/16000)} s of audio). Older B2Wave prompts are removed from the module automatically when space runs out. Your PC copy stays.`;
+  const L=$('#fileList');
+  L.querySelectorAll('[data-prev]').forEach(b=>b.onclick=()=>new Audio('/audio/'+encodeURIComponent(b.dataset.prev)).play());
+  L.querySelectorAll('[data-call]').forEach(b=>b.onclick=()=>{ if(S.call.state!=='active'){ toast('Start a call first, then press Call'); return; } api('file_play',{name:b.dataset.call,remote:true}).then(()=>toast('Playing into the call')).catch(e=>toast(e.message)); });
+  L.querySelectorAll('[data-push]').forEach(b=>b.onclick=async()=>{ b.disabled=true; b.textContent='Copying…'; try{ renderFiles(await api('file_push',{name:b.dataset.push})); toast('Copied to the module'); }catch(e){ toast(e.message); b.disabled=false; b.innerHTML=ICON('upload')+' Module'; } });
+  L.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(!confirm(`Delete "${b.dataset.del}" from the PC and the module? This can't be undone.`)) return; try{ renderFiles(await api('file_delete',{name:b.dataset.del})); }catch(e){ toast(e.message); } });
+  const sel=$('#cAudio'), prev=sel.value;
+  sel.innerHTML='<option value="">Choose…</option>'+r.files.map(f=>`<option value="file:${esc(f.name)}" data-size="${f.size}">${esc(f.name)}${f.on_module?'':' (will be copied to the module)'}</option>`).join('')+'<option value="tts">Text-to-speech (from the box on the left)</option>';
+  if(prev) sel.value=prev;
+}
+function onUploadProgress(e){
+  const pct=Math.round(e.done*100/e.total);
+  $('#upInfo').innerHTML=`Copying <b>${esc(e.name)}</b> to the module… ${pct}% <div class="prog" style="margin:6px 0 0"><i style="width:${pct}%"></i></div>`;
+}
+
+$('#helpSearch').oninput=e=>{ const q=e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.hsec').forEach(d=>{ const hit=!q||d.textContent.toLowerCase().includes(q); d.hidden=!hit; if(q&&hit) d.open=true; }); };
+document.querySelectorAll('#helpBody [data-go]').forEach(a=>a.onclick=ev=>{ ev.preventDefault(); show(a.dataset.go); });
+
+function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();
 </script>
 </body>

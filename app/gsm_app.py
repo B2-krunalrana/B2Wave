@@ -32,6 +32,8 @@ ROOT = Path(__file__).parent
 DATA = Path(os.environ.get("B2W_DATA") or ROOT / "data")
 STATIC = ROOT / "static"
 DATA.mkdir(exist_ok=True)
+AUDIO = DATA / "audio"          # PC-side prompt library (source of truth)
+AUDIO.mkdir(exist_ok=True)
 
 log = logging.getLogger("gsm")
 
@@ -125,6 +127,11 @@ def repair_stored_messages():
     """Older versions stored some Unicode SMS as raw UCS2 hex - decode them once."""
     changed = 0
     for x in messages.data:
+        num = x.get("number", "")
+        # undo old mis-decoding of numeric short codes ("57575701" -> CJK characters)
+        if num and all(ord(ch) > 0x2E7F for ch in num) and len(num) <= 8:
+            x["number"] = m.ucs2_encode(num)
+            changed += 1
         if x.get("dir") == "in" and m.looks_ucs2(x.get("text", "")):
             x["text"] = m.ucs2_decode(x["text"])
             changed += 1
@@ -134,6 +141,14 @@ def repair_stored_messages():
 
 
 repair_stored_messages()
+
+for _c in campaigns.data:                     # app restarted while a campaign was running
+    if _c.get("status") == "running":
+        _c["status"] = "interrupted"
+        for _r in _c["results"]:
+            if _r["status"] in ("dialing", "ringing", "pending"):
+                _r["status"] = "not called (interrupted)"
+campaigns.save()
 
 
 async def sync_inbox():
@@ -170,29 +185,57 @@ async def probe_serial(port: str) -> bool:
         await t.close()
 
 
+def find_simcom_at_port() -> str:
+    """The 4G module's AT port, whatever COM number Windows gave it this time."""
+    ports = [p for p in m.list_serial_ports() if p["simcom"]]
+    ports.sort(key=lambda p: ("AT" not in p["description"].upper(), p["device"]))
+    return ports[0]["device"] if ports else ""
+
+
+async def bridge_reachable(host: str) -> bool:
+    try:
+        r, w = await asyncio.wait_for(asyncio.open_connection(host, m.BRIDGE_PORT), 2)
+        w.close()
+        return True
+    except Exception:
+        return False
+
+
 async def pick_transport():
+    """Choose the link to the 4G module, robust to COM-number changes and unplugged cables.
+    Order: configured link -> same module on a new COM port -> any SIMCom AT port -> Wi-Fi bridge."""
     c = config.data
+    modem.status.notice = ""
     if c["mode"] == "wifi" and c["host"]:
         return m.TcpTransport(c["host"])
-    if c["mode"] == "serial" and c["serial_port"]:
-        return m.SerialTransport(c["serial_port"], c.get("baud", 115200))
-    # auto: last bridge -> discovery -> SIMCom USB port
-    if c.get("last_host"):
-        try:
-            r, w = await asyncio.wait_for(asyncio.open_connection(c["last_host"], m.BRIDGE_PORT), 2)
-            w.close()
-            return m.TcpTransport(c["last_host"])
-        except Exception:
-            pass
+    if c["mode"] == "serial":
+        ports = {p["device"] for p in m.list_serial_ports()}
+        if c.get("serial_port") in ports:
+            return m.SerialTransport(c["serial_port"], c.get("baud", 115200))
+        at = find_simcom_at_port()
+        if at:                                               # replugged -> new COM number
+            log.info("4G module moved from %s to %s", c.get("serial_port"), at)
+            c["serial_port"] = at
+            config.save()
+            return m.SerialTransport(at)
+        host = c.get("last_host") or c.get("host")
+        if host and await bridge_reachable(host):            # cable unplugged -> Wi-Fi fallback
+            modem.status.notice = "4G_USB cable not found, using the Wi-Fi bridge instead."
+            return m.TcpTransport(host)
+        modem.status.error = ("4G_USB cable not detected. Plug cable 2 into the 4G_USB port, "
+                              "keep the USB_SELECT switch on 4G.")
+        return None
+    # auto: SIMCom USB port first (most reliable), then Wi-Fi bridge
+    at = find_simcom_at_port()
+    if at and await probe_serial(at):
+        return m.SerialTransport(at)
+    if c.get("last_host") and await bridge_reachable(c["last_host"]):
+        return m.TcpTransport(c["last_host"])
     found = await m.discover_bridges()
     if found:
-        host = found[0]["ip"]
-        c["last_host"] = host
+        c["last_host"] = found[0]["ip"]
         config.save()
-        return m.TcpTransport(host)
-    for p in m.list_serial_ports():
-        if p["simcom"] and await probe_serial(p["device"]):
-            return m.SerialTransport(p["device"])
+        return m.TcpTransport(found[0]["ip"])
     return None
 
 
@@ -206,6 +249,19 @@ async def wait_reconnect(timeout: float) -> bool:
         reconnect_evt.clear()
 
 
+def friendly_error(e: Exception) -> str:
+    t = str(e) or e.__class__.__name__
+    if "could not open port" in t or "PermissionError" in t or "Access is denied" in t:
+        return "The 4G USB port is busy or was unplugged. Close other serial tools, check cable 2, then wait."
+    if "ClearCommError" in t or "device does not recognize" in t.lower() or "WriteFile failed" in t:
+        return "The 4G_USB cable was unplugged. Plug it back in and B2Wave reconnects by itself."
+    if "does not answer AT" in t:
+        return "Connected, but the 4G module isn't answering. It may be starting up (wait 20 s) or need more power."
+    if "refused" in t or "timed out" in t.lower() or "WinError 1225" in t:
+        return "Can't reach the board over Wi-Fi. Is it powered and on the same network?"
+    return t
+
+
 async def supervisor():
     while True:
         reader = None
@@ -214,8 +270,9 @@ async def supervisor():
             await modem.emit_status()
             transport = await pick_transport()
             if transport is None:
-                modem.status.error = ("Board not found. Check it is powered and on the same Wi-Fi, "
-                                      "or set the IP / COM port in Settings.")
+                if not modem.status.error or modem.status.error.startswith("Searching"):
+                    modem.status.error = ("Board not found. Plug the 4G_USB cable (switch on 4G), "
+                                          "or put the board and this PC on the same Wi-Fi.")
                 await modem.emit_status()
                 await wait_reconnect(5)
                 continue
@@ -236,7 +293,7 @@ async def supervisor():
             raise
         except Exception as e:
             log.warning("connection problem: %s", e)
-            modem.status.error = str(e) or e.__class__.__name__
+            modem.status.error = friendly_error(e)
             log.debug("supervisor error", exc_info=True)
         finally:
             if reader and not reader.done():
@@ -247,6 +304,59 @@ async def supervisor():
 
 
 # ======================================================================= websocket API
+async def library_state() -> dict:
+    """PC library + what is on the module."""
+    mod = {"files": [], "total": 0, "free": 0, "error": ""}
+    if modem.status.connected:
+        try:
+            mod = await modem.list_files()
+            mod["error"] = ""
+        except Exception as e:
+            mod["error"] = str(e)
+    else:
+        mod["error"] = "board offline"
+    on_mod = {f["name"]: f["size"] for f in mod["files"]}
+    lib = []
+    for f in sorted(AUDIO.glob("*")):
+        if f.is_file():
+            size = f.stat().st_size
+            lib.append({"name": f.name, "size": size, "on_pc": True,
+                        "on_module": on_mod.get(f.name) == size})
+    names = {x["name"] for x in lib}
+    for n, size in on_mod.items():                     # files that exist only on the module
+        if n not in names:
+            lib.append({"name": n, "size": size, "on_pc": False, "on_module": True})
+    return {"files": lib, "total": mod["total"], "free": mod["free"], "module_error": mod["error"]}
+
+
+async def ensure_on_module(name: str):
+    """Copy a PC library prompt to the module if missing/changed, making room if needed."""
+    src = AUDIO / name
+    if not src.exists():
+        return                                         # module-only file: nothing to sync
+    data = src.read_bytes()
+    st = await modem.list_files()
+    if any(f["name"] == name and f["size"] == len(data) for f in st["files"]):
+        return
+    free = st["free"] + next((f["size"] for f in st["files"] if f["name"] == name), 0)
+    if len(data) > free - 8192:
+        # make room: remove other B2Wave prompts (ones we also have on the PC), oldest first
+        ours = [f for f in st["files"] if f["name"] != name and (AUDIO / f["name"]).exists()]
+        ours.sort(key=lambda f: (AUDIO / f["name"]).stat().st_mtime)
+        for f in ours:
+            await modem.delete_file(f["name"])
+            free += f["size"]
+            log.info("removed %s from module to make room", f["name"])
+            if len(data) <= free - 8192:
+                break
+    if len(data) > free - 8192:
+        raise RuntimeError(f"needs {len(data)//1024} KB but the module has only {max(0, free - 8192)//1024} KB free")
+
+    async def prog(done, total):
+        await broadcast({"type": "upload_progress", "name": name, "done": done, "total": total})
+    await modem.upload_file(name, data, prog)
+
+
 async def handle_op(op: str, d: dict):
     if op == "send_sms":
         to, text = d["to"].strip(), d["text"]
@@ -335,17 +445,33 @@ async def handle_op(op: str, d: dict):
         return {}
     # ---------------- audio files on the module
     if op == "files_list":
-        return await modem.list_files()
+        return await library_state()
     if op == "file_upload":
+        name = d["name"]
+        if not m.re.fullmatch(r"[A-Za-z0-9_.-]{1,40}", name):
+            raise ValueError("file name: use letters, digits, _ . - only")
         data = base64.b64decode(d["data"])
-        info = await modem.list_files()
-        if len(data) > info["free"] - 8192:
-            raise RuntimeError(f"not enough space on the module: file {len(data)//1024} KB, free {info['free']//1024} KB")
-        await modem.upload_file(d["name"], data)
-        return await modem.list_files()
+        (AUDIO / name).write_bytes(data)                 # always keep it on the PC
+        try:
+            await ensure_on_module(name)
+        except Exception as e:
+            st = await library_state()
+            st["warning"] = f"Saved on PC, but not copied to the module yet: {e}"
+            return st
+        return await library_state()
+    if op == "file_push":
+        await ensure_on_module(d["name"])
+        return await library_state()
     if op == "file_delete":
-        await modem.delete_file(d["name"])
-        return await modem.list_files()
+        name = d["name"]
+        if d.get("module", True) and modem.status.connected:
+            try:
+                await modem.delete_file(name)
+            except Exception:
+                pass
+        if d.get("pc", True) and (AUDIO / name).exists():
+            (AUDIO / name).unlink()
+        return await library_state()
     if op == "file_play":
         await modem.play_file(d["name"], remote=bool(d.get("remote")), repeat=int(d.get("repeat", 0)))
         return {}
@@ -359,6 +485,11 @@ async def handle_op(op: str, d: dict):
     if op == "campaigns_list":
         return {"campaigns": campaigns.data, "running": runner.running, "dtmf": list(dtmf_log)}
     if op == "campaign_start":
+        if d.get("audio"):
+            await ensure_on_module(d["audio"])
+            f = AUDIO / d["audio"]
+            if f.exists():
+                d["audio_size"] = f.stat().st_size
         return await runner.start(d)
     if op == "campaign_stop":
         await runner.stop()
@@ -495,6 +626,38 @@ async def on_cleanup(app):
     await modem.disconnect()
 
 
+async def shutdown_handler(request):
+    if request.remote not in ("127.0.0.1", "::1"):
+        raise web.HTTPForbidden()
+    log.info("shutdown requested by a newer instance")
+    asyncio.get_running_loop().call_later(0.3, lambda: os._exit(0))
+    return web.Response(text="bye")
+
+
+def replace_running_instance(port: int):
+    """If B2Wave is already running on this port, ask it to exit so we can take over."""
+    import socket
+    import time
+    import urllib.request
+    with socket.socket() as s:
+        s.settimeout(0.5)
+        if s.connect_ex(("127.0.0.1", port)) != 0:
+            return
+    print("  Another B2Wave is running - replacing it...")
+    try:
+        urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{port}/api/shutdown", method="POST"), timeout=3)
+    except Exception:
+        pass
+    for _ in range(20):
+        time.sleep(0.25)
+        with socket.socket() as s:
+            s.settimeout(0.3)
+            if s.connect_ex(("127.0.0.1", port)) != 0:
+                time.sleep(0.5)          # let it release the serial port
+                return
+    print(f"  Port {port} is still busy. Close the other program or use --port 8081")
+
+
 def main():
     ap = argparse.ArgumentParser(description="GSM Bridge browser app")
     ap.add_argument("--port", type=int, default=8080)
@@ -519,9 +682,12 @@ def main():
     app.router.add_get("/ws", ws_handler)
     app.router.add_static("/static", STATIC)
     app.router.add_static("/doc", ROOT.parent / "doc")
+    app.router.add_static("/audio", AUDIO)
+    app.router.add_post("/api/shutdown", shutdown_handler)
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)
 
+    replace_running_instance(a.port)
     host = "0.0.0.0" if a.lan else "127.0.0.1"
     url = f"http://127.0.0.1:{a.port}"
     print(f"\n  B2Wave running ->  {url}\n  (Ctrl+C to stop)\n")
