@@ -753,6 +753,21 @@ input[type=checkbox],input[type=radio]{width:auto}
 a.iconbtn{text-decoration:none}
 @media (max-width:860px){.ctypes,.grid4{grid-template-columns:1fr 1fr}.keymap{grid-template-columns:1fr 1fr}}
 .tbl td.keys small{font:500 12px Inter,system-ui,sans-serif;letter-spacing:0}
+
+/* API page */
+.codebox{position:relative;background:#0b0d11;border:1px solid var(--line);border-radius:10px;padding:12px 44px 12px 14px;overflow-x:auto}
+.codebox code{display:block;white-space:pre-wrap;word-break:break-all;color:#d6dbe6;font:12.5px/1.55 ui-monospace,Consolas,monospace}
+.codebox .iconbtn{position:absolute;top:8px;right:8px;background:#151922;border-color:#232836;color:#9aa4b5}
+.ep{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--panel)}
+.ep summary{cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;list-style:none}
+.ep summary::-webkit-details-marker{display:none}
+.ep[open] summary{margin-bottom:10px}
+.mth{font:700 11px ui-monospace,Consolas,monospace;padding:3px 8px;border-radius:6px;color:#fff;min-width:44px;text-align:center}
+.mth.get{background:#0ea5e9}.mth.post{background:#16a34a}
+.idrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--panel)}
+.idrow code{background:var(--panel2);padding:2px 8px;border-radius:6px;font-size:12.5px;flex:none}
+.idrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.whev{display:flex;gap:16px;flex-wrap:wrap}.whev .chk{margin:0}
 </style>
 </head>
 <body>
@@ -783,6 +798,7 @@ a.iconbtn{text-decoration:none}
       <button data-v="audio" title="Audio"><i data-lucide="headphones"></i><span>Talk on calls</span></button>
       <button data-v="console" title="Console"><i data-lucide="square-terminal"></i><span>AT console</span></button>
       <div class="ngroup">Support</div>
+      <button data-v="api" title="REST API"><i data-lucide="code-xml"></i><span>API &amp; integrations</span></button>
       <button data-v="help" title="Help"><i data-lucide="life-buoy"></i><span>Help &amp; guide</span></button>
       <button data-v="settings" title="Settings"><i data-lucide="settings"></i><span>Settings</span></button>
     </nav>
@@ -1746,6 +1762,91 @@ a.iconbtn{text-decoration:none}
       </div>
     </section>
 
+    <!-- REST API -->
+    <section class="view" id="v-api">
+      <div class="wiz" style="max-width:1150px">
+        <div class="tabs" id="apiTabs">
+          <button data-a="start" class="on"><i data-lucide="rocket"></i> Get started</button>
+          <button data-a="keys"><i data-lucide="key-round"></i> API keys</button>
+          <button data-a="docs"><i data-lucide="book-open"></i> Endpoints</button>
+          <button data-a="ids"><i data-lucide="hash"></i> Template &amp; draft IDs</button>
+          <button data-a="hooks"><i data-lucide="webhook"></i> Webhooks</button>
+          <button data-a="log"><i data-lucide="scroll-text"></i> Request log</button>
+        </div>
+
+        <div class="apanel" data-ap="start">
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="cable"></i></span><div><h3>Connect your server through an SSH tunnel</h3><small>B2Wave only listens on this PC (127.0.0.1). The tunnel carries API calls securely, with no open ports and no public IP.</small></div></div>
+            <div class="grid2 top">
+              <div class="hsbox">
+                <h4><span class="num">1</span> Create an API key</h4>
+                <p class="hint" style="margin:0 0 10px">Each system gets its own key. It is shown once; store it in your server's secrets.</p>
+                <button class="btn" data-atab="keys"><i data-lucide="key-round"></i> Create API key</button>
+              </div>
+              <div class="hsbox">
+                <h4><span class="num">2</span> Open the tunnel from this PC</h4>
+                <div class="grid2"><div><label>Server (user@host)</label><input id="tunHost" placeholder="ubuntu@api.mycompany.com"></div><div><label>Port on the server</label><input id="tunPort" type="number" value="9080"></div></div>
+                <label>Run this on this PC (Command Prompt or PowerShell)</label>
+                <div class="codebox"><code id="tunCmd"></code><button class="iconbtn sm" data-copy="tunCmd" title="Copy"><i data-lucide="copy"></i></button></div>
+                <p class="hint">Keep the window open. Your server then calls <code id="tunBase">http://127.0.0.1:9080</code>. Windows 10/11 include <code>ssh</code>. Add your PC's public key to the server first so it doesn't ask for a password.</p>
+              </div>
+            </div>
+            <div class="hsbox" style="margin-top:12px">
+              <h4><span class="num">3</span> Call the API from your server</h4>
+              <div class="codebox"><code id="firstCurl"></code><button class="iconbtn sm" data-copy="firstCurl" title="Copy"><i data-lucide="copy"></i></button></div>
+              <p class="hint">Expect <code>{"ok": true, "board": {...}}</code>. Then send SMS or start broadcast calls: see <a href="#" data-atab="docs">Endpoints</a>.</p>
+            </div>
+            <details class="manual" style="margin-top:10px"><summary>Other option: the server connects to this PC (needs OpenSSH Server on Windows)</summary>
+              <div class="codebox" style="margin-top:8px"><code id="tunCmd2"></code><button class="iconbtn sm" data-copy="tunCmd2" title="Copy"><i data-lucide="copy"></i></button></div>
+            </details>
+          </div>
+        </div>
+
+        <div class="apanel" data-ap="keys" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="key-round"></i></span><div style="flex:1"><h3>API keys</h3><small>Send as <code>Authorization: Bearer &lt;key&gt;</code>. 120 requests/minute per key. Stored only as a hash.</small></div></div>
+            <div class="grid2c"><input id="apiKeyName" placeholder="Key name, e.g. CRM server"><button class="btn" id="apiKeyNew"><i data-lucide="plus"></i> Create key</button></div>
+            <div class="tblwrap" style="margin-top:12px"><table class="tbl" id="apiKeys"></table></div>
+          </div>
+        </div>
+
+        <div class="apanel" data-ap="docs" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="book-open"></i></span><div style="flex:1"><h3>Endpoints</h3><small>JSON in, JSON out. Every response has <code>"ok": true/false</code>.</small></div>
+              <div class="seg" id="apiLang" style="width:auto"><button data-l="curl" class="on">curl</button><button data-l="py">Python</button></div></div>
+            <div id="apiDocs"></div>
+          </div>
+        </div>
+
+        <div class="apanel" data-ap="ids" hidden>
+          <div class="grid2 top">
+            <div class="card"><div class="cardhead"><span class="cicon"><i data-lucide="message-square-quote"></i></span><div><h3>SMS templates</h3><small>Use as <code>template_id</code> / <code>sms_template_id</code></small></div></div><div id="idTpl"></div></div>
+            <div class="card"><div class="cardhead"><span class="cicon"><i data-lucide="file-pen"></i></span><div><h3>Campaign drafts</h3><small>Use as <code>draft_id</code> with POST /api/v1/campaigns</small></div></div><div id="idDraft"></div></div>
+          </div>
+          <div class="card"><div class="cardhead"><span class="cicon"><i data-lucide="file-audio"></i></span><div><h3>Audio prompts</h3><small>Use the file name as <code>audio</code> in broadcast calls</small></div></div><div id="idAudio"></div></div>
+        </div>
+
+        <div class="apanel" data-ap="hooks" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="webhook"></i></span><div><h3>Webhooks</h3><small>B2Wave POSTs events to your server. Through the tunnel, use a URL your server can receive.</small></div></div>
+            <label>Webhook URL</label><input id="whUrl" placeholder="https://api.mycompany.com/b2wave/events">
+            <label>Events</label>
+            <div class="whev"><label class="chk"><input type="checkbox" value="sms.received" checked> sms.received</label><label class="chk"><input type="checkbox" value="call.ended" checked> call.ended</label><label class="chk"><input type="checkbox" value="campaign.finished" checked> campaign.finished</label></div>
+            <p class="hint">Each request carries <code>X-B2Wave-Event</code> and <code>X-B2Wave-Signature: sha256=&lt;HMAC of the body with your secret&gt;</code>.</p>
+            <div class="actions"><button class="btn" id="whSave"><i data-lucide="save"></i> Save</button><button class="btn ghost" id="whSecret"><i data-lucide="eye"></i> Show secret</button><button class="btn ghost" id="whTest"><i data-lucide="send"></i> Send test event</button></div>
+            <div class="codebox" style="margin-top:12px"><code id="whVerify"></code><button class="iconbtn sm" data-copy="whVerify" title="Copy"><i data-lucide="copy"></i></button></div>
+          </div>
+        </div>
+
+        <div class="apanel" data-ap="log" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="scroll-text"></i></span><div style="flex:1"><h3>Request log</h3><small>Last 300 API requests and webhook deliveries</small></div><button class="btn ghost sm" id="apiLogRefresh"><i data-lucide="rotate-cw"></i> Refresh</button></div>
+            <div class="tblwrap"><table class="tbl" id="apiLog"></table></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- SETTINGS -->
     <section class="view" id="v-settings">
       <div class="settings">
@@ -1924,7 +2025,8 @@ function show(v){
   S.view=v;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS',ai:'AI voice agent'}[v];
+  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS',ai:'AI voice agent',api:'API & integrations'}[v];
+  if(v==='api'){ loadApi(); apiTab(lsGet('apiTab')||'start'); }
   if(v==='ai') loadAi(); if(v==='audio') loadAudioCtl();
   if(v==='bulk') loadBulk(); if(v==='settings'||v==='campaigns') loadSmtp(); if(v==='settings') loadBackupInfo();
   if(v==='home') renderHome();
@@ -2776,7 +2878,7 @@ document.querySelectorAll('#helpBody [data-go]').forEach(a=>a.onclick=ev=>{ ev.p
 // ================================================================ v2 shell: theme, drawer, toasts, dialogs, charts
 const SUBTITLES={home:'Overview of your board, SIM and activity',messages:'Send and receive SMS in any language',phone:'Dial, answer and review calls',
   campaigns:'Calls, SMS or both: create, run and analyse campaigns',setup:'Detect, flash and test the board layer by layer',audio:'Wiring options and the PC audio bridge',
-  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, email, device info and notifications',bulk:'Send one personalised message to many numbers',ai:'Let a LiveKit AI agent talk to the person on the call'};
+  console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, email, device info and notifications',bulk:'Send one personalised message to many numbers',ai:'Let a LiveKit AI agent talk to the person on the call',api:'Send SMS and broadcast calls from your own server'};
 function applyTheme(t){
   const sys=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
   const th=t||lsGet('theme')||sys;
@@ -3814,6 +3916,84 @@ $('#cwTts').addEventListener('input',()=>{ const t=$('#cwTts'), bad=/\{[^}]*\}/.
   let w=$('#cwTtsWarn'); if(!w){ t.insertAdjacentHTML('afterend','<div class="hint" id="cwTtsWarn"></div>'); w=$('#cwTtsWarn'); }
   w.innerHTML=bad?'<span style="color:var(--warn)">Variables like {name} are skipped in voice. They are removed before speaking. Use them in the SMS step.</span>':''; });
 function openRecFolder(){ api('open_folder',{what:'recordings'}).then(r=>toast('Opened '+r.path)).catch(e=>toast(e.message)); }
+
+// ================================================================ REST API page
+const APIP={info:null, lang:'curl'};
+function apiTab(t){ document.querySelectorAll('#apiTabs button').forEach(b=>b.classList.toggle('on',b.dataset.a===t));
+  document.querySelectorAll('#v-api .apanel').forEach(p=>p.hidden=p.dataset.ap!==t); lsSet('apiTab',t);
+  if(t==='ids') apiIds(); if(t==='log'||t==='keys'||t==='hooks') loadApi(); if(t==='docs') apiDocs(); }
+document.querySelectorAll('#apiTabs button').forEach(b=>b.onclick=()=>apiTab(b.dataset.a));
+document.querySelectorAll('[data-atab]').forEach(b=>b.onclick=e=>{ e.preventDefault(); apiTab(b.dataset.atab); });
+document.querySelectorAll('#v-api [data-copy]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText($('#'+b.dataset.copy).textContent).then(()=>toast('Copied')));
+function apiBase(){ return `http://127.0.0.1:${+$('#tunPort').value||9080}`; }
+function apiTunnel(){
+  const host=($('#tunHost').value||'user@your-server').trim(), rp=+$('#tunPort').value||9080, lp=(APIP.info||{}).port||8080;
+  lsSet('tunHost',$('#tunHost').value); lsSet('tunPort',$('#tunPort').value);
+  $('#tunCmd').textContent=`ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R ${rp}:127.0.0.1:${lp} ${host}`;
+  $('#tunCmd2').textContent=`ssh -N -L ${rp}:127.0.0.1:${lp} <windows-user>@<this-pc-address>     # run on the server`;
+  $('#tunBase').textContent=apiBase();
+  $('#firstCurl').textContent=`curl -s ${apiBase()}/api/v1/status -H "Authorization: Bearer $B2WAVE_KEY"`;
+  if(APIP.docsOn) apiDocs();
+}
+$('#tunHost').value=lsGet('tunHost'); $('#tunPort').value=lsGet('tunPort')||9080;
+$('#tunHost').oninput=apiTunnel; $('#tunPort').oninput=apiTunnel;
+async function loadApi(){
+  try{ APIP.info=await api('api_info'); }catch(e){ toast(e.message); return; }
+  const I=APIP.info; apiTunnel();
+  $('#apiKeys').innerHTML=I.keys.length?`<thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th>Requests</th><th></th></tr></thead><tbody>${I.keys.map(k=>`<tr><td><b>${esc(k.name)}</b></td><td><code>${esc(k.prefix)}…</code></td><td>${k.created?fmtTime(k.created)+' '+fmtTime(k.created,true):''}</td><td>${k.last_used?fmtTime(k.last_used)+' '+fmtTime(k.last_used,true):'never'}</td><td>${k.uses||0}</td><td><button class="btn ghost sm" data-revoke="${k.id}">${ICON('ban')} Revoke</button></td></tr>`).join('')}</tbody>`:'<tbody><tr><td class="empty">No API keys yet</td></tr></tbody>';
+  $('#apiKeys').querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{ if(await ask('Revoke this key?','Systems using it stop working immediately.',{danger:true,confirm:'Revoke'})){ await api('api_key_revoke',{id:b.dataset.revoke}); loadApi(); toast('Key revoked'); } });
+  $('#apiLog').innerHTML=I.log.length?`<thead><tr><th>Time</th><th>Key / source</th><th>Request</th><th>Status</th><th>ms</th></tr></thead><tbody>${I.log.map(l=>`<tr><td>${fmtTime(l.time,true)}</td><td>${esc(l.key)}</td><td><code>${esc(l.method)} ${esc(l.path)}</code></td><td><span class="rs ${String(l.status).startsWith('2')?'ok':'bad'}">${esc(l.status)}</span></td><td>${l.ms}</td></tr>`).join('')}</tbody>`:'<tbody><tr><td class="empty">No requests yet</td></tr></tbody>';
+  const w=I.webhook||{}; if(!$('#whUrl').dataset.touched) $('#whUrl').value=w.url||'';
+  if(w.events) document.querySelectorAll('.whev input').forEach(c=>c.checked=w.events.includes(c.value));
+  $('#whVerify').textContent=`# Python: verify a webhook\nimport hmac, hashlib\nexpected = "sha256=" + hmac.new(SECRET.encode(), request_body, hashlib.sha256).hexdigest()\nok = hmac.compare_digest(expected, request.headers["X-B2Wave-Signature"])`;
+}
+$('#whUrl').oninput=()=>$('#whUrl').dataset.touched='1';
+$('#apiKeyNew').onclick=async()=>{
+  try{ const r=await api('api_key_create',{name:$('#apiKeyName').value}); $('#apiKeyName').value=''; loadApi();
+    Swal.fire({...swalBase,icon:'success',title:'API key created',html:`Copy it now. It <b>won't be shown again</b>.<div class="codebox" style="margin-top:12px;text-align:left"><code id="newKey">${esc(r.created.key)}</code></div>`,confirmButtonText:'Copy & close'})
+      .then(()=>navigator.clipboard.writeText(r.created.key).then(()=>toast('Key copied'))); }catch(e){ toast(e.message); }
+};
+$('#whSave').onclick=async()=>{ const ev=[...document.querySelectorAll('.whev input:checked')].map(c=>c.value);
+  try{ await api('webhook_save',{url:$('#whUrl').value,events:ev}); toast('Webhook saved'); loadApi(); }catch(e){ toast(e.message); } };
+$('#whSecret').onclick=async()=>{ const ev=[...document.querySelectorAll('.whev input:checked')].map(c=>c.value);
+  const r=await api('webhook_save',{url:$('#whUrl').value,events:ev,show_secret:true}); Swal.fire({...swalBase,title:'Webhook secret',html:`<div class="codebox"><code>${esc(r.secret)}</code></div><p class="hint">Use it to verify X-B2Wave-Signature on your server.</p>`}); };
+$('#whTest').onclick=async()=>{ try{ const r=await api('webhook_test'); const st=(r.result||{}).status; toast(String(st).startsWith('2')?'Test event delivered ('+st+')':'Delivery failed: '+st); loadApi(); }catch(e){ toast(e.message); } };
+$('#apiLogRefresh').onclick=loadApi;
+document.querySelectorAll('#apiLang button').forEach(b=>b.onclick=()=>{ APIP.lang=b.dataset.l; document.querySelectorAll('#apiLang button').forEach(x=>x.classList.toggle('on',x===b)); apiDocs(); });
+const API_EPS=[
+  {m:'GET',p:'/api/v1/status',t:'Board, SIM and network status',b:null},
+  {m:'POST',p:'/api/v1/sms',t:'Send one SMS (text or template)',b:{to:'+919800000001',template_id:'t_reminder',vars:{name:'Asha'}}},
+  {m:'POST',p:'/api/v1/sms',t:'Send SMS to many people (runs as an SMS campaign)',b:{name:'Offer',numbers:['9800000001','9800000002'],text:'Hi {name|there}, 20% off today!'}},
+  {m:'POST',p:'/api/v1/calls',t:'Broadcast call + SMS by response (template IDs)',b:{name:'Order confirm',audio:'prompt1.wav',rows:[{number:'9800000001',name:'Ravi'}],keymap:{'1':'Confirmed','2':'Cancelled'},sms_rules:[{when:'key:1',template_id:'t_confirm'},{when:'not_answered',template_id:'t_missed'}],record:false}},
+  {m:'POST',p:'/api/v1/campaigns',t:'Launch a saved draft by ID with new numbers',b:{draft_id:'<draft id>',rows:[{number:'9800000001',name:'Ravi'}]}},
+  {m:'GET',p:'/api/v1/campaigns/{id}',t:'Campaign status and per-number results',b:null},
+  {m:'POST',p:'/api/v1/campaigns/{id}/stop',t:'Stop a running campaign',b:{}},
+  {m:'GET',p:'/api/v1/templates',t:'List SMS template IDs',b:null},
+  {m:'GET',p:'/api/v1/drafts',t:'List campaign draft IDs',b:null},
+  {m:'GET',p:'/api/v1/audio',t:'List audio prompt names',b:null},
+  {m:'GET',p:'/api/v1/messages?since=2026-11-21T00:00:00&limit=100',t:'Read SMS (incoming and sent)',b:null},
+];
+function apiDocs(){
+  APIP.docsOn=true; const base=apiBase();
+  $('#apiDocs').innerHTML=API_EPS.map((e,i)=>{ const body=e.b?JSON.stringify(e.b,null,2):'';
+    const code=APIP.lang==='curl'
+      ? `curl -s -X ${e.m} "${base}${e.p}" \\\n  -H "Authorization: Bearer $B2WAVE_KEY"${e.b?` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(e.b)}'`:''}`
+      : `import os, requests\nr = requests.${e.m.toLowerCase()}("${base}${e.p}",\n    headers={"Authorization": f"Bearer {os.environ['B2WAVE_KEY']}"}${e.b?`,\n    json=${body.replace(/\n/g,'\n    ')}`:''})\nprint(r.json())`;
+    return `<details class="ep" ${i<2?'open':''}><summary><span class="mth ${e.m.toLowerCase()}">${e.m}</span><code>${esc(e.p)}</code><span class="muted">${esc(e.t)}</span></summary>
+      <div class="codebox"><code id="ep${i}">${esc(code)}</code><button class="iconbtn sm" data-copy="ep${i}" title="Copy">${ICON('copy')}</button></div></details>`; }).join('')
+    +`<div class="note" style="margin-top:12px">${ICON('info')} <b>Errors:</b> 401 bad key · 400 invalid input · 404 unknown template/draft/campaign · 409 a campaign is already running · 429 rate limit · 502 SMS failed · 503 board offline. Rules <code>when</code>: key:1…key:9, key:0, key:any, no_key, not_answered, answered, always.</div>`;
+  $('#apiDocs').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText($('#'+b.dataset.copy).textContent).then(()=>toast('Copied')));
+}
+async function apiIds(){
+  try{
+    const [t,d,a]=await Promise.all([api('templates_list'),api('drafts_list'),api('files_list').catch(()=>({files:[]}))]);
+    const row=(id,name,extra='')=>`<div class="idrow"><code>${esc(id)}</code><span>${esc(name)}${extra?` <small class="muted">${esc(extra)}</small>`:''}</span><button class="iconbtn sm" data-cp="${esc(id)}" title="Copy ID">${ICON('copy')}</button></div>`;
+    $('#idTpl').innerHTML=t.templates.map(x=>row(x.id,x.name,x.text.slice(0,60))).join('')||'<div class="empty">No templates</div>';
+    $('#idDraft').innerHTML=d.drafts.map(x=>row(x.id,x.name||'Untitled',(MODE_INFO[x.mode]||{}).label||'')).join('')||'<div class="empty">No drafts. Save one from Campaigns.</div>';
+    $('#idAudio').innerHTML=(a.files||[]).map(x=>row(x.name,'',(x.on_module?'on module':'on PC only'))).join('')||'<div class="empty">No audio. Upload in Campaigns, then Audio library.</div>';
+    document.querySelectorAll('#v-api [data-cp]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText(b.dataset.cp).then(()=>toast('Copied '+b.dataset.cp)));
+  }catch(e){ toast(e.message); }
+}
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();

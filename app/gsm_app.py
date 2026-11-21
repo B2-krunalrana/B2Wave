@@ -34,6 +34,7 @@ import bulksms
 import mailer
 import livekit_api as lk
 import backup as bk
+import api_v1
 import base64
 
 ROOT = Path(__file__).parent
@@ -78,6 +79,7 @@ sms_templates = Store(DATA / "sms_templates.json", [
 ])
 AGENT_DIR = ROOT.parent / "agent"
 dtmf_log = deque(maxlen=200)
+api = None          # api_v1.ApiV1, created in main()
 console = deque(maxlen=400)
 clients: set[web.WebSocketResponse] = set()
 reconnect_evt = asyncio.Event()
@@ -157,6 +159,8 @@ async def on_modem_event(evt: dict):
                            "time": raw["time"], "sim_index": raw["sim_index"], "read": False})
         if msg:
             await broadcast({"type": "message", "msg": msg, "notify": True})
+            if api:
+                asyncio.create_task(api.webhook("sms.received", {k: msg.get(k) for k in ("id", "number", "text", "time")}))
         return
     elif t == "call_ended":
         rec = {k: evt[k] for k in ("number", "direction", "answered", "duration", "time")}
@@ -165,6 +169,8 @@ async def on_modem_event(evt: dict):
         calls.data[:] = calls.data[-500:]
         calls.save()
         await broadcast({"type": "call_log", "call": rec})
+        if api:
+            asyncio.create_task(api.webhook("call.ended", rec))
         return
     await broadcast(evt)
 
@@ -315,6 +321,8 @@ async def email_report(kind: str, obj: dict):
 
 async def _campaign_done(camp):
     await email_report("campaign", camp)
+    if api:
+        asyncio.create_task(api.webhook("campaign.finished", api._camp_view(camp, True)))
 
 runner.on_done = _campaign_done
 runner.record_sent = None   # set after record_sent is defined
@@ -826,6 +834,30 @@ async def handle_op(op: str, d: dict):
         await modem.read_sim_identity()
         await modem.emit_status()
         return asdict(modem.status)
+    # ---------------- REST API keys, log, webhook
+    if op == "api_info":
+        return {"keys": api.public_keys(), "log": list(api.log)[:100], "webhook": {k: v for k, v in (config.data.get("webhook") or {}).items() if k != "secret"},
+                "webhook_has_secret": bool((config.data.get("webhook") or {}).get("secret")), "port": request_port()}
+    if op == "api_key_create":
+        return {"created": api.create_key(d.get("name", "")), "keys": api.public_keys()}
+    if op == "api_key_revoke":
+        api.revoke_key(d["id"])
+        return {"keys": api.public_keys()}
+    if op == "webhook_save":
+        wh = dict(config.data.get("webhook") or {})
+        wh["url"] = (d.get("url") or "").strip()
+        wh["events"] = d.get("events") or ["sms.received", "call.ended", "campaign.finished"]
+        if d.get("secret"):
+            wh["secret"] = d["secret"].strip()
+        if not wh.get("secret"):
+            import secrets as _s
+            wh["secret"] = _s.token_hex(16)
+        config.data["webhook"] = wh
+        config.save()
+        return {"webhook": {k: v for k, v in wh.items() if k != "secret"}, "secret": wh["secret"] if d.get("show_secret") else ""}
+    if op == "webhook_test":
+        await api.webhook("test.ping", {"hello": "from B2Wave"})
+        return {"result": api.log[0] if api.log else {}}
     # ---------------- campaign drafts + SMS templates
     if op == "drafts_list":
         return {"drafts": drafts.data}
@@ -1182,12 +1214,21 @@ def replace_running_instance(port: int):
     print(f"  Port {port} is still busy. Close the other program or use --port 8081")
 
 
+_PORT = 8080
+
+
+def request_port() -> int:
+    return _PORT
+
+
 def main():
     ap = argparse.ArgumentParser(description="GSM Bridge browser app")
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--lan", action="store_true", help="listen on all interfaces (phones on your Wi-Fi)")
     ap.add_argument("--no-browser", action="store_true")
     a = ap.parse_args()
+    global _PORT, api
+    _PORT = a.port
     from logging.handlers import RotatingFileHandler
     logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s", datefmt="%H:%M:%S")
     fh = RotatingFileHandler(DATA / "app.log", maxBytes=2_000_000, backupCount=3, encoding="utf-8")
@@ -1201,7 +1242,12 @@ def main():
         if h is not fh:
             h.setLevel(logging.INFO)
 
-    app = web.Application(client_max_size=bk.MAX_ZIP)
+    api = api_v1.ApiV1({"config": config, "modem": modem, "runner": runner, "bulk_runner": bulk_runner,
+                        "drafts": drafts, "sms_templates": sms_templates, "messages": messages, "campaigns": campaigns,
+                        "ensure_on_module": ensure_on_module, "library_state": library_state, "audio_dir": AUDIO,
+                        "record_sent": record_sent})
+    app = web.Application(client_max_size=bk.MAX_ZIP, middlewares=[api.middleware])
+    api.routes(app)
     app.router.add_get("/", index)
     app.router.add_get("/ws", ws_handler)
     app.router.add_static("/static", STATIC)

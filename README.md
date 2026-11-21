@@ -27,6 +27,7 @@ PC. There is no cloud and no account.
 | **AI voice agent** | LiveKit agent talks on B2Wave calls. Engines: **LiveKit Inference** (no extra keys: Deepgram/AssemblyAI STT, GPT-4.1/Gemini LLM, Cartesia/ElevenLabs TTS), **agent hosted on LiveKit Cloud**, or **own OpenAI key** (Realtime). Paste-the-env setup, step tabs, B2Wave installs/starts/stops the worker, PC test mode, live transcript, history |
 | **SIM number** | The SIM's own number is detected (AT+CNUM) and shown at the top of every page; SIM swaps are detected by ICCID; manual number for SIMs that don't store it |
 | **Backup & restore** | One .zip with all data (optionally secrets); restore with preview, Merge or Replace, automatic safety copy, live reload of every open page |
+| **REST API** | Bearer-key API for other systems via an SSH tunnel: send SMS (text or `template_id`), broadcast calls with SMS-by-response rules (template IDs), launch saved drafts by `draft_id`, read campaign results/messages, signed webhooks (`sms.received`, `call.ended`, `campaign.finished`), request log |
 | **Email reports** | Gmail / Outlook / Zoho / Yahoo / custom SMTP. Campaign and bulk reports are emailed automatically when finished (HTML summary + CSV) |
 | **Setup wizard** | Detects the board, flashes the prebuilt ESP32 firmware (no Arduino IDE), layered tests (Wi-Fi → module → SIM → network), driver guidance, diagnostics report |
 | **Talk on calls** | Main guide: solder a **3.5 mm headset socket** once and plug in any wired earphones with mic (parts list, plug pin diagram, wiring, tick-off steps, test, troubleshooting). Live call audio controls (volume, mic, earpiece/loudspeaker path, mute, test voice). Other ways (speaker+mic, PC bridge, Wi-Fi codec) folded under one section |
@@ -76,6 +77,33 @@ Caller ⇄ A7672S (SPK/MIC) ⇄ USB sound card ⇄ B2Wave page (livekit-client) 
 
 ---
 
+## REST API (through an SSH tunnel)
+1. **API & integrations → API keys**: create a key (shown once).
+2. Open a reverse tunnel **from this PC** to your server (no open ports needed):
+   ```
+   ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 9080:127.0.0.1:8080 user@your-server
+   ```
+3. From the server:
+   ```bash
+   curl -s http://127.0.0.1:9080/api/v1/status -H "Authorization: Bearer $B2WAVE_KEY"
+   curl -s -X POST http://127.0.0.1:9080/api/v1/sms -H "Authorization: Bearer $B2WAVE_KEY" -H "Content-Type: application/json"         -d '{"to":"+919800000001","template_id":"t_reminder","vars":{"name":"Asha"}}'
+   curl -s -X POST http://127.0.0.1:9080/api/v1/calls -H "Authorization: Bearer $B2WAVE_KEY" -H "Content-Type: application/json"         -d '{"audio":"prompt1.wav","rows":[{"number":"9800000001","name":"Ravi"}],"keymap":{"1":"Confirmed"},
+             "sms_rules":[{"when":"key:1","template_id":"t_confirm"},{"when":"not_answered","template_id":"t_missed"}]}'
+   curl -s -X POST http://127.0.0.1:9080/api/v1/campaigns -H "Authorization: Bearer $B2WAVE_KEY" -H "Content-Type: application/json"         -d '{"draft_id":"<id>","numbers":["9800000001"]}'
+   ```
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/status` | board, SIM, network, busy state |
+| POST | `/api/v1/sms` | one SMS (direct) or many (SMS campaign); `text` or `template_id`, `vars` |
+| POST | `/api/v1/calls` | broadcast call; `audio` or `tts`, `keymap`, `sms_rules`/`sms_template_id`, `record` |
+| POST | `/api/v1/campaigns` | launch a saved draft by `draft_id` with new `numbers`/`rows` |
+| GET | `/api/v1/campaigns`, `/api/v1/campaigns/{id}` | list / results per number |
+| POST | `/api/v1/campaigns/{id}/stop` | stop |
+| GET | `/api/v1/templates`, `/drafts`, `/audio`, `/messages` | IDs and data |
+
+Errors: 401 key · 400 input · 404 unknown id · 409 busy · 429 rate limit (120/min/key) · 502 SMS failed · 503 board offline.
+Webhooks are signed: `X-B2Wave-Signature: sha256=HMAC(secret, body)`.
+
 ## Using it
 
 - **Bulk SMS:** paste `number, name` lines or upload a CSV with a `number` column, write the message with variable chips, check the preview, then Send. Keep the gap at 3 s or more.
@@ -95,6 +123,7 @@ app/
   mailer.py         SMTP email + HTML report templates
   livekit_api.py    LiveKit access tokens (with agent dispatch) + connection test
   backup.py         export / inspect / restore of all data as one .zip
+  api_v1.py         REST API v1 (keys, endpoints, webhooks, rate limit, request log)
   flasher.py        board detection, esptool flashing, USB diagnostics
   static/index.html single-page UI
   static/vendor/    pinned libraries: Lucide, Chart.js, SweetAlert2, Notyf, livekit-client
