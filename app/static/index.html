@@ -5,6 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>B2Wave</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/static/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+<link rel="manifest" href="/static/icons/manifest.webmanifest">
+<meta name="theme-color" content="#4f46e5">
+<meta name="application-name" content="B2Wave">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -588,6 +594,77 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
 @media (max-width:860px){.bkcounts{grid-template-columns:repeat(3,1fr)}}
 .card label.drop{display:flex}
 .drop b{display:block}
+
+/* stepper + tabs */
+.stepper{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:var(--shadow)}
+.stepper button{flex:1;min-width:150px;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;text-align:left;color:var(--muted);transition:.12s}
+.stepper button:hover{background:var(--panel2);color:var(--text)}
+.stepper button.on{background:var(--accent-soft);color:var(--text)}
+.stepper .sn{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:700;font-size:13px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.stepper .sn svg.lucide{width:15px;height:15px}
+.stepper button.on .sn{background:var(--accent);border-color:var(--accent);color:#fff}
+.stepper button.done .sn{background:var(--ok);border-color:var(--ok);color:#fff}
+.stepper button.final.ready .sn{background:var(--ok);border-color:var(--ok);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 25%,transparent)}
+.stepper .st b{display:block;font-size:13.5px}.stepper .st small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.stepdiv{width:1px;background:var(--line);margin:6px 2px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px;box-shadow:var(--shadow)}
+.tabs button{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;color:var(--muted);font-weight:600;font-size:13.5px}
+.tabs button svg.lucide{width:16px;height:16px}
+.tabs button:hover{color:var(--text);background:var(--panel2)}
+.tabs button.on{background:var(--accent-soft);color:var(--accent)}
+.actions .spacer{flex:1}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.parsed{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pchip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.pchip.ok,.pchip.saved{background:var(--ok-soft);color:var(--ok-ink);border-color:transparent}
+.pchip svg.lucide{width:13px;height:13px}
+details.manual{margin-top:12px}details.manual summary{cursor:pointer;color:var(--muted);font-size:13.5px}
+.engines{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.engine{position:relative;text-align:left;display:flex;flex-direction:column;gap:5px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--panel);transition:.12s}
+.engine:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.engine.on{border-color:var(--accent);background:var(--accent-soft)}
+.engine .eico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--panel2);color:var(--accent)}
+.engine.on .eico{background:var(--accent);color:#fff}
+.engine small{color:var(--muted);font-size:12.5px;line-height:1.45}
+.engine .tag{position:absolute;top:12px;right:12px;margin:0}
+.ebox{margin-top:14px;padding:14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.grid3c{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.worker{margin-top:14px;padding:14px;border-radius:14px;border:1px dashed var(--line);background:var(--panel)}
+.whead{display:flex;align-items:center;gap:10px}.whead small{display:block;color:var(--muted);font-size:12.5px}
+.cicon.sm{width:32px;height:32px}
+.worker .wlog{max-height:180px;margin-top:10px}
+.tpls{display:flex;gap:8px;flex-wrap:wrap}
+.tpls button{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-size:13px;color:var(--text)}
+.tpls button svg.lucide{width:16px;height:16px;color:var(--accent)}
+.tpls button.on{border-color:var(--accent);background:var(--accent-soft)}
+.ready{border-radius:14px;padding:14px 16px;border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.ready.ok{background:var(--ok-soft);border-color:transparent}.ready.warn{background:var(--warn-soft);border-color:transparent}
+.ready .rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ready.ok .rhead{color:var(--ok-ink)}.ready.warn .rhead{color:var(--warn-ink)}
+.ready .rlist{display:flex;gap:8px;flex-wrap:wrap}
+.howit{margin-top:4px}
+@media (max-width:860px){.engines,.grid3c{grid-template-columns:1fr}.stepper button{min-width:46%}.stepdiv{display:none}}
+
+.btgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btno,.btyes{border-radius:12px;padding:14px;border:1px solid var(--line)}
+.btno{background:var(--bad-soft);border-color:transparent}.btno>b{color:var(--bad-ink)}
+.btyes{background:var(--ok-soft);border-color:transparent}.btyes>b{color:var(--ok-ink)}
+.btno>b,.btyes>b{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.btno li,.btyes li{color:var(--text)}
+#audSeg button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+@media (max-width:860px){.btgrid{grid-template-columns:1fr}#audSeg{flex-wrap:wrap}#audSeg button{flex:1 1 45%}}
+
+.heroacts{display:flex;gap:6px;flex-wrap:wrap}
+.kpi2{cursor:pointer;transition:transform .12s,border-color .12s}.kpi2:hover{transform:translateY(-2px);border-color:var(--accent)}
+.tabs.flat{background:none;border:0;box-shadow:none;padding:0;border-bottom:1px solid var(--line);border-radius:0;gap:2px}
+.tabs.flat button{border-radius:10px 10px 0 0;padding:9px 14px;position:relative}
+.tabs.flat button.on{background:none;color:var(--accent)}
+.tabs.flat button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--accent)}
+.tcount{font-style:normal;font-size:11px;font-weight:700;background:var(--warn);color:#fff;border-radius:9px;padding:0 6px;margin-left:2px}
+.tcount[hidden]{display:none}
+.ht{margin:0 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.quickacts{grid-template-columns:repeat(4,1fr)}
+@media (max-width:860px){.heroacts{width:100%}.heroacts .btn{flex:1}}
+.stepper button,.stepper button.final{flex-direction:row!important;justify-content:flex-start!important;text-align:left}
 </style>
 </head>
 <body>
@@ -691,13 +768,18 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
 
     <!-- HOME DASHBOARD -->
     <section class="view" id="v-home">
-      <div class="wiz" style="max-width:1100px">
+      <div class="wiz" style="max-width:1200px">
         <div class="hero card">
           <div class="hero-logo" id="heroLogo"></div>
           <div style="flex:1;min-width:220px">
             <h2 style="margin:0">B2Wave</h2>
-            <p class="sub" style="margin:2px 0 0">SMS, calls and voice campaigns from your browser</p>
             <div class="heronum" id="heroNum"></div>
+          </div>
+          <div class="heroacts">
+            <button class="btn ghost sm" data-go="messages"><i data-lucide="message-square-plus"></i> SMS</button>
+            <button class="btn ghost sm" data-go="phone"><i data-lucide="phone"></i> Call</button>
+            <button class="btn ghost sm" data-go="campaigns"><i data-lucide="megaphone"></i> Campaign</button>
+            <button class="btn ghost sm" data-go="ai"><i data-lucide="bot"></i> AI call</button>
           </div>
           <div class="hero-state" id="heroState"><span class="dot"></span><span>Connecting…</span></div>
         </div>
@@ -709,25 +791,43 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
           <div class="card stat"><span class="sic"><i data-lucide="activity"></i></span><span class="sl">Today</span><b id="stToday">—</b><small id="stTodayS"></small></div>
         </div>
 
-        <div class="card">
-          <h3 style="margin-top:0">What you should know right now</h3>
-          <div id="tips" class="tips"></div>
-        </div>
-
-        <div class="quickacts">
-          <button class="qa" data-go="messages"><span><i data-lucide="mail"></i></span><b>Send SMS</b><small>Chat-style messages, Unicode ok</small></button>
-          <button class="qa" data-go="phone"><span><i data-lucide="phone"></i></span><b>Make a call</b><small>Dial, answer, keypad</small></button>
-          <button class="qa" data-go="campaigns"><span><i data-lucide="megaphone"></i></span><b>Voice campaign</b><small>Play audio, capture 1 / 2</small></button>
-          <button class="qa" data-go="audio"><span><i data-lucide="headphones"></i></span><b>Talk from PC</b><small>Wiring + audio bridge</small></button>
+        <div class="stats">
+          <div class="card stat kpi2" data-go="messages"><span class="sic"><i data-lucide="message-square-text"></i></span><span class="sl">Messages</span><b id="kMsg">0</b><small id="kMsgS"></small></div>
+          <div class="card stat kpi2" data-go="phone"><span class="sic"><i data-lucide="phone-call"></i></span><span class="sl">Calls · 7 days</span><b id="kCall">0</b><small id="kCallS"></small></div>
+          <div class="card stat kpi2" data-go="campaigns"><span class="sic"><i data-lucide="megaphone"></i></span><span class="sl">Last campaign</span><b id="kCamp">—</b><small id="kCampS">No campaigns yet</small></div>
+          <div class="card stat kpi2" data-go="bulk"><span class="sic"><i data-lucide="send"></i></span><span class="sl">Last bulk SMS</span><b id="kBulk">—</b><small id="kBulkS">No bulk jobs yet</small></div>
         </div>
 
         <div class="grid2 top">
           <div class="card"><h3 style="margin-top:0">Activity · last 7 days</h3><div class="chartbox"><canvas id="chActivity"></canvas></div></div>
           <div class="card"><h3 style="margin-top:0">Campaign call outcomes</h3><div class="chartbox"><canvas id="chOutcome"></canvas></div></div>
         </div>
-        <div class="grid2 top">
-          <div class="card"><h3 style="margin-top:0">Latest messages</h3><div id="homeMsgs"></div></div>
-          <div class="card"><h3 style="margin-top:0">Latest calls</h3><div id="homeCalls"></div></div>
+
+        <div class="card">
+          <div class="tabs flat" id="homeTabs">
+            <button data-h="recent" class="on"><i data-lucide="clock"></i> Recent activity</button>
+            <button data-h="tips"><i data-lucide="lightbulb"></i> Guidance <em class="tcount" id="tipCount"></em></button>
+            <button data-h="start"><i data-lucide="rocket"></i> Quick start</button>
+          </div>
+          <div class="hpanel" data-hp="recent">
+            <div class="grid2 top" style="margin-top:12px">
+              <div><h4 class="ht">Latest messages</h4><div id="homeMsgs"></div></div>
+              <div><h4 class="ht">Latest calls</h4><div id="homeCalls"></div></div>
+            </div>
+          </div>
+          <div class="hpanel" data-hp="tips" hidden><div id="tips" class="tips" style="margin-top:12px"></div></div>
+          <div class="hpanel" data-hp="start" hidden>
+            <div class="quickacts" style="margin-top:12px">
+              <button class="qa" data-go="messages"><span><i data-lucide="mail"></i></span><b>Send SMS</b><small>Chat-style messages, Unicode ok</small></button>
+              <button class="qa" data-go="bulk"><span><i data-lucide="send"></i></span><b>Bulk SMS</b><small>One message to many numbers</small></button>
+              <button class="qa" data-go="campaigns"><span><i data-lucide="megaphone"></i></span><b>Voice campaign</b><small>Play audio, capture 1 / 2</small></button>
+              <button class="qa" data-go="ai"><span><i data-lucide="bot"></i></span><b>AI voice agent</b><small>LiveKit agent talks on calls</small></button>
+              <button class="qa" data-go="audio"><span><i data-lucide="headphones"></i></span><b>Talk on calls</b><small>Headset, speaker, PC bridge</small></button>
+              <button class="qa" data-go="settings"><span><i data-lucide="archive"></i></span><b>Backup</b><small>Export or restore all data</small></button>
+              <button class="qa" data-go="setup"><span><i data-lucide="cpu"></i></span><b>Setup &amp; tests</b><small>Drivers, firmware, diagnostics</small></button>
+              <button class="qa" data-go="help"><span><i data-lucide="life-buoy"></i></span><b>Help &amp; guide</b><small>Everything explained</small></button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1017,9 +1117,77 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
         <div class="card">
           <h2>Talk on calls</h2>
           <p class="sub" style="margin-bottom:8px">The A7672S firmware on this board (A131B01A7672M6) can't send call audio over USB. Voice only comes out of the <b>SPK</b> and <b>MIC</b> pads on the back of the board. Pick one of these setups.</p>
-          <div class="seg" id="audSeg"><button data-o="a" class="on">A · Speaker + mic</button><button data-o="b">B · Through this PC</button><button data-o="c">C · Over Wi-Fi</button></div>
+          <div class="seg" id="audSeg"><button data-o="a" class="on"><i data-lucide="speaker"></i> A · Speaker + mic</button><button data-o="d"><i data-lucide="headphones"></i> B · Headset jack</button><button data-o="b"><i data-lucide="monitor-speaker"></i> C · Through this PC</button><button data-o="c"><i data-lucide="wifi"></i> D · Over Wi-Fi</button></div>
         </div>
 
+        <div class="card" id="audCtl">
+          <div class="cardhead"><span class="cicon"><i data-lucide="sliders-horizontal"></i></span><div style="flex:1"><h3>Call audio controls</h3><small>Changes apply to the 4G module instantly, even during a call</small></div><span class="rs" id="acState">Not loaded</span></div>
+          <div class="grid2">
+            <div><label>Speaker / earphone volume <b id="acVolV">–</b></label><input type="range" id="acVol" min="0" max="7" step="1"></div>
+            <div><label>Microphone sensitivity <b id="acMicV">–</b></label><input type="range" id="acMic" min="0" max="7" step="1"></div>
+          </div>
+          <label>Audio output path</label>
+          <div class="seg" id="acPath"><button data-v="1"><i data-lucide="headphones"></i> Earpiece / headset</button><button data-v="3"><i data-lucide="volume-2"></i> Loudspeaker</button></div>
+          <p class="hint">If your earphones or speaker are silent, switch the path and test again. Which one drives the SPK pads depends on the board wiring.</p>
+          <div class="actions">
+            <label class="chk" style="margin:0"><input type="checkbox" id="acMute"> Mute my microphone</label><span class="spacer"></span>
+            <button class="btn ghost" id="acTest"><i data-lucide="volume-2"></i> Play test voice on the board</button>
+          </div>
+        </div>
+
+        <div class="card audopt" data-o="d" hidden>
+          <h3>Headset jack: plug in any wired earphones with mic <span class="tag">Easy · ~₹150</span></h3>
+          <p class="sub">Add a standard <b>3.5 mm 4-pole (TRRS) socket</b> to the board's SPK and MIC pads. Then any phone earphones with a mic (the kind that came with your phone) plug straight in, like a landline handset.</p>
+          <div id="wireD"></div>
+          <div class="grid2 top">
+            <div>
+              <h4>Parts</h4>
+              <ul class="plain">
+                <li>1 × <b>3.5 mm TRRS female jack breakout</b>, 4 pins marked L / R / G / M (search "TRRS audio jack module")</li>
+                <li>1 × <b>47 µF</b> electrolytic capacitor (16 V or more)</li>
+                <li>1 × <b>22 Ω</b> resistor (¼ W)</li>
+                <li>4 thin wires, soldering iron, a little heat-shrink</li>
+                <li>Any <b>wired earphones with mic</b> (3.5 mm, 4-pole)</li>
+              </ul>
+            </div>
+            <div>
+              <h4>What each part does</h4>
+              <ul class="plain">
+                <li><b>The capacitor</b> lets the voice through but blocks the steady DC voltage, so your earphones don't get a constant current.</li>
+                <li><b>The resistor</b> limits the volume and protects both your ears and the module's speaker amplifier.</li>
+                <li><b>Both ears (L and R) are joined</b>, so you hear the call in both.</li>
+              </ul>
+            </div>
+          </div>
+          <h4>Steps</h4>
+          <ol class="plain">
+            <li>Power off the board. Turn it over: the <b>SPK</b> and <b>MIC</b> pad pairs are near the SIM slot, each with a <b>+</b> mark.</li>
+            <li><b>SPK +</b> → capacitor <b>+ leg</b>. Capacitor − leg → 22 Ω resistor → jack <b>L</b> and <b>R</b> (bridge L and R together).</li>
+            <li>Jack <b>G</b> (ground) → board <b>GND</b> (header pin 41 or 43) <b>and</b> → <b>MIC −</b> pad.</li>
+            <li>Jack <b>M</b> (mic) → <b>MIC +</b> pad.</li>
+            <li><b>Leave SPK − unconnected.</b> Never connect it to ground: it's an active output, and grounding it can damage the amplifier.</li>
+            <li>Power on, plug in your earphones, then use <b>Call audio controls</b> above: <i>Play test voice</i>, choose the path that works, set volume and mic.</li>
+          </ol>
+          <div class="note" style="display:flex;gap:10px;margin-top:10px"><i data-lucide="info"></i><div><b>Earphone standard:</b> almost all phone earphones since 2012 use the <b>CTIA</b> layout (L, R, Ground, Mic), which is what the steps above assume. Very old Nokia/Sony earphones (OMTP) swap Ground and Mic. If the mic doesn't work, that's usually why. Plain earphones without a mic also work for listening.</div></div>
+        </div>
+
+        <div class="card" id="audBt">
+          <div class="cardhead"><span class="cicon"><i data-lucide="bluetooth"></i></span><div><h3>Bluetooth headset?</h3><small>What the board's "Bluetooth 5.0 LE" can and can't do</small></div></div>
+          <div class="btgrid">
+            <div class="btno"><b><i data-lucide="circle-x"></i> Not directly on this board</b>
+              <ul class="plain">
+                <li>The ESP32-S3 only has <b>Bluetooth Low Energy</b> (for sensors and data). Handsfree headsets and car kits use <b>Bluetooth Classic</b> (the "HFP" call profile), which this chip doesn't have.</li>
+                <li>New "LE Audio" earbuds need radio features the ESP32-S3 lacks too.</li>
+                <li>The ESP32 also has no audio wires to the 4G module, so it can't carry call sound.</li>
+              </ul></div>
+            <div class="btyes"><b><i data-lucide="circle-check"></i> What works today</b>
+              <ul class="plain">
+                <li><b>Pair the Bluetooth headset with your PC</b>, then wire the board to a USB sound card (option C, "Through this PC").</li>
+                <li>In the <b>PC audio bridge</b>, pick the headset as <i>PC speaker</i> and <i>PC microphone</i>. You talk on GSM calls through your Bluetooth headset.</li>
+                <li>Or use the <b>headset jack</b> option for a wired headset with no PC involved.</li>
+              </ul></div>
+          </div>
+        </div>
         <div class="card audopt" data-o="a">
           <h3>Option A: speaker + mic straight on the board <span class="tag">Easiest · ~₹100</span></h3>
           <p class="sub">You talk at the board, like a desk phone. The app still dials, answers and hangs up.</p>
@@ -1034,7 +1202,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
         </div>
 
         <div class="card audopt" data-o="b" hidden>
-          <h3>Option B: talk through this PC <span class="tag">Recommended · ~₹250</span></h3>
+          <h3>Option C: talk through this PC <span class="tag">Recommended for AI calls · ~₹250</span></h3>
           <p class="sub">A cheap USB sound card carries call audio to your laptop. The bridge below plays it on your PC speakers and sends your PC mic into the call. Use headphones to avoid echo.</p>
           <div id="wireB"></div>
           <h4>Parts</h4>
@@ -1060,7 +1228,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
         </div>
 
         <div class="card audopt" data-o="c" hidden>
-          <h3>Option C: voice over Wi-Fi, no laptop <span class="tag">Advanced · ~₹350</span></h3>
+          <h3>Option D: voice over Wi-Fi, no laptop <span class="tag">Advanced · ~₹350</span></h3>
           <p class="sub">An I2S audio codec board sits between the ESP32 and the SPK/MIC pads. The ESP32 streams the call audio over Wi-Fi to any browser, even your phone. Needs a firmware update, which I'll build once you have the parts.</p>
           <div id="wireC"></div>
           <h4>Parts</h4>
@@ -1165,102 +1333,187 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
     <!-- AI VOICE AGENT -->
     <section class="view" id="v-ai">
       <div class="wiz" style="max-width:1150px">
-        <div class="card aihero">
+        <div class="stepper" id="aiTabs" role="tablist">
+          <button data-t="connect" class="on" role="tab"><span class="sn">1</span><span class="st"><b>Connect LiveKit</b><small id="aiT1">Paste your keys</small></span></button>
+          <button data-t="engine" role="tab"><span class="sn">2</span><span class="st"><b>AI engine</b><small id="aiT2">Models and agent</small></span></button>
+          <button data-t="persona" role="tab"><span class="sn">3</span><span class="st"><b>Persona</b><small id="aiT3">What it says</small></span></button>
+          <span class="stepdiv"></span>
+          <button data-t="talk" role="tab" class="final"><span class="sn"><i data-lucide="phone-call"></i></span><span class="st"><b>Talk &amp; call</b><small id="aiT4">Final step</small></span></button>
+          <button data-t="history" role="tab"><span class="sn"><i data-lucide="history"></i></span><span class="st"><b>History</b><small>Transcripts</small></span></button>
+        </div>
+
+        <!-- STEP 1 · CONNECT -->
+        <div class="aipanel" data-p="connect">
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="plug"></i></span><div style="flex:1"><h3>Connect your LiveKit project</h3><small>LiveKit Cloud: Settings &gt; API keys &gt; Create key &gt; copy the <b>Environment variables</b></small></div><span class="rs" id="aiState">Not connected</span></div>
+            <label>Paste from LiveKit</label>
+            <textarea id="aiEnv" rows="4" spellcheck="false" class="mono" placeholder="LIVEKIT_URL=wss://your-project.livekit.cloud&#10;LIVEKIT_API_KEY=APIxxxxxxxx&#10;LIVEKIT_API_SECRET=xxxxxxxxxxxxxxxx"></textarea>
+            <div class="parsed" id="aiParsed"></div>
+            <details class="manual"><summary>Or enter the values one by one</summary>
+              <label>LiveKit URL</label><input id="aiUrl" placeholder="wss://your-project.livekit.cloud">
+              <div class="grid2">
+                <div><label>API key</label><input id="aiKey" placeholder="APIxxxxxxxx" autocomplete="off"></div>
+                <div><label>API secret</label><div class="pw"><input id="aiSecret" type="password" placeholder="secret" autocomplete="new-password"><button class="iconbtn" type="button" data-eye="aiSecret"><i data-lucide="eye"></i></button></div></div>
+              </div>
+            </details>
+            <div class="note" style="margin-top:12px;display:flex;gap:10px"><i data-lucide="lock"></i><div>Keys are saved only on this PC (<code>agent/.env</code> and <code>app/data</code>) and are never uploaded to GitHub. Don't have a project yet? Create one free at <a href="https://cloud.livekit.io" target="_blank" rel="noopener">cloud.livekit.io</a>.</div></div>
+            <div class="actions"><button class="btn" id="aiConnect"><i data-lucide="plug-zap"></i> Save &amp; test connection</button><span class="spacer"></span><button class="btn ghost" data-next="engine">Next: AI engine <i data-lucide="arrow-right"></i></button></div>
+          </div>
+        </div>
+
+        <!-- STEP 2 · ENGINE -->
+        <div class="aipanel" data-p="engine" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="brain"></i></span><div><h3>Choose how the agent thinks and speaks</h3><small>Pick one. You can switch any time.</small></div></div>
+            <div class="engines" id="aiEngines">
+              <button class="engine on" data-e="inference"><span class="eico"><i data-lucide="sparkles"></i></span><b>LiveKit Inference</b><span class="tag">Recommended</span><small>No other API keys. Speech, AI and voice run through your LiveKit project and are billed by LiveKit.</small></button>
+              <button class="engine" data-e="cloud"><span class="eico"><i data-lucide="cloud"></i></span><b>Agent hosted on LiveKit Cloud</b><small>Your agent runs in LiveKit Cloud (deployed with the LiveKit CLI or built in their console). Nothing runs on this PC.</small></button>
+              <button class="engine" data-e="openai"><span class="eico"><i data-lucide="key-round"></i></span><b>My own OpenAI key</b><small>OpenAI Realtime speech-to-speech, billed to your OpenAI account.</small></button>
+            </div>
+
+            <div class="ebox" data-for="inference">
+              <div class="grid3c">
+                <div><label>Speech recognition</label><select id="aiStt">
+                  <option value="deepgram/nova-3:multi">Deepgram Nova-3 (multilingual: Hindi, English…)</option>
+                  <option value="deepgram/nova-2-phonecall:en">Deepgram Nova-2 Phonecall (English, tuned for phone audio)</option>
+                  <option value="assemblyai/universal-streaming:en">AssemblyAI Universal (English)</option>
+                  <option value="cartesia/ink-whisper">Cartesia Ink Whisper</option></select></div>
+                <div><label>AI model</label><select id="aiLlm">
+                  <option value="openai/gpt-4.1-mini">OpenAI GPT-4.1 mini (fast, recommended)</option>
+                  <option value="openai/gpt-4.1">OpenAI GPT-4.1</option>
+                  <option value="openai/gpt-4o-mini">OpenAI GPT-4o mini</option>
+                  <option value="openai/gpt-5-mini">OpenAI GPT-5 mini</option>
+                  <option value="google/gemini-2.5-flash">Google Gemini 2.5 Flash</option>
+                  <option value="google/gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+                  <option value="deepseek-ai/deepseek-v3">DeepSeek V3</option></select></div>
+                <div><label>Voice engine</label><select id="aiTts">
+                  <option value="cartesia/sonic-2">Cartesia Sonic-2 (natural, multilingual)</option>
+                  <option value="cartesia/sonic-turbo">Cartesia Sonic Turbo (lowest delay)</option>
+                  <option value="elevenlabs/eleven_multilingual_v2">ElevenLabs Multilingual v2</option>
+                  <option value="elevenlabs/eleven_flash_v2_5">ElevenLabs Flash v2.5</option>
+                  <option value="rime/arcana">Rime Arcana</option>
+                  <option value="inworld/inworld-tts-1">Inworld TTS-1</option></select></div>
+              </div>
+              <label>Voice ID <span class="muted">(optional: leave empty for the default voice)</span></label>
+              <input id="aiTtsVoice" placeholder="e.g. a Cartesia or ElevenLabs voice ID" class="mono">
+            </div>
+            <div class="ebox" data-for="cloud" hidden>
+              <label>Agent name in LiveKit Cloud</label><input id="aiAgentCloud" placeholder="b2wave-agent">
+              <p class="hint">B2Wave asks LiveKit to send this agent into every call room. To deploy B2Wave's own agent to LiveKit Cloud, run <code>lk agent create</code> inside the <code>agent</code> folder (LiveKit CLI), using the same name.</p>
+            </div>
+            <div class="ebox" data-for="openai" hidden>
+              <div class="grid2">
+                <div><label>OpenAI API key</label><div class="pw"><input id="aiOpenai" type="password" placeholder="sk-..." autocomplete="new-password"><button class="iconbtn" type="button" data-eye="aiOpenai"><i data-lucide="eye"></i></button></div></div>
+                <div><label>Voice</label><select id="aiVoice"><option>alloy</option><option>ash</option><option>ballad</option><option>coral</option><option>echo</option><option>sage</option><option>shimmer</option><option>verse</option></select></div>
+              </div>
+              <p class="hint">Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>.</p>
+            </div>
+
+            <div class="worker" id="aiWorker">
+              <div class="whead"><span class="cicon sm"><i data-lucide="server"></i></span><div style="flex:1"><b>Agent worker on this PC</b><small id="awSub">Runs the AI agent in the background. B2Wave starts and stops it for you.</small></div><span class="rs" id="awState">Stopped</span></div>
+              <div class="actions" style="margin-top:10px">
+                <button class="btn" id="awInstall"><i data-lucide="download"></i> Install agent (one time)</button>
+                <button class="btn green" id="awStart"><i data-lucide="play"></i> Start</button>
+                <button class="btn ghost" id="awRestart"><i data-lucide="rotate-cw"></i> Restart</button>
+                <button class="btn ghost" id="awStop"><i data-lucide="square"></i> Stop</button>
+                <span class="spacer"></span><label class="chk" style="margin:0"><input type="checkbox" id="awAuto"> Start with B2Wave</label>
+              </div>
+              <pre class="wlog" id="awLog"></pre>
+            </div>
+            <div class="actions"><button class="btn" id="aiSaveEngine"><i data-lucide="save"></i> Save engine</button><span class="spacer"></span><button class="btn ghost" data-next="connect"><i data-lucide="arrow-left"></i> Back</button><button class="btn ghost" data-next="persona">Next: Persona <i data-lucide="arrow-right"></i></button></div>
+          </div>
+        </div>
+
+        <!-- STEP 3 · PERSONA -->
+        <div class="aipanel" data-p="persona" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="user-round-cog"></i></span><div><h3>Persona</h3><small>Who the agent is and what it should achieve</small></div></div>
+            <label>Start from a template</label>
+            <div class="tpls" id="aiTpls">
+              <button data-p="receptionist"><i data-lucide="building-2"></i>Receptionist</button>
+              <button data-p="appointment"><i data-lucide="calendar-check"></i>Appointment reminder</button>
+              <button data-p="survey"><i data-lucide="clipboard-list"></i>Feedback survey</button>
+              <button data-p="payment"><i data-lucide="indian-rupee"></i>Payment reminder</button>
+              <button data-p="lead"><i data-lucide="target"></i>Lead qualification</button>
+              <button data-p="custom"><i data-lucide="pencil"></i>Custom</button>
+            </div>
+            <label>Instructions</label>
+            <textarea id="aiInstr" rows="6" placeholder="You are Riya from B2 Clinic. Confirm tomorrow's appointment at 11 am..."></textarea>
+            <div class="grid2">
+              <div><label>Opening line</label><input id="aiGreet" placeholder="Hello! This is Riya calling from B2 Clinic."></div>
+              <div><label>Language</label><select id="aiLang"><option value="">Auto (match the person)</option><option>English (Indian accent)</option><option>Hindi</option><option>Gujarati</option><option>Hinglish</option><option>Marathi</option><option>Tamil</option><option>Telugu</option><option>Bengali</option></select></div>
+            </div>
+            <div class="actions"><button class="btn" id="aiSavePersona"><i data-lucide="save"></i> Save persona</button><span class="spacer"></span><button class="btn ghost" data-next="engine"><i data-lucide="arrow-left"></i> Back</button><button class="btn green" data-next="talk">Go to Talk &amp; call <i data-lucide="arrow-right"></i></button></div>
+          </div>
+        </div>
+
+        <!-- FINAL · TALK -->
+        <div class="aipanel" data-p="talk" hidden>
+          <div class="ready" id="aiReady"></div>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="phone-call"></i></span><div style="flex:1"><h3>Talk to the agent</h3><small>Try it from this PC first, then call a phone</small></div><span class="rs" id="aiLive">Idle</span></div>
+            <div class="seg" id="aiMode"><button data-m="test" class="on"><i data-lucide="laptop"></i> Test with PC mic</button><button data-m="call"><i data-lucide="phone-outgoing"></i> Call a phone number</button></div>
+            <div class="grid2" style="margin-top:12px">
+              <div id="aiCallBox" hidden>
+                <label>Phone number</label><input id="aiNum" placeholder="+91 98xxxxxxxx" inputmode="tel">
+                <div class="grid2">
+                  <div><label>Call audio in (from board SPK)</label><select id="aiIn"></select></div>
+                  <div><label>Into call (to board MIC)</label><select id="aiOut"></select></div>
+                </div>
+                <p class="hint">Needs the USB sound card wiring (Talk on calls &gt; option B). Without it the agent can't hear or speak to the person.</p>
+              </div>
+              <div id="aiTestBox">
+                <div class="grid2">
+                  <div><label>Your microphone</label><select id="aiMic"></select></div>
+                  <div><label>Your speaker / headphones</label><select id="aiSpk"></select></div>
+                </div>
+                <p class="hint">Talk to the agent from this PC. No phone call is made.</p>
+              </div>
+              <div class="aimeter">
+                <div class="meters" style="margin-top:0"><span>Person</span><div class="meter"><i id="aiMIn"></i></div><span>Agent</span><div class="meter"><i id="aiMOut"></i></div></div>
+                <ol class="aisteps" id="aiStepsLog"></ol>
+              </div>
+            </div>
+            <div class="actions"><button class="btn green" id="aiGo"><i data-lucide="play"></i> Start test conversation</button><button class="btn red" id="aiHang" disabled><i data-lucide="phone-off"></i> End</button><span class="muted" id="aiTimer" style="font-variant-numeric:tabular-nums"></span></div>
+            <div class="transcript" id="aiTranscript"><div class="empty" style="padding:14px">The live transcript appears here during the conversation.</div></div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="aipanel" data-p="history" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="history"></i></span><div><h3>AI call history</h3><small>Every AI conversation with its transcript</small></div></div>
+            <div id="aiHistory"><div class="empty">No AI calls yet</div></div>
+          </div>
+        </div>
+
+        <details class="hsec howit"><summary><span><i data-lucide="workflow"></i></span> How AI calls work</summary>
           <div class="aiflow">
             <span class="fnode"><i data-lucide="smartphone"></i><b>Caller</b><small>GSM / VoLTE</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
             <span class="fnode"><i data-lucide="cpu"></i><b>A7672S</b><small>SPK / MIC pads</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
             <span class="fnode"><i data-lucide="usb"></i><b>USB sound card</b><small>audio bridge</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
             <span class="fnode accent"><i data-lucide="radio"></i><b>LiveKit</b><small>real-time room</small></span><span class="farrow"><i data-lucide="arrow-left-right"></i></span>
-            <span class="fnode accent"><i data-lucide="bot"></i><b>AI agent</b><small>OpenAI voice</small></span>
+            <span class="fnode accent"><i data-lucide="bot"></i><b>AI agent</b><small>Inference / OpenAI / Cloud</small></span>
           </div>
-          <ul class="checks" id="aiChecks" style="margin:16px 0 0"></ul>
-        </div>
-
-        <div class="grid2 top">
-          <div class="card">
-            <div class="cardhead"><span class="cicon"><i data-lucide="key-round"></i></span><div style="flex:1"><h3>1 · LiveKit &amp; AI keys</h3><small>Free LiveKit Cloud project + OpenAI key</small></div><span class="rs" id="aiState">Not set up</span></div>
-            <label>LiveKit URL</label><input id="aiUrl" placeholder="wss://your-project.livekit.cloud">
-            <div class="grid2">
-              <div><label>API key</label><input id="aiKey" placeholder="APIxxxxxxxx" autocomplete="off"></div>
-              <div><label>API secret</label><div class="pw"><input id="aiSecret" type="password" placeholder="secret" autocomplete="new-password"><button class="iconbtn" type="button" data-eye="aiSecret"><i data-lucide="eye"></i></button></div></div>
-            </div>
-            <div class="grid2">
-              <div><label>OpenAI API key</label><div class="pw"><input id="aiOpenai" type="password" placeholder="sk-..." autocomplete="new-password"><button class="iconbtn" type="button" data-eye="aiOpenai"><i data-lucide="eye"></i></button></div></div>
-              <div><label>Agent name</label><input id="aiAgent" placeholder="b2wave-agent"></div>
-            </div>
-            <div class="note" style="margin-top:12px;display:flex;gap:10px"><i data-lucide="info"></i><div>Create a project at <a href="https://cloud.livekit.io" target="_blank" rel="noopener">cloud.livekit.io</a>, then go to <b>Settings &gt; API keys</b>. Get an OpenAI key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>. Keys stay on this PC (<code>agent/.env</code>).</div></div>
-            <div class="actions"><button class="btn" id="aiSave"><i data-lucide="save"></i> Save</button><button class="btn ghost" id="aiTest"><i data-lucide="plug-zap"></i> Test LiveKit</button></div>
-            <div class="agentrun">
-              <div><b>Start the AI agent worker</b><small>Run this once and keep the window open while making AI calls</small></div>
-              <code id="aiCmd">agent\run_agent.bat</code><button class="btn ghost sm" id="aiCopy"><i data-lucide="copy"></i> Copy</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="cardhead"><span class="cicon"><i data-lucide="sparkles"></i></span><div><h3>2 · Agent persona</h3><small>What the AI says and how it behaves</small></div></div>
-            <label>Template</label>
-            <select id="aiPreset">
-              <option value="custom">Custom</option>
-              <option value="receptionist">Receptionist / enquiry</option>
-              <option value="appointment">Appointment reminder</option>
-              <option value="survey">Customer feedback survey</option>
-              <option value="payment">Payment reminder</option>
-              <option value="lead">Lead qualification</option>
-            </select>
-            <label>Instructions</label>
-            <textarea id="aiInstr" rows="6" placeholder="You are Riya from B2 Clinic. Confirm tomorrow's appointment at 11 am..."></textarea>
-            <label>Opening line</label><input id="aiGreet" placeholder="Hello! This is Riya calling from B2 Clinic.">
-            <div class="grid2">
-              <div><label>Voice</label><select id="aiVoice"><option>alloy</option><option>ash</option><option>ballad</option><option>coral</option><option>echo</option><option>sage</option><option>shimmer</option><option>verse</option></select></div>
-              <div><label>Language</label><select id="aiLang"><option value="">Auto (match the caller)</option><option>English (Indian accent)</option><option>Hindi</option><option>Gujarati</option><option>Hinglish</option><option>Marathi</option><option>Tamil</option><option>Telugu</option><option>Bengali</option></select></div>
-            </div>
-            <div class="actions"><button class="btn ghost" id="aiSavePersona"><i data-lucide="save"></i> Save persona</button></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="cardhead"><span class="cicon"><i data-lucide="phone-call"></i></span><div style="flex:1"><h3>3 · Talk to the agent</h3><small>Try it from this PC first, then call a phone</small></div><span class="rs" id="aiLive">Idle</span></div>
-          <div class="seg" id="aiMode"><button data-m="test" class="on"><i data-lucide="laptop"></i> Test with PC mic</button><button data-m="call"><i data-lucide="phone-outgoing"></i> Call a phone number</button></div>
-          <div class="grid2" style="margin-top:12px">
-            <div id="aiCallBox" hidden>
-              <label>Phone number</label><input id="aiNum" placeholder="+91 98xxxxxxxx" inputmode="tel">
-              <div class="grid2">
-                <div><label>Call audio in (from board SPK)</label><select id="aiIn"></select></div>
-                <div><label>Into call (to board MIC)</label><select id="aiOut"></select></div>
-              </div>
-              <p class="hint">Needs the USB sound card wiring (Talk on calls &gt; option B). Without it the agent can't hear or speak to the person.</p>
-            </div>
-            <div id="aiTestBox">
-              <div class="grid2">
-                <div><label>Your microphone</label><select id="aiMic"></select></div>
-                <div><label>Your speaker / headphones</label><select id="aiSpk"></select></div>
-              </div>
-              <p class="hint">Talk to the agent from this PC to check keys, persona and voice. No phone call is made.</p>
-            </div>
-            <div class="aimeter">
-              <div class="meters" style="margin-top:0"><span>Person</span><div class="meter"><i id="aiMIn"></i></div><span>Agent</span><div class="meter"><i id="aiMOut"></i></div></div>
-              <ol class="aisteps" id="aiSteps"></ol>
-            </div>
-          </div>
-          <div class="actions"><button class="btn green" id="aiGo"><i data-lucide="play"></i> Start test conversation</button><button class="btn red" id="aiHang" disabled><i data-lucide="phone-off"></i> End</button><span class="muted" id="aiTimer" style="font-variant-numeric:tabular-nums"></span></div>
-          <div class="transcript" id="aiTranscript"><div class="empty" style="padding:14px">The live transcript appears here during the conversation.</div></div>
-        </div>
-
-        <div class="card">
-          <div class="cardhead"><span class="cicon"><i data-lucide="history"></i></span><div><h3>4 · AI call history</h3><small>Every AI conversation with its transcript</small></div></div>
-          <div id="aiHistory"><div class="empty">No AI calls yet</div></div>
-        </div>
+        </details>
       </div>
     </section>
 
     <!-- SETTINGS -->
     <section class="view" id="v-settings">
       <div class="settings">
-        <div class="card">
+        <div class="tabs" id="setTabs" role="tablist">
+          <button data-s="device" class="on"><i data-lucide="cpu"></i> Device</button>
+          <button data-s="connection"><i data-lucide="cable"></i> Connection</button>
+          <button data-s="email"><i data-lucide="mail"></i> Email</button>
+          <button data-s="backup"><i data-lucide="archive"></i> Backup</button>
+          <button data-s="alerts"><i data-lucide="bell"></i> Notifications</button>
+        </div>
+        <div class="card" data-stab="device">
           <h3>Device</h3>
           <div class="kv" id="devInfo"></div>
         </div>
-        <div class="card">
+        <div class="card" data-stab="connection" hidden>
           <h3>Connection</h3>
           <div class="seg" id="modeSeg">
             <button data-m="auto">Auto</button><button data-m="wifi">Wi-Fi bridge</button><button data-m="serial">USB cable</button>
@@ -1274,7 +1527,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
           </div>
           <div id="scanOut"></div>
         </div>
-        <div class="card" id="smtpCard">
+        <div class="card" id="smtpCard" data-stab="email" hidden>
           <div class="cardhead"><span class="cicon"><i data-lucide="mail"></i></span><div style="flex:1"><h3>Email (SMTP)</h3><small>Email campaign and bulk SMS reports automatically when they finish</small></div><span class="rs" id="smtpState">Not set up</span></div>
           <div class="grid2">
             <div><label>Provider</label><select id="smPreset"><option value="gmail">Gmail</option><option value="outlook">Outlook / Microsoft 365</option><option value="zoho">Zoho Mail (India)</option><option value="yahoo">Yahoo Mail</option><option value="custom">Custom server</option></select></div>
@@ -1288,7 +1541,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
           <div class="note" style="margin-top:12px;display:flex;gap:10px"><i data-lucide="key-round"></i><div><b>Gmail:</b> turn on 2-Step Verification, then create an App Password at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> and paste it above. Your normal Gmail password will not work. The password is stored only on this PC (app/data/config.json).</div></div>
           <div class="actions"><button class="btn" id="smSave"><i data-lucide="save"></i> Save</button><button class="btn ghost" id="smTest"><i data-lucide="send"></i> Send test email</button></div>
         </div>
-        <div class="card" id="backupCard">
+        <div class="card" id="backupCard" data-stab="backup" hidden>
           <div class="cardhead"><span class="cicon"><i data-lucide="archive"></i></span><div style="flex:1"><h3>Backup &amp; restore</h3><small>Export everything to one .zip, or restore it on this or another PC</small></div></div>
           <div class="bkcounts" id="bkCounts"></div>
           <div class="grid2 top" style="margin-top:6px">
@@ -1310,7 +1563,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
           </div>
           <div id="bkSafety"></div>
         </div>
-        <div class="card">
+        <div class="card" data-stab="alerts" hidden>
           <h3>Notifications</h3>
           <p style="color:var(--muted);margin:0 0 10px;font-size:14px">Desktop alerts and ringtone for incoming SMS and calls.</p>
           <button class="btn ghost" id="notifBtn">Enable notifications</button>
@@ -1328,7 +1581,7 @@ a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decorati
     <div class="st" id="cSt"></div>
     <div id="cKeysWrap" hidden>
       <div class="keys" id="cKeys"></div>
-      <div class="vol">Volume <input type="range" min="0" max="5" value="3" id="vol"></div>
+      <div class="vol">Volume <input type="range" min="0" max="7" value="5" id="vol"></div>
     </div>
     <div class="callrow">
       <button class="round btn green pulse" id="cAnswer" title="Answer"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></button>
@@ -1380,6 +1633,7 @@ function handle(e){
       $('#log').innerHTML=''; e.console.forEach(addLog);
       renderAll();
       Splash.msg(e.status.connected?'Connected to the board':'Server ready, looking for the board…'); Splash.hide();
+      if(!window._aiAuto){ window._aiAuto=1; aiAutoStart(); }
       if(!S.booted){ S.booted=true; const hv=location.hash.slice(1); show(hv&&document.getElementById('v-'+hv)?hv:(S.config.setup_done?'home':'setup')); }
       break;
     case 'status': S.status=e.status; const prev=S.call.state; S.call=e.call; renderStatus(); renderHome(); renderCall(prev); W.onStatus(); if(prev!==S.call.state) Bridge.onCall(S.call.state); break;
@@ -1389,6 +1643,7 @@ function handle(e){
     case 'upload_progress': onUploadProgress(e); break;
     case 'bulk': onBulk(e.job); break;
     case 'sim_changed': onSimChanged(e); break;
+    case 'agent_worker': onAgentWorker(e); break;
     case 'restored': if(!BKP.restoring) bkDone(e.result,false); break;
     case 'message': upsertMsg(e.msg); if(e.notify) notifySms(e.msg); renderHome(); break;
     case 'messages': S.messages=e.messages; renderThreads(); renderConv(); break;
@@ -1422,12 +1677,12 @@ function show(v){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS',ai:'AI voice agent'}[v];
-  if(v==='ai') loadAi();
+  if(v==='ai') loadAi(); if(v==='audio') loadAudioCtl();
   if(v==='bulk') loadBulk(); if(v==='settings'||v==='campaigns') loadSmtp(); if(v==='settings') loadBackupInfo();
   if(v==='home') renderHome();
   if(location.hash!=='#'+v) history.replaceState(null,'','#'+v);
   $('#subtitle').textContent=SUBTITLES[v]||'';
-  if(v==='home'){ loadCampaignsQuiet(); setTimeout(()=>renderCharts(),30); }
+  if(v==='home'){ loadHomeData(); setTimeout(()=>renderCharts(),30); }
   if(v==='campaigns'){ loadFiles(); loadCampaigns(); }
   document.title='B2Wave · '+$('#title').textContent;
   if(v==='console') $('#log').scrollTop=1e9;
@@ -2149,32 +2404,37 @@ const LOGO_SVG=(size=40,animated=true)=>{
   const id='b2w'+(++_logoN);
   return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" class="b2logo${animated?' anim':''}" role="img" aria-label="B2Wave">
   <defs>
-    <linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset=".55" stop-color="#7c3aed"/><stop offset="1" stop-color="#c026d3"/></linearGradient>
-    <linearGradient id="${id}w" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#67e8f9" stop-opacity=".2"/><stop offset=".5" stop-color="#67e8f9"/><stop offset="1" stop-color="#67e8f9" stop-opacity=".2"/></linearGradient>
-    <clipPath id="${id}c"><rect width="64" height="64" rx="16"/></clipPath>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4338ca"/><stop offset=".5" stop-color="#7c3aed"/><stop offset="1" stop-color="#db2777"/></linearGradient>
+    <linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="${id}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset="1" stop-color="#22d3ee" stop-opacity=".55"/></linearGradient>
+    <clipPath id="${id}c"><rect width="64" height="64" rx="17"/></clipPath>
+    <filter id="${id}s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.1" flood-color="#1e1b4b" flood-opacity=".45"/></filter>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#${id}g)"/>
+  <rect width="64" height="64" rx="17" fill="url(#${id}g)"/>
   <g clip-path="url(#${id}c)">
-    <path class="lg-shine" d="M-20 0 L4 0 L-16 64 L-40 64 Z" fill="#fff" opacity=".12"/>
-    <path class="lg-wave" d="M-64 50 q8 -7 16 0 t16 0 t16 0 t16 0 t16 0 t16 0 t16 0 t16 0" fill="none" stroke="url(#${id}w)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 0H64V26C44 33 20 33 0 24Z" fill="url(#${id}h)"/>
+    <g class="lg-wave2"><path d="M-64 52c8-6 16-6 24 0s16 6 24 0 16-6 24 0 16 6 24 0 16-6 24 0 16 6 24 0V72H-64Z" fill="#fff" opacity=".16"/></g>
+    <g class="lg-wave"><path d="M-64 55c8-5 16-5 24 0s16 5 24 0 16-5 24 0 16 5 24 0 16-5 24 0 16 5 24 0V72H-64Z" fill="url(#${id}w)" opacity=".9"/></g>
+    <path class="lg-shine" d="M-26 0H-8L-30 64H-48Z" fill="#fff" opacity=".14"/>
   </g>
-  <text x="9" y="38" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="25" font-weight="800" fill="#fff" letter-spacing="-1.5">B2</text>
+  <text x="8.5" y="39" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="26" font-weight="800" fill="#fff" letter-spacing="-1.6" filter="url(#${id}s)">B2</text>
   <g class="lg-sig" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.6">
-    <circle cx="48" cy="20" r="2.6" fill="#67e8f9" stroke="none"/>
-    <path class="a1" d="M52.2 15.8 a6 6 0 0 1 0 8.4"/><path class="a1" d="M43.8 24.2 a6 6 0 0 1 0 -8.4"/>
-    <path class="a2" d="M55.6 12.4 a10.8 10.8 0 0 1 0 15.2"/><path class="a2" d="M40.4 27.6 a10.8 10.8 0 0 1 0 -15.2"/>
+    <circle cx="49" cy="18.5" r="2.7" fill="#67e8f9" stroke="none"/>
+    <path class="a1" d="M53.2 14.3a6 6 0 0 1 0 8.4"/><path class="a1" d="M44.8 22.7a6 6 0 0 1 0-8.4"/>
+    <path class="a2" d="M56.6 10.9a10.8 10.8 0 0 1 0 15.2"/><path class="a2" d="M41.4 26.1a10.8 10.8 0 0 1 0-15.2"/>
   </g>
 </svg>`;
 };
 
+
 document.querySelector('.brand .logo').innerHTML=LOGO_SVG(40);
 $('#heroLogo').innerHTML=LOGO_SVG(60);
-(()=>{ const l=document.createElement('link'); l.rel='icon'; l.type='image/svg+xml'; l.href='data:image/svg+xml,'+encodeURIComponent(LOGO_SVG(64,false)); document.head.appendChild(l); })();
-document.querySelectorAll('.qa').forEach(b=>b.onclick=()=>show(b.dataset.go));
+
+document.querySelectorAll('#v-home [data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
 
 // ---------------------------------------------------------------- home dashboard
 function renderHome(){
-  renderSide(); renderSim(); if(S.view==='home') renderCharts();
+  renderSide(); renderSim(); renderKpis(); if(S.view==='home') renderCharts();
   const s=S.status||{}, on=!!s.connected;
   const simOk=(s.sim||'').includes('READY'), reg=['registered','roaming'].includes(s.network);
   const usb=(s.transport||'').startsWith('USB'), wifi=(s.transport||'').startsWith('Wi-Fi');
@@ -2211,6 +2471,7 @@ function renderHome(){
   tip('info','<i data-lucide="megaphone"></i>','Voice campaigns',`Your audio prompts are kept on this PC and copied to the module automatically before each campaign. Keys people press (1, 2…) are captured live.`,'campaigns','Open');
   if(unread) tip('warn','<i data-lucide="mail"></i>',`${unread} unread message${unread>1?'s':''}`,'New SMS arrived.','messages','Read');
   $('#tips').innerHTML=T.join('');
+  const warn=T.filter(t=>/tip (bad|warn)/.test(t)).length; const tc=$('#tipCount'); if(tc){ tc.textContent=warn||''; tc.hidden=!warn; }
   $('#tips').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
 
   // recent lists
@@ -2531,7 +2792,7 @@ function busy(delta){
 const _apiRaw=api;
 api=function(op,data){ busy(1); return _apiRaw(op,data).finally(()=>busy(-1)); };
 
-// ================================================================ AI voice agent (LiveKit)
+// ================================================================ AI voice agent (LiveKit) - tabbed wizard
 const AI_PRESETS={
   receptionist:{greet:'Hello! Thank you for calling. How can I help you today?',instr:'You are a polite receptionist for our business. Answer questions about timings, location and services. If you do not know something, offer to have a team member call back and collect the person\'s name and best time to call.'},
   appointment:{greet:'Hello! I am calling to confirm your appointment for tomorrow.',instr:'You are calling to confirm an appointment tomorrow at 11 am. Ask the person to confirm, or to reschedule. If they reschedule, ask for a preferred day and time. Confirm the final answer clearly before ending.'},
@@ -2539,55 +2800,154 @@ const AI_PRESETS={
   payment:{greet:'Hello! This is a friendly reminder about your pending payment.',instr:'You remind the customer politely about a pending payment of Rs 2,500 due this week. Ask when they plan to pay. Never threaten or be rude. If they already paid, apologise and thank them.'},
   lead:{greet:'Hello! I am calling about the enquiry you made on our website.',instr:'You qualify a sales lead. Ask what they are looking for, their budget range, and when they want to start. Be warm and brief. Offer a callback from a specialist at a time they choose.'},
 };
-const AIS={ cfg:{}, room:null, mode:'test', t0:0, timer:0, transcript:[], segs:{}, agentJoined:false, myTrackSid:'', meters:[], raf:0, number:'', stopping:false, gotStream:false };
+const AIS={ cfg:{}, a:{}, engine:'inference', tab:'connect', connected:null, worker:{state:'stopped',installed:false},
+  room:null, mode:'test', t0:0, timer:0, transcript:[], agentJoined:false, myTrackSid:'', meters:[], raf:0, number:'', stopping:false, gotStream:false };
 const LK=()=>window.LivekitClient;
 
+// ---------- tabs
+function aiTab(t){
+  AIS.tab=t;
+  document.querySelectorAll('#aiTabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  document.querySelectorAll('.aipanel').forEach(p=>p.hidden=p.dataset.p!==t);
+  if(t==='talk'){ aiReady(); aiDevices(); }
+  if(t==='history') aiHistory();
+  if(t==='engine') aiWorkerStatus();
+  lsSet('aiTab',t);
+}
+document.querySelectorAll('#aiTabs button').forEach(b=>b.onclick=()=>aiTab(b.dataset.t));
+document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>aiTab(b.dataset.next));
+
+// ---------- load
 async function loadAi(){
   try{
-    const r=await api('ai_get'); const a=r.ai||{}; AIS.cfg=r;
-    $('#aiUrl').value=a.url||''; $('#aiKey').value=a.api_key||''; $('#aiAgent').value=a.agent_name||'b2wave-agent';
+    const r=await api('ai_get'); AIS.cfg=r; const a=AIS.a=r.ai||{};
+    $('#aiUrl').value=a.url||''; $('#aiKey').value=a.api_key||'';
     $('#aiSecret').value=''; $('#aiSecret').placeholder=r.has_secret?'Saved (leave empty to keep)':'secret';
-    $('#aiOpenai').value=''; $('#aiOpenai').placeholder=r.openai_set?'Saved (leave empty to keep)':'sk-...';
-    $('#aiPreset').value=a.preset||'custom'; $('#aiInstr').value=a.instructions||''; $('#aiGreet').value=a.greeting||'';
-    $('#aiVoice').value=a.voice||'alloy'; $('#aiLang').value=a.language||'';
-    $('#aiCmd').textContent=(r.agent_dir||'agent')+'\\run_agent.bat';
-    aiChecks(); aiDevices(); aiHistory();
+    $('#aiEnv').value=''; aiParse();
+    AIS.engine=a.engine||'inference'; aiEngine(AIS.engine,false);
+    $('#aiStt').value=a.stt||'deepgram/nova-3:multi'; $('#aiLlm').value=a.llm||'openai/gpt-4.1-mini'; $('#aiTts').value=a.tts||'cartesia/sonic-2'; $('#aiTtsVoice').value=a.tts_voice||'';
+    $('#aiAgentCloud').value=a.agent_name||'b2wave-agent';
+    $('#aiOpenai').value=''; $('#aiOpenai').placeholder=r.openai_set?'Saved (leave empty to keep)':'sk-...'; $('#aiVoice').value=a.voice||'alloy';
+    $('#aiInstr').value=a.instructions||''; $('#aiGreet').value=a.greeting||''; $('#aiLang').value=a.language||'';
+    document.querySelectorAll('#aiTpls button').forEach(b=>b.classList.toggle('on',b.dataset.p===(a.preset||'')));
+    $('#awAuto').checked=lsGet('awAuto')==='1';
+    aiStatus(); await aiWorkerStatus();
+    const saved=lsGet('aiTab'); aiTab(saved&&document.querySelector(`.aipanel[data-p="${saved}"]`)?saved:(r.configured?(AIS.a.instructions?'talk':'persona'):'connect'));
+    aiHistory();
   }catch(e){ toast(e.message); }
 }
-function aiChecks(extra={}){
-  const r=AIS.cfg, row=(ok,title,sub)=>`<li><span class="ic ${ok===true?'ok':ok===false?'bad':ok==='warn'?'warn':''}">${ok===true?ICON('check'):ok===false?ICON('x'):ok==='warn'?'!':''}</span><div><b>${title}</b><small>${sub}</small></div></li>`;
-  const s=$('#aiState'); s.className='rs '+(r.configured&&r.openai_set?'ok':'warn'); s.innerHTML=r.configured&&r.openai_set?ICON('circle-check')+' Keys saved':ICON('circle-alert')+' Not set up';
-  $('#aiChecks').innerHTML=[
-    row(!!r.configured,'LiveKit keys',r.configured?'Saved. Use "Test LiveKit" to verify':'Enter URL, API key and secret below'),
-    row(!!r.openai_set,'OpenAI key (for the agent voice)',r.openai_set?'Saved in agent/.env':'Needed by the AI agent'),
-    row(extra.agent===true?true:extra.agent===false?false:'warn','Agent worker running',extra.agent===true?'The agent joined the last conversation':extra.agent===false?'Agent did not join. Start agent\\run_agent.bat':'Start agent\\run_agent.bat and keep it open'),
-    row(S.status.connected?true:'warn','B2Wave board (for phone calls)',S.status.connected?'Connected: '+esc(S.status.operator||''):'Offline: test mode still works'),
-    row('warn','USB sound card wiring (for phone calls)','Talk on calls > option B. Not needed for PC test mode'),
-  ].join('');
+
+// ---------- step 1: paste env / connect
+function aiParse(){
+  const txt=$('#aiEnv').value, get=k=>{ const m=txt.match(new RegExp('^\\s*(?:export\\s+)?'+k+'\\s*[=:]\\s*["\']?([^"\'\\s]+)','mi')); return m?m[1]:''; };
+  let url=get('LIVEKIT_URL'), key=get('LIVEKIT_API_KEY'), sec=get('LIVEKIT_API_SECRET');
+  if(!url){ const m=txt.match(/wss?:\/\/[^\s"']+/); if(m) url=m[0]; }                 // "Websocket URL" style paste
+  if(!key){ const m=txt.match(/\bAPI[A-Za-z0-9]{8,}\b/); if(m) key=m[0]; }
+  if(url) $('#aiUrl').value=url; if(key) $('#aiKey').value=key; if(sec) $('#aiSecret').value=sec;
+  const has=(v,saved)=>v?'ok':saved?'saved':'';
+  const chip=(label,st)=>`<span class="pchip ${st}">${st?ICON('check'):ICON('circle')} ${label}${st==='saved'?' (saved)':''}</span>`;
+  $('#aiParsed').innerHTML=txt.trim()||AIS.cfg.configured?chip('URL',has($('#aiUrl').value,AIS.a.url))+chip('API key',has($('#aiKey').value,AIS.a.api_key))+chip('API secret',has($('#aiSecret').value,AIS.cfg.has_secret)):'';
 }
+$('#aiEnv').oninput=aiParse;
+['#aiUrl','#aiKey','#aiSecret'].forEach(id=>$(id).oninput=aiParse);
 document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{ const i=$('#'+b.dataset.eye); i.type=i.type==='password'?'text':'password'; b.innerHTML=ICON(i.type==='password'?'eye':'eye-off'); });
-$('#aiPreset').onchange=e=>{ const p=AI_PRESETS[e.target.value]; if(p){ $('#aiInstr').value=p.instr; $('#aiGreet').value=p.greet; } };
-async function aiSave(silent){
-  const d={url:$('#aiUrl').value,api_key:$('#aiKey').value,agent_name:$('#aiAgent').value||'b2wave-agent',preset:$('#aiPreset').value,
-    instructions:$('#aiInstr').value,greeting:$('#aiGreet').value,voice:$('#aiVoice').value,language:$('#aiLang').value};
+function aiCollect(){
+  const d={url:$('#aiUrl').value.trim(),api_key:$('#aiKey').value.trim(),engine:AIS.engine,stt:$('#aiStt').value,llm:$('#aiLlm').value,tts:$('#aiTts').value,
+    tts_voice:$('#aiTtsVoice').value.trim(),agent_name:($('#aiAgentCloud').value||'b2wave-agent').trim(),voice:$('#aiVoice').value,
+    instructions:$('#aiInstr').value,greeting:$('#aiGreet').value,language:$('#aiLang').value,preset:(document.querySelector('#aiTpls button.on')||{}).dataset?.p||'custom'};
   if($('#aiSecret').value.trim()) d.api_secret=$('#aiSecret').value.trim();
   if($('#aiOpenai').value.trim()) d.openai_key=$('#aiOpenai').value.trim();
-  if(d.url && !/^wss?:\/\//.test(d.url)){ toast('The LiveKit URL starts with wss://'); return false; }
-  const r=await api('ai_save',d); AIS.cfg.configured=r.configured; AIS.cfg.openai_set=r.openai_set; aiChecks();
-  if(!silent) toast('AI settings saved'); return true;
+  return d;
 }
-$('#aiSave').onclick=()=>aiSave(false).catch(e=>toast(e.message));
-$('#aiSavePersona').onclick=()=>aiSave(false).catch(e=>toast(e.message));
-$('#aiTest').onclick=async()=>{ const b=$('#aiTest'); b.disabled=true; b.innerHTML=ICON('loader-circle','spin')+' Testing…';
-  try{ if(!await aiSave(true)) return; const r=await api('ai_test'); Swal.fire({...swalBase,icon:'success',title:'LiveKit connected',html:`Your project answered (${r.rooms} active room${r.rooms===1?'':'s'}). Now start <b>agent\\run_agent.bat</b> and try a test conversation.`}); }
-  catch(e){ Swal.fire({...swalBase,icon:'error',title:'LiveKit test failed',html:esc(e.message)}); }
-  finally{ b.disabled=false; b.innerHTML=ICON('plug-zap')+' Test LiveKit'; } };
-$('#aiCopy').onclick=()=>{ navigator.clipboard.writeText($('#aiCmd').textContent).then(()=>toast('Command copied')); };
-document.querySelectorAll('#aiMode button').forEach(b=>b.onclick=()=>{ if(AIS.room) return; AIS.mode=b.dataset.m;
-  document.querySelectorAll('#aiMode button').forEach(x=>x.classList.toggle('on',x===b));
-  $('#aiCallBox').hidden=AIS.mode!=='call'; $('#aiTestBox').hidden=AIS.mode!=='test';
-  $('#aiGo').innerHTML=ICON(AIS.mode==='call'?'phone-outgoing':'play')+(AIS.mode==='call'?' Call with AI agent':' Start test conversation'); });
+async function aiSave(silent){
+  const d=aiCollect();
+  if(d.url && !/^wss?:\/\//.test(d.url)){ toast('The LiveKit URL starts with wss://'); return false; }
+  const r=await api('ai_save',d); AIS.cfg.configured=r.configured; AIS.cfg.openai_set=r.openai_set||AIS.cfg.openai_set;
+  Object.assign(AIS.a,d); if(d.api_secret) AIS.cfg.has_secret=true;
+  $('#aiSecret').value=''; $('#aiOpenai').value=''; aiParse(); aiStatus();
+  if(!silent) toast('Saved'); return true;
+}
+$('#aiConnect').onclick=async()=>{
+  const b=$('#aiConnect'); b.disabled=true; b.innerHTML=ICON('loader-circle','spin')+' Connecting…';
+  try{
+    if(!$('#aiUrl').value||!$('#aiKey').value||(!$('#aiSecret').value&&!AIS.cfg.has_secret)){ throw new Error('Paste the three LIVEKIT_ lines from LiveKit (URL, API key and secret).'); }
+    if(!await aiSave(true)) return;
+    const r=await api('ai_test'); AIS.connected=true; aiStatus();
+    $('#aiEnv').value=''; aiParse();
+    Swal.fire({...swalBase,icon:'success',title:'LiveKit connected',html:`Your project <b>${esc(($('#aiUrl').value||'').replace(/^wss:\/\//,''))}</b> answered.<br>Next, choose the AI engine.`,confirmButtonText:'Next: AI engine'}).then(()=>aiTab('engine'));
+  }catch(e){ AIS.connected=false; aiStatus(); Swal.fire({...swalBase,icon:'error',title:'Could not connect',html:esc(e.message)}); }
+  finally{ b.disabled=false; b.innerHTML=ICON('plug-zap')+' Save &amp; test connection'; }
+};
 
+// ---------- step 2: engine + worker
+function aiEngine(e,save=true){
+  AIS.engine=e;
+  document.querySelectorAll('#aiEngines .engine').forEach(b=>b.classList.toggle('on',b.dataset.e===e));
+  document.querySelectorAll('.ebox').forEach(x=>x.hidden=x.dataset.for!==e);
+  $('#aiWorker').hidden=e==='cloud';
+  aiStatus();
+}
+document.querySelectorAll('#aiEngines .engine').forEach(b=>b.onclick=()=>aiEngine(b.dataset.e));
+$('#aiSaveEngine').onclick=async()=>{
+  if(AIS.engine==='openai' && !$('#aiOpenai').value.trim() && !AIS.cfg.openai_set){ toast('Paste your OpenAI API key'); return; }
+  try{ await aiSave(true); toast('Engine saved'); if(AIS.engine!=='cloud' && AIS.worker.running){ await api('agent_restart'); toast('Agent restarted with the new settings'); } aiWorkerStatus(); }catch(e){ toast(e.message); }
+};
+async function aiWorkerStatus(){ try{ AIS.worker=await api('agent_status'); renderWorker(); }catch{} }
+function renderWorker(){
+  const w=AIS.worker, st=$('#awState');
+  const map={ready:['ok','circle-check','Running'],starting:['run','loader-circle','Starting…'],installing:['run','loader-circle','Installing…'],error:['bad','circle-x','Error'],stopped:['','circle','Stopped']};
+  const [c,ic,label]=map[w.state]||map.stopped; st.className='rs '+c; st.innerHTML=ICON(ic,c==='run'?'spin':'')+' '+label;
+  $('#awInstall').hidden=w.installed&&w.state!=='installing'; $('#awInstall').disabled=w.state==='installing';
+  $('#awStart').hidden=!w.installed||w.running; $('#awStop').hidden=!w.running; $('#awRestart').hidden=!w.running;
+  $('#awSub').textContent=!w.installed?'Not installed yet. One click installs it (about 2-4 minutes, one time).':w.state==='ready'?'Ready: waiting for calls.':w.running?'Connecting to LiveKit…':'Installed. Click Start before talking to the agent.';
+  if(w.log){ $('#awLog').textContent=w.log.join('\n'); $('#awLog').scrollTop=1e9; }
+  aiStatus();
+}
+function onAgentWorker(e){ AIS.worker.state=e.state; AIS.worker.running=['ready','starting'].includes(e.state)||AIS.worker.running&&e.state!=='stopped';
+  const l=$('#awLog'); l.textContent+=(l.textContent?'\n':'')+e.line; l.scrollTop=1e9;
+  if(/installed|exited|started|stopped/i.test(e.line)) aiWorkerStatus(); else renderWorker(); }
+$('#awInstall').onclick=async()=>{ try{ await api('agent_install'); AIS.worker.state='installing'; renderWorker(); }catch(e){ toast(e.message); } };
+$('#awStart').onclick=async()=>{ try{ await aiSave(true); AIS.worker=await api('agent_start'); renderWorker(); }catch(e){ toast(e.message); } };
+$('#awStop').onclick=async()=>{ AIS.worker=await api('agent_stop'); renderWorker(); };
+$('#awRestart').onclick=async()=>{ try{ AIS.worker=await api('agent_restart'); renderWorker(); }catch(e){ toast(e.message); } };
+$('#awAuto').onchange=e=>lsSet('awAuto',e.target.checked?'1':'0');
+
+// ---------- step 3: persona
+document.querySelectorAll('#aiTpls button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#aiTpls button').forEach(x=>x.classList.toggle('on',x===b));
+  const p=AI_PRESETS[b.dataset.p]; if(p){ $('#aiInstr').value=p.instr; $('#aiGreet').value=p.greet; } else $('#aiInstr').focus(); });
+$('#aiSavePersona').onclick=async()=>{ if(!$('#aiInstr').value.trim()){ toast('Write the instructions (or pick a template)'); return; } try{ await aiSave(true); toast('Persona saved'); aiStatus(); }catch(e){ toast(e.message); } };
+
+// ---------- status (tab badges + readiness on the Talk page)
+function aiNeeds(){
+  const n=[];
+  if(!AIS.cfg.configured) n.push(['connect','Connect your LiveKit project']);
+  if(AIS.engine==='openai'&&!AIS.cfg.openai_set) n.push(['engine','Add your OpenAI API key']);
+  if(AIS.engine!=='cloud'&&AIS.worker.state!=='ready') n.push(['engine',AIS.worker.installed?'Start the agent worker':'Install and start the agent worker']);
+  if(!(AIS.a.instructions||'').trim()) n.push(['persona','Write the persona (or pick a template)']);
+  return n;
+}
+function aiStatus(){
+  const s=$('#aiState'); const ok=AIS.cfg.configured;
+  s.className='rs '+(AIS.connected===false?'bad':ok?'ok':'warn'); s.innerHTML=AIS.connected===false?ICON('circle-x')+' Connection failed':ok?ICON('circle-check')+(AIS.connected?' Connected':' Saved'):ICON('circle-alert')+' Not connected';
+  const engLabel={inference:'LiveKit Inference',cloud:'Hosted on LiveKit Cloud',openai:'OpenAI Realtime'}[AIS.engine];
+  const mark=(i,done,txt)=>{ const b=document.querySelector(`#aiTabs button[data-t="${['connect','engine','persona'][i]}"]`); b.classList.toggle('done',done); b.querySelector('.sn').innerHTML=done?ICON('check'):String(i+1); $('#aiT'+(i+1)).textContent=txt; };
+  mark(0,!!ok,ok?'Connected':'Paste your keys');
+  const engDone=ok&&(AIS.engine==='cloud'||(AIS.worker.state==='ready'&&(AIS.engine!=='openai'||AIS.cfg.openai_set)));
+  mark(1,engDone,engLabel+(AIS.engine!=='cloud'?(AIS.worker.state==='ready'?' · running':' · not running'):''));
+  mark(2,!!(AIS.a.instructions||'').trim(),(AIS.a.instructions||'').trim()?'Saved':'What it says');
+  const need=aiNeeds(); $('#aiT4').textContent=need.length?need.length+' thing'+(need.length>1?'s':'')+' left':'Ready';
+  document.querySelector('#aiTabs button[data-t="talk"]').classList.toggle('ready',!need.length);
+  if(AIS.tab==='talk') aiReady();
+}
+function aiReady(){
+  const need=aiNeeds(), box=$('#aiReady');
+  box.className='ready '+(need.length?'warn':'ok');
+  box.innerHTML=need.length?`<div class="rhead">${ICON('list-checks')}<b>Before you talk, finish ${need.length} step${need.length>1?'s':''}:</b></div><div class="rlist">${need.map(([t,txt])=>`<button class="btn ghost sm" data-goto="${t}">${ICON('arrow-right')} ${esc(txt)}</button>`).join('')}</div>`
+    :`<div class="rhead">${ICON('circle-check')}<b>Everything is ready.</b><span class="muted">Engine: ${esc({inference:'LiveKit Inference',cloud:'LiveKit Cloud agent',openai:'OpenAI Realtime'}[AIS.engine])}${AIS.a.language?' · '+esc(AIS.a.language):''}</span></div>`;
+  box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>aiTab(b.dataset.goto));
+}
+
+// ---------- devices, transcript, call engine (unchanged behaviour)
 async function aiDevices(){
   try{ const tmp=await navigator.mediaDevices.getUserMedia({audio:true}); tmp.getTracks().forEach(t=>t.stop()); }catch{ return; }
   const ds=await navigator.mediaDevices.enumerateDevices(), ins=ds.filter(d=>d.kind==='audioinput'), outs=ds.filter(d=>d.kind==='audiooutput');
@@ -2598,23 +2958,27 @@ async function aiDevices(){
   if(!lsGet('bCallOut')){ const u=outs.find(usb); if(u) $('#aiOut').value=u.deviceId; }
 }
 function aiStep(text,state='run'){
-  const ol=$('#aiSteps'); [...ol.querySelectorAll('li.run')].forEach(li=>{ li.className='ok'; li.querySelector('.ic').innerHTML=ICON('check'); });
+  const ol=$('#aiStepsLog'); [...ol.querySelectorAll('li.run')].forEach(li=>{ li.className='ok'; li.querySelector('.ic').innerHTML=ICON('check'); });
   ol.insertAdjacentHTML('beforeend',`<li class="${state}"><span class="ic">${state==='run'?ICON('loader-circle','spin'):state==='ok'?ICON('check'):ICON('x')}</span>${esc(text)}<small>${fmtDur(Math.floor((Date.now()-AIS.t0)/1000))}</small></li>`);
 }
 function aiLive(text,cls){ const s=$('#aiLive'); s.className='rs '+(cls||''); s.innerHTML=text; }
 function aiSay(who,text,id,final=true){
   if(!text||!text.trim()) return;
-  const key=id||(who+Date.now());
-  const ex=AIS.transcript.find(x=>x.id===key);
+  const key=id||(who+Date.now()); const ex=AIS.transcript.find(x=>x.id===key);
   if(ex){ ex.text=text; ex.final=final; } else AIS.transcript.push({id:key,who,text,final,t:Math.floor((Date.now()-AIS.t0)/1000)});
   const box=$('#aiTranscript');
   box.innerHTML=AIS.transcript.map(x=>`<div class="tline ${x.who}"><span class="tw">${x.who==='agent'?ICON('bot')+' Agent':ICON('user')+' Person'}</span><div class="tb ${x.final?'':'partial'}">${esc(x.text)}</div><small>${fmtDur(x.t)}</small></div>`).join('');
   box.scrollTop=1e9;
 }
-
+document.querySelectorAll('#aiMode button').forEach(b=>b.onclick=()=>{ if(AIS.room) return; AIS.mode=b.dataset.m;
+  document.querySelectorAll('#aiMode button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#aiCallBox').hidden=AIS.mode!=='call'; $('#aiTestBox').hidden=AIS.mode!=='test';
+  $('#aiGo').innerHTML=ICON(AIS.mode==='call'?'phone-outgoing':'play')+(AIS.mode==='call'?' Call with AI agent':' Start test conversation'); });
 async function aiStart(){
   if(!LK()){ toast('LiveKit library failed to load'); return; }
   if(AIS.room) return;
+  const need=aiNeeds();
+  if(need.length && !await ask('Setup not finished',`Still missing: <b>${need.map(n=>esc(n[1])).join(', ')}</b>. Try anyway?`,{confirm:'Try anyway'})) return;
   const mode=AIS.mode, number=($('#aiNum').value||'').trim();
   if(mode==='call'){
     if(!number){ toast('Enter the phone number'); return; }
@@ -2623,41 +2987,34 @@ async function aiStart(){
     if(!await ask('Call with the AI agent?',`B2Wave dials <b>${esc(number)}</b>. When the person answers, the AI agent talks to them through the USB sound card.`,{confirm:'Call now'})) return;
   }
   lsSet('aiMic',$('#aiMic').value); lsSet('aiSpk',$('#aiSpk').value); lsSet('bCallIn',$('#aiIn').value); lsSet('bCallOut',$('#aiOut').value);
-  Object.assign(AIS,{t0:Date.now(),transcript:[],segs:{},agentJoined:false,number,stopping:false,gotStream:false,outcome:'',error:''});
-  $('#aiSteps').innerHTML=''; $('#aiTranscript').innerHTML='<div class="empty" style="padding:14px">Waiting for the conversation…</div>';
+  Object.assign(AIS,{t0:Date.now(),transcript:[],agentJoined:false,number,stopping:false,gotStream:false,error:''});
+  $('#aiStepsLog').innerHTML=''; $('#aiTranscript').innerHTML='<div class="empty" style="padding:14px">Waiting for the conversation…</div>';
   $('#aiGo').disabled=true; $('#aiHang').disabled=false;
   clearInterval(AIS.timer); AIS.timer=setInterval(()=>$('#aiTimer').textContent=fmtDur(Math.floor((Date.now()-AIS.t0)/1000)),500);
   try{
     aiStep('Getting a LiveKit room'); aiLive(ICON('loader-circle','spin')+' Starting','run');
     const tk=await api('ai_token',{mode,number});
     if(mode==='call'){
-      aiStep('Dialing '+number);
-      await api('dial',{number});
-      const t1=Date.now();
-      while(S.call.state!=='active'){
-        if(AIS.stopping) return;
-        if(S.call.state==='idle' && Date.now()-t1>3000){ throw new Error('The call was not answered'); }
+      aiStep('Dialing '+number); await api('dial',{number}); const t1=Date.now();
+      while(S.call.state!=='active'){ if(AIS.stopping) return;
+        if(S.call.state==='idle'&&Date.now()-t1>3000) throw new Error('The call was not answered');
         if(Date.now()-t1>60000) throw new Error('No answer after 60 s');
-        await new Promise(r=>setTimeout(r,250));
-      }
+        await new Promise(r=>setTimeout(r,250)); }
       aiStep('Answered');
     }
     aiStep('Joining LiveKit room');
-    const L=LK(), room=new L.Room({adaptiveStream:false,dynacast:false});
-    AIS.room=room;
-    room.on(L.RoomEvent.ParticipantConnected,p=>{ if(p.identity!==tk.identity){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); aiChecks({agent:true}); } });
-    room.on(L.RoomEvent.TrackSubscribed,(track,pub,p)=>{ if(track.kind!=='audio') return;
-      const el=track.attach(); el.autoplay=true; document.body.appendChild(el); el.style.display='none';
+    const L=LK(), room=new L.Room({adaptiveStream:false,dynacast:false}); AIS.room=room;
+    room.on(L.RoomEvent.ParticipantConnected,p=>{ if(p.identity!==tk.identity){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); } });
+    room.on(L.RoomEvent.TrackSubscribed,(track)=>{ if(track.kind!=='audio') return;
+      const el=track.attach(); el.autoplay=true; el.style.display='none'; document.body.appendChild(el);
       const sink=mode==='call'?$('#aiOut').value:$('#aiSpk').value; if(el.setSinkId&&sink) el.setSinkId(sink).catch(()=>{});
       aiMeter(track.mediaStreamTrack,'#aiMOut'); });
-    room.on(L.RoomEvent.TranscriptionReceived,(segs,p)=>{ if(AIS.gotStream) return;
-      const who=(p&&p.identity===tk.identity)?'person':'agent'; segs.forEach(s=>aiSay(who,s.text,'s'+s.id,s.final)); });
+    room.on(L.RoomEvent.TranscriptionReceived,(segs,p)=>{ if(AIS.gotStream) return; const who=(p&&p.identity===tk.identity)?'person':'agent'; segs.forEach(s=>aiSay(who,s.text,'s'+s.id,s.final)); });
     if(typeof room.registerTextStreamHandler==='function'){
       room.registerTextStreamHandler('lk.transcription',async(reader,info)=>{ AIS.gotStream=true;
         const attrs=reader.info&&reader.info.attributes||{}; const who=(attrs['lk.transcribed_track_id']&&attrs['lk.transcribed_track_id']===AIS.myTrackSid)||info.identity===tk.identity?'person':'agent';
         const id='t'+(reader.info&&reader.info.id||Date.now()); let txt='';
-        for await (const chunk of reader){ txt+=chunk; aiSay(who,txt,id,false); }
-        aiSay(who,txt,id,true); });
+        for await (const chunk of reader){ txt+=chunk; aiSay(who,txt,id,false); } aiSay(who,txt,id,true); });
     }
     room.on(L.RoomEvent.Disconnected,()=>{ if(!AIS.stopping) aiStop('LiveKit disconnected'); });
     await room.connect(tk.url,tk.token);
@@ -2668,8 +3025,8 @@ async function aiStart(){
     aiMeter(track.mediaStreamTrack,'#aiMIn');
     aiStep('Waiting for the AI agent');
     if(room.remoteParticipants.size){ AIS.agentJoined=true; aiStep('AI agent joined'); aiLive(ICON('audio-lines')+' Live','ok'); }
-    setTimeout(()=>{ if(AIS.room===room && !AIS.agentJoined){ aiStep('Agent did not join: is agent\\run_agent.bat running with the same agent name?','bad'); aiChecks({agent:false}); aiLive(ICON('circle-alert')+' No agent','bad'); } },15000);
-    if(mode==='call'){ AIS.watch=setInterval(()=>{ if(S.call.state==='idle') aiStop('Call ended'); },500); }
+    setTimeout(()=>{ if(AIS.room===room&&!AIS.agentJoined){ aiStep(AIS.engine==='cloud'?'Agent did not join: check the agent name in LiveKit Cloud':'Agent did not join: is the agent worker running (step 2)?','bad'); aiLive(ICON('circle-alert')+' No agent','bad'); } },15000);
+    if(mode==='call') AIS.watch=setInterval(()=>{ if(S.call.state==='idle') aiStop('Call ended'); },500);
   }catch(e){ AIS.error=e.message; aiStep(e.message,'bad'); toast(e.message); aiStop(e.message); }
 }
 function aiMeter(mst,id){
@@ -2680,16 +3037,15 @@ async function aiStop(reason){
   if(AIS.stopping) return; AIS.stopping=true;
   clearInterval(AIS.watch); clearInterval(AIS.timer); cancelAnimationFrame(AIS.raf); AIS.raf=0; AIS.meters=[];
   ['#aiMIn','#aiMOut'].forEach(i=>$(i).style.width='0');
-  if(AIS.mode==='call' && S.call.state!=='idle'){ try{ await api('hangup'); }catch{} }
-  const room=AIS.room; AIS.room=null;
-  if(room){ try{ await room.disconnect(); }catch{} }
+  if(AIS.mode==='call'&&S.call.state!=='idle'){ try{ await api('hangup'); }catch{} }
+  const room=AIS.room; AIS.room=null; if(room){ try{ await room.disconnect(); }catch{} }
   document.querySelectorAll('body > audio').forEach(a=>a.remove());
   try{ AIS.ac&&AIS.ac.close(); }catch{} AIS.ac=null;
   const dur=Math.floor((Date.now()-AIS.t0)/1000);
-  if(reason) aiStep(reason, AIS.error?'bad':'ok');
+  if(reason) aiStep(reason,AIS.error?'bad':'ok');
   aiLive('Idle',''); $('#aiGo').disabled=false; $('#aiHang').disabled=true;
   if(AIS.t0){ try{ const r=await api('ai_log_save',{room:'',number:AIS.number,mode:AIS.mode,started:new Date(AIS.t0).toISOString(),ended:new Date().toISOString(),duration:dur,
-    agent_joined:AIS.agentJoined,transcript:AIS.transcript.filter(x=>x.final!==false||x.text).map(x=>({who:x.who,text:x.text,t:x.t})),outcome:reason||'ended',error:AIS.error||''}); renderAiHistory(r.calls); }catch{} }
+    agent_joined:AIS.agentJoined,transcript:AIS.transcript.map(x=>({who:x.who,text:x.text,t:x.t})),outcome:reason||'ended',error:AIS.error||''}); renderAiHistory(r.calls); }catch{} }
   AIS.t0=0;
 }
 $('#aiGo').onclick=aiStart;
@@ -2707,7 +3063,7 @@ function renderAiHistory(calls){
     const txt=`B2Wave AI call ${c.mode==='call'?c.number:'(PC test)'} ${c.started||''}\n\n`+(c.transcript||[]).map(x=>`[${fmtDur(x.t||0)}] ${x.who==='agent'?'Agent':'Person'}: ${x.text}`).join('\n');
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=`ai-call-${(c.number||'test').replace(/\D/g,'')}-${(c.started||'').slice(0,10)}.txt`; a.click(); });
 }
-
+async function aiAutoStart(){ if(lsGet('awAuto')!=='1') return; try{ const w=await api('agent_status'); if(w.installed&&!w.running&&w.env){ await api('agent_start'); toast('AI agent worker started'); } }catch{} }
 
 // ================================================================ SIM number (top of every page)
 function fmtPhone(n){ if(!n) return ''; const d=n.replace(/[^\d+]/g,''); const m=d.match(/^\+91(\d{5})(\d{5})$/); return m?`+91 ${m[1]} ${m[2]}`:d; }
@@ -2812,6 +3168,65 @@ function bkDone(r,mine){
   if(mine) Swal.fire({...swalBase,icon:'success',title:'Restore complete',html:`<ul style="text-align:left;margin:0 auto;display:inline-block">${lines}</ul><p style="margin-top:12px">Safety copy: <code>${esc(r.safety_copy||'')}</code><br>The dashboard reloads now.</p>`,confirmButtonText:'Reload now'}).then(go);
   else { toast('Data was restored from a backup. Reloading…'); setTimeout(go,1500); }
 }
+
+
+// ---------------- settings tabs
+function setTab(t){ document.querySelectorAll('#setTabs button').forEach(b=>b.classList.toggle('on',b.dataset.s===t));
+  document.querySelectorAll('[data-stab]').forEach(c=>c.hidden=c.dataset.stab!==t); lsSet('setTab',t);
+  if(t==='email') loadSmtp(); if(t==='backup') loadBackupInfo(); }
+document.querySelectorAll('#setTabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.s));
+setTab(lsGet('setTab')||'device');
+
+
+// ---------------- headset jack diagram + call audio controls
+(()=>{ const bt=$('#audBt'); if(bt) bt.parentNode.appendChild(bt); })();
+$('#wireD').innerHTML=wiring('Board','3.5 mm TRRS jack',[
+  {l:'SPK +',r:'L + R (both ears)',p:'47µF (+ to board) → 22Ω',c:'red'},
+  {l:'GND (pin 41/43)',r:'G  (ground)'},
+  {l:'MIC −',r:'G  (same ground)'},
+  {l:'MIC +',r:'M  (microphone)',c:'blue'},
+  {l:'SPK −',r:'leave unconnected',p:'never to ground',c:'warn'}]);
+const AC={loaded:false};
+async function loadAudioCtl(){
+  if(!S.status.connected){ const s=$('#acState'); s.className='rs warn'; s.innerHTML=ICON('circle-alert')+' Board offline'; return; }
+  try{ const a=await api('audio_get'); acRender(a); }catch(e){ const s=$('#acState'); s.className='rs bad'; s.textContent=e.message; }
+}
+function acRender(a){
+  AC.loaded=true; const s=$('#acState'); s.className='rs ok'; s.innerHTML=ICON('circle-check')+' Live from module';
+  if(a.volume!=null){ $('#acVol').value=a.volume; $('#acVolV').textContent=a.volume+'/7'; }
+  if(a.mic!=null){ $('#acMic').value=a.mic; $('#acMicV').textContent=a.mic+'/7'; }
+  document.querySelectorAll('#acPath button').forEach(b=>b.classList.toggle('on',+b.dataset.v===a.path));
+  $('#acMute').checked=!!a.mute;
+  if(a.volume!=null){ const v=$('#vol'); if(v) v.value=a.volume; }
+}
+async function acSet(d){ try{ acRender(await api('audio_set',d)); }catch(e){ toast(e.message); } }
+$('#acVol').oninput=e=>$('#acVolV').textContent=e.target.value+'/7';
+$('#acVol').onchange=e=>acSet({volume:+e.target.value});
+$('#acMic').oninput=e=>$('#acMicV').textContent=e.target.value+'/7';
+$('#acMic').onchange=e=>acSet({mic:+e.target.value});
+document.querySelectorAll('#acPath button').forEach(b=>b.onclick=()=>acSet({path:+b.dataset.v}));
+$('#acMute').onchange=e=>acSet({mute:e.target.checked});
+$('#acTest').onclick=async()=>{ try{ await api('tts_play',{text:'Hello. This is a B2Wave audio test. If you can hear this clearly, your speaker is working.',remote:false}); toast('Playing a test voice on the board'); }catch(e){ toast(e.message); } };
+
+
+// ---------------- home: KPI row + tabs
+function homeTab(t){ document.querySelectorAll('#homeTabs button').forEach(b=>b.classList.toggle('on',b.dataset.h===t));
+  document.querySelectorAll('#v-home .hpanel').forEach(p=>p.hidden=p.dataset.hp!==t); lsSet('homeTab',t); }
+document.querySelectorAll('#homeTabs button').forEach(b=>b.onclick=()=>homeTab(b.dataset.h));
+homeTab(lsGet('homeTab')||'recent');
+function renderKpis(){
+  const M=S.messages||[], inn=M.filter(m=>m.dir==='in').length, out=M.length-inn, unread=M.filter(m=>m.dir==='in'&&!m.read).length;
+  $('#kMsg').textContent=M.length; $('#kMsgS').textContent=`${inn} received · ${out} sent${unread?` · ${unread} unread`:''}`;
+  const wk=Date.now()-7*864e5, Cs=(S.calls||[]).filter(c=>new Date(c.time).getTime()>wk), ans=Cs.filter(c=>c.answered).length, miss=Cs.filter(c=>c.direction==='in'&&!c.answered).length;
+  $('#kCall').textContent=Cs.length; $('#kCallS').textContent=`${ans} answered${miss?` · ${miss} missed`:''}`;
+  const c=(C.campaigns||[])[0];
+  if(c){ const sm=c.summary||(typeof liveSummary==='function'?liveSummary(c):null)||{}; $('#kCamp').textContent=sm.called?`${sm.answer_rate||0}% answered`:c.status;
+    $('#kCampS').textContent=`${c.name} · ${sm.answered||0}/${sm.called||0}${sm.responded?` · ${sm.responded} responded`:''}`; }
+  const j=(BK.jobs||[])[0];
+  if(j){ const sent=j.results.filter(r=>r.status==='sent').length, f=j.results.filter(r=>r.status==='failed').length;
+    $('#kBulk').textContent=`${sent}/${j.results.length} sent`; $('#kBulkS').textContent=`${j.name}${f?` · ${f} failed`:''} · ${j.status}`; }
+}
+async function loadHomeData(){ try{ const [a,b]=await Promise.all([api('campaigns_list'),api('bulk_list')]); C.campaigns=a.campaigns; BK.jobs=b.jobs; renderKpis(); renderCharts(); }catch{} }
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();

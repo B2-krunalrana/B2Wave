@@ -11,6 +11,7 @@ calls, live AT console.
 from __future__ import annotations
 
 import argparse
+import sys
 import time
 import re
 import os
@@ -162,6 +163,113 @@ async def on_modem_event(evt: dict):
 
 modem = m.Modem(on_modem_event)
 runner = camp_mod.CampaignRunner(modem, broadcast, campaigns)
+
+
+class AgentWorker:
+    """Runs agent/agent.py as a child process so users never touch a terminal."""
+    def __init__(self):
+        self.proc = None
+        self.state = "stopped"          # stopped | installing | starting | ready | error
+        self.log = deque(maxlen=300)
+        self.task = None
+
+    @property
+    def python(self) -> Path:
+        return AGENT_DIR / ".venv" / "Scripts" / "python.exe"
+
+    def info(self) -> dict:
+        return {"state": self.state, "installed": self.python.exists(), "running": bool(self.proc and self.proc.returncode is None),
+                "log": list(self.log)[-80:], "env": (AGENT_DIR / ".env").exists()}
+
+    async def _line(self, text: str):
+        text = text.rstrip()
+        if not text:
+            return
+        try:                                    # agents print JSON logs: show the message (+ the real error)
+            j = json.loads(text)
+            text = f"{j.get('level', '')[:4]} {j.get('message', '')}" + (f" ({j['name']})" if j.get("name", "").startswith("b2wave") else "")
+            if j.get("exc_info"):
+                last = [l for l in str(j["exc_info"]).splitlines() if l.strip()][-1:]
+                text += "  -> " + (last[0].strip()[:220] if last else "")
+        except Exception:
+            pass
+        self.log.append(text)
+        if "registered worker" in text:
+            self.state = "ready"
+        elif "worker failed" in text or "Traceback" in text:
+            self.state = "error"
+        await broadcast({"type": "agent_worker", "line": text, "state": self.state})
+
+    async def _run(self, *cmd, cwd=None) -> int:
+        proc = await asyncio.create_subprocess_exec(*cmd, cwd=cwd or AGENT_DIR, stdout=asyncio.subprocess.PIPE,
+                                                    stderr=asyncio.subprocess.STDOUT,
+                                                    creationflags=getattr(__import__("subprocess"), "CREATE_NO_WINDOW", 0))
+        async for raw in proc.stdout:
+            await self._line(raw.decode(errors="replace"))
+        return await proc.wait()
+
+    async def install(self):
+        self.state = "installing"
+        await self._line("Setting up the AI agent (one time, about 2-4 minutes)...")
+        try:
+            if not self.python.exists():
+                import shutil
+                if shutil.which("py"):
+                    code = await self._run("py", "-3.12", "-m", "venv", str(AGENT_DIR / ".venv"))
+                    if code != 0:
+                        code = await self._run(sys.executable, "-m", "venv", str(AGENT_DIR / ".venv"))
+                else:
+                    code = await self._run(sys.executable, "-m", "venv", str(AGENT_DIR / ".venv"))
+                if code != 0:
+                    raise RuntimeError("could not create the agent environment")
+            code = await self._run(str(self.python), "-m", "pip", "install", "--disable-pip-version-check",
+                                   "--progress-bar", "off", "-r", "requirements.txt")
+            if code != 0:
+                raise RuntimeError("pip install failed (see log)")
+            self.state = "stopped"
+            await self._line("Agent installed. Click Start.")
+        except Exception as e:
+            self.state = "error"
+            await self._line(f"Install failed: {e}")
+
+    async def start(self):
+        if self.proc and self.proc.returncode is None:
+            return
+        if not self.python.exists():
+            raise RuntimeError("Install the agent first.")
+        if not (AGENT_DIR / ".env").exists():
+            raise RuntimeError("Save your LiveKit settings first (step 1).")
+        self.state = "starting"
+        self.proc = await asyncio.create_subprocess_exec(
+            str(self.python), "agent.py", "start", cwd=AGENT_DIR, stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT, creationflags=getattr(__import__("subprocess"), "CREATE_NO_WINDOW", 0))
+        await self._line(f"Agent worker started (pid {self.proc.pid})")
+
+        async def pump(proc):
+            async for raw in proc.stdout:
+                await self._line(raw.decode(errors="replace"))
+            code = await proc.wait()
+            if self.proc is proc:
+                self.state = "stopped" if code in (0, 1, -15) and self.state != "error" else "error"
+                await self._line(f"Agent worker exited (code {code})")
+        self.task = asyncio.create_task(pump(self.proc))
+
+    async def stop(self):
+        if self.proc and self.proc.returncode is None:
+            if sys.platform == "win32":             # the venv launcher spawns a child: end the whole tree
+                await asyncio.to_thread(__import__("subprocess").run, ["taskkill", "/PID", str(self.proc.pid), "/T", "/F"],
+                                        capture_output=True, creationflags=getattr(__import__("subprocess"), "CREATE_NO_WINDOW", 0))
+            else:
+                self.proc.terminate()
+            try:
+                await asyncio.wait_for(self.proc.wait(), 8)
+            except asyncio.TimeoutError:
+                self.proc.kill()
+        self.state = "stopped"
+        await self._line("Agent worker stopped")
+
+
+agent_worker = AgentWorker()
 
 
 async def record_sent(number: str, text: str, status: str, error: str):
@@ -515,6 +623,10 @@ async def handle_op(op: str, d: dict):
     if op == "volume":
         await modem.set_volume(d["level"])
         return {}
+    if op == "audio_get":
+        return await modem.audio_get()
+    if op == "audio_set":
+        return await modem.audio_set(d)
     if op == "clear_calls":
         calls.data.clear()
         calls.save()
@@ -672,7 +784,8 @@ async def handle_op(op: str, d: dict):
                 "agent_dir": str(AGENT_DIR)}
     if op == "ai_save":
         a = dict(config.data.get("ai") or {})
-        for k in ("url", "api_key", "agent_name", "instructions", "greeting", "voice", "language", "preset"):
+        for k in ("url", "api_key", "agent_name", "instructions", "greeting", "voice", "language", "preset",
+                  "engine", "stt", "llm", "tts", "tts_voice"):
             if k in d:
                 a[k] = d[k].strip() if isinstance(d[k], str) else d[k]
         if d.get("api_secret"):
@@ -711,10 +824,27 @@ async def handle_op(op: str, d: dict):
         if not lk.configured(a):
             raise RuntimeError("LiveKit is not set up. Fill in the keys on the AI Agent page.")
         room = f"b2w-{d.get('mode', 'test')}-{uuid.uuid4().hex[:8]}"
-        meta = {k: a.get(k, "") for k in ("instructions", "greeting", "voice", "language")}
+        meta = {k: a.get(k, "") for k in ("instructions", "greeting", "voice", "language", "engine", "stt", "llm", "tts", "tts_voice")}
         meta.update(mode=d.get("mode", "test"), number=d.get("number", ""))
         return {"url": a["url"], "room": room, "identity": "b2wave-bridge",
                 "token": lk.call_token(a, room, "b2wave-bridge", meta), "agent_name": a.get("agent_name") or "b2wave-agent"}
+    if op == "agent_status":
+        return agent_worker.info()
+    if op == "agent_install":
+        if agent_worker.state == "installing":
+            raise RuntimeError("Already installing")
+        asyncio.create_task(agent_worker.install())
+        return {}
+    if op == "agent_start":
+        await agent_worker.start()
+        return agent_worker.info()
+    if op == "agent_stop":
+        await agent_worker.stop()
+        return agent_worker.info()
+    if op == "agent_restart":
+        await agent_worker.stop()
+        await agent_worker.start()
+        return agent_worker.info()
     if op == "ai_log_save":
         rec = {k: d.get(k) for k in ("room", "number", "mode", "started", "ended", "duration", "agent_joined",
                                      "transcript", "outcome", "error")}
@@ -865,6 +995,10 @@ async def on_startup(app):
 
 
 async def on_cleanup(app):
+    try:
+        await agent_worker.stop()
+    except Exception:
+        pass
     app["supervisor"].cancel()
     await modem.disconnect()
 
@@ -923,6 +1057,10 @@ async def shutdown_handler(request):
     if request.remote not in ("127.0.0.1", "::1"):
         raise web.HTTPForbidden()
     log.info("shutdown requested by a newer instance")
+    try:
+        await agent_worker.stop()                 # don't leave the AI worker running
+    except Exception:
+        pass
     asyncio.get_running_loop().call_later(0.3, lambda: os._exit(0))
     return web.Response(text="bye")
 
@@ -978,6 +1116,7 @@ def main():
     app.router.add_static("/audio", AUDIO)
     app.router.add_post("/api/shutdown", shutdown_handler)
     app.router.add_get("/api/backup", backup_handler)
+    app.router.add_get("/favicon.ico", lambda r: web.FileResponse(STATIC / "icons" / "favicon.ico"))
     app.router.add_post("/api/restore", restore_handler)
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)

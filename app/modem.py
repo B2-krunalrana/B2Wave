@@ -701,7 +701,40 @@ class Modem:
         await self.cmd_ok(f"AT+VTS={digit[:1]}")
 
     async def set_volume(self, level: int):
-        await self.cmd_ok(f"AT+CLVL={max(0, min(5, int(level)))}")
+        """Speaker / earphone volume. The A7672S uses AT+COUTGAIN (0-7); AT+CLVL is not supported."""
+        lvl = max(0, min(7, int(level)))
+        ok, _, _ = await self.cmd(f"AT+COUTGAIN={lvl}")
+        if not ok:
+            await self.cmd_ok(f"AT+CLVL={min(lvl, 5)}")
+
+    async def audio_get(self) -> dict:
+        """Current voice settings: volume, mic gain, output path, mute, ringer level."""
+        def num(lines, key):
+            for l in lines:
+                if l.startswith(key):
+                    try:
+                        return int(l.split(":")[1].split(",")[0])
+                    except ValueError:
+                        pass
+            return None
+        return {"volume": num(await self._q("AT+COUTGAIN?"), "+COUTGAIN"),
+                "mic": num(await self._q("AT+CMICGAIN?"), "+CMICGAIN"),
+                "path": num(await self._q("AT+CSDVC?"), "+CSDVC"),
+                "mute": num(await self._q("AT+CMUT?"), "+CMUT"),
+                "ringer": num(await self._q("AT+CRSL?"), "+CRSL")}
+
+    async def audio_set(self, d: dict) -> dict:
+        if "volume" in d:
+            await self.set_volume(d["volume"])
+        if "mic" in d:
+            await self.cmd_ok(f"AT+CMICGAIN={max(0, min(7, int(d['mic'])))}")
+        if "path" in d:
+            await self.cmd_ok(f"AT+CSDVC={1 if int(d['path']) != 3 else 3}")
+        if "mute" in d:
+            await self.cmd_ok(f"AT+CMUT={1 if d['mute'] else 0}")
+        if "ringer" in d:
+            await self.cmd(f"AT+CRSL={max(0, min(100, int(d['ringer'])))}")
+        return await self.audio_get()
 
     # ------------------------------------------------------------ audio files on the module
     async def list_files(self) -> dict:

@@ -25,12 +25,12 @@ PC. There is no cloud and no account.
 | **Phone** | Dialer, answer/decline, in-call keypad (DTMF), call log with network end reason |
 | **Voice campaigns** | Upload any audio (converted to 8 kHz in the browser, kept on the PC, auto-copied to the module), batch calls, **key-press capture (1 / 2 …)**, per-call analytics |
 | **Call analytics** | Outcome (Responded, Listened no response, Hung up during prompt, No answer, Busy, Rejected, Unreachable, Invalid number, Network error), who ended the call, ring/talk time, prompt played fully/partly/stopped by key, key timestamps, hold/resume, network cause (AT+CEER), full timeline, CSV |
-| **AI voice agent** | LiveKit + OpenAI realtime agent talks to the person on a B2Wave call; persona templates, PC test mode, live transcript, call history |
+| **AI voice agent** | LiveKit agent talks on B2Wave calls. Engines: **LiveKit Inference** (no extra keys: Deepgram/AssemblyAI STT, GPT-4.1/Gemini LLM, Cartesia/ElevenLabs TTS), **agent hosted on LiveKit Cloud**, or **own OpenAI key** (Realtime). Paste-the-env setup, step tabs, B2Wave installs/starts/stops the worker, PC test mode, live transcript, history |
 | **SIM number** | The SIM's own number is detected (AT+CNUM) and shown at the top of every page; SIM swaps are detected by ICCID; manual number for SIMs that don't store it |
 | **Backup & restore** | One .zip with all data (optionally secrets); restore with preview, Merge or Replace, automatic safety copy, live reload of every open page |
 | **Email reports** | Gmail / Outlook / Zoho / Yahoo / custom SMTP. Campaign and bulk reports are emailed automatically when finished (HTML summary + CSV) |
 | **Setup wizard** | Detects the board, flashes the prebuilt ESP32 firmware (no Arduino IDE), layered tests (Wi-Fi → module → SIM → network), driver guidance, diagnostics report |
-| **Talk on calls** | Wiring guides: speaker+mic, USB sound card with built-in PC audio bridge, I2S codec |
+| **Talk on calls** | Wiring guides: speaker+mic, **3.5 mm headset jack** (any wired earphones with mic), USB sound card + PC audio bridge (also for Bluetooth headsets paired to the PC), I2S codec. Live call audio controls (volume `AT+COUTGAIN`, mic gain, earpiece/loudspeaker path, mute, test voice) |
 | **Robustness** | Auto-reconnect after COM renumbering, Wi-Fi fallback, call recovery after restart, single-instance launcher, friendly errors, app log |
 | **UI** | Light/dark theme, collapsible sidebar (Ctrl+B), mobile drawer, animated logo, splash + progress loaders, Help & guide page |
 
@@ -73,7 +73,7 @@ un_agent.bat`** (first run installs LiveKit Agents into `agent/.venv`) and keep 
 ```
 Caller ⇄ A7672S (SPK/MIC) ⇄ USB sound card ⇄ B2Wave page (livekit-client) ⇄ LiveKit room ⇄ agent/agent.py (OpenAI Realtime)
 ```
-`agent/requirements.txt` pins LiveKit Agents **1.0.23**: newer releases load native DLLs that Windows Smart App Control blocks on some PCs.
+`agent/requirements.txt` pins LiveKit Agents **1.2.16** (has LiveKit Inference). Newer releases load native DLLs that Windows Smart App Control blocks on some PCs. The worker uses a random free port for its health endpoint, so it never clashes with port 8081.
 
 ---
 
