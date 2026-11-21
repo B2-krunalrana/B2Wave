@@ -26,6 +26,8 @@ PC. There is no cloud and no account.
 | **Voice campaigns** | Upload any audio (converted to 8 kHz in the browser, kept on the PC, auto-copied to the module), batch calls, **key-press capture (1 / 2 …)**, per-call analytics |
 | **Call analytics** | Outcome (Responded, Listened no response, Hung up during prompt, No answer, Busy, Rejected, Unreachable, Invalid number, Network error), who ended the call, ring/talk time, prompt played fully/partly/stopped by key, key timestamps, hold/resume, network cause (AT+CEER), full timeline, CSV |
 | **AI voice agent** | LiveKit + OpenAI realtime agent talks to the person on a B2Wave call; persona templates, PC test mode, live transcript, call history |
+| **SIM number** | The SIM's own number is detected (AT+CNUM) and shown at the top of every page; SIM swaps are detected by ICCID; manual number for SIMs that don't store it |
+| **Backup & restore** | One .zip with all data (optionally secrets); restore with preview, Merge or Replace, automatic safety copy, live reload of every open page |
 | **Email reports** | Gmail / Outlook / Zoho / Yahoo / custom SMTP. Campaign and bulk reports are emailed automatically when finished (HTML summary + CSV) |
 | **Setup wizard** | Detects the board, flashes the prebuilt ESP32 firmware (no Arduino IDE), layered tests (Wi-Fi → module → SIM → network), driver guidance, diagnostics report |
 | **Talk on calls** | Wiring guides: speaker+mic, USB sound card with built-in PC audio bridge, I2S codec |
@@ -63,7 +65,8 @@ The first run creates `app/.venv` and installs the dependencies; after that the 
 ### 5. AI voice agent (optional)
 1. Create a free project at <https://cloud.livekit.io> (copy the URL, API key, secret) and get an OpenAI API key.
 2. **AI voice agent** page → paste the keys → **Save** → **Test LiveKit**.
-3. Double-click **`agentun_agent.bat`** (first run installs LiveKit Agents into `agent/.venv`) and keep it open.
+3. Double-click **`agent
+un_agent.bat`** (first run installs LiveKit Agents into `agent/.venv`) and keep it open.
 4. **Test with PC mic** to talk to the agent from your PC, or **Call a phone number** to let it talk on a real call.
    Phone calls need the USB sound card wiring (Talk on calls → option B) because the module can't stream call audio over USB.
 
@@ -92,6 +95,7 @@ app/
   bulksms.py        bulk SMS runner with templates and retry
   mailer.py         SMTP email + HTML report templates
   livekit_api.py    LiveKit access tokens (with agent dispatch) + connection test
+  backup.py         export / inspect / restore of all data as one .zip
   flasher.py        board detection, esptool flashing, USB diagnostics
   static/index.html single-page UI
   static/vendor/    pinned libraries: Lucide, Chart.js, SweetAlert2, Notyf, livekit-client

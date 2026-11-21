@@ -11,6 +11,7 @@ calls, live AT console.
 from __future__ import annotations
 
 import argparse
+import time
 import re
 import os
 import asyncio
@@ -31,6 +32,7 @@ import campaign as camp_mod
 import bulksms
 import mailer
 import livekit_api as lk
+import backup as bk
 import base64
 
 ROOT = Path(__file__).parent
@@ -98,8 +100,31 @@ def add_message(msg: dict) -> dict | None:
     return msg
 
 
+async def apply_sim_identity():
+    """Manual number for SIMs that don't store their own number; detect SIM swaps."""
+    st = modem.status
+    if not st.iccid:
+        return None
+    manual = (config.data.get("sim_numbers") or {}).get(st.iccid)
+    if manual and st.phone_src != "sim":
+        st.phone, st.phone_src = manual, "manual"
+    prev = config.data.get("last_iccid")
+    if prev != st.iccid:
+        config.data["last_iccid"] = st.iccid
+        config.save()
+        if prev:
+            log.info("SIM changed %s -> %s (%s)", prev[-6:], st.iccid[-6:], st.phone or "number unknown")
+            return {"type": "sim_changed", "iccid": st.iccid, "phone": st.phone, "operator": st.operator}
+    return None
+
+
 async def on_modem_event(evt: dict):
     t = evt["type"]
+    if t == "status":
+        changed = await apply_sim_identity()
+        evt["status"] = asdict(modem.status)
+        if changed:
+            await broadcast(changed)
     if t == "log":
         console.append(evt)
         logging.getLogger("gsm.modem").debug("%s %s", evt["dir"], evt["line"])
@@ -612,6 +637,28 @@ async def handle_op(op: str, d: dict):
             raise RuntimeError(obj["email_status"])
         await broadcast({"type": "campaign" if kind == "campaign" else "bulk", ("campaign" if kind == "campaign" else "job"): obj})
         return {"status": obj["email_status"]}
+    # ---------------- SIM number
+    if op == "sim_set_number":
+        if not modem.status.iccid:
+            raise RuntimeError("No SIM detected yet. Insert a SIM and wait until it shows READY.")
+        num = m.normalize_number(d.get("number", ""))
+        if len(re.sub(r"\D", "", num)) < 8:
+            raise ValueError("Enter the full mobile number, e.g. +91 98xxxxxxxx")
+        config.data.setdefault("sim_numbers", {})[modem.status.iccid] = num
+        config.save()
+        modem.status.phone, modem.status.phone_src = num, "manual"
+        await modem.emit_status()
+        return {"phone": num}
+    if op == "sim_refresh":
+        await modem.read_sim_identity()
+        await modem.emit_status()
+        return asdict(modem.status)
+    # ---------------- backup summary
+    if op == "backup_info":
+        sd = DATA / "backups"
+        safety = sorted([f.name for f in sd.glob("before-restore-*.zip")], reverse=True)[:10] if sd.exists() else []
+        return {"counts": bk.counts(_stores(), AUDIO), "safety": safety,
+                "has_secrets": bool((config.data.get("smtp") or {}).get("password") or (config.data.get("ai") or {}).get("api_secret"))}
     # ---------------- AI voice agent (LiveKit)
     if op == "ai_get":
         a = dict(config.data.get("ai") or {})
@@ -822,6 +869,56 @@ async def on_cleanup(app):
     await modem.disconnect()
 
 
+def _local(request) -> bool:
+    return request.remote in ("127.0.0.1", "::1")
+
+
+def _stores() -> dict:
+    return {"messages": messages, "calls": calls, "campaigns": campaigns, "bulk": bulk, "ai_calls": ai_calls}
+
+
+async def backup_handler(request):
+    if not _local(request):
+        raise web.HTTPForbidden(text="Backups can only be downloaded on the PC running B2Wave.")
+    secrets = request.query.get("secrets") == "1"
+    blob = await asyncio.to_thread(bk.build, _stores(), config.data, AUDIO, AGENT_DIR / ".env", secrets)
+    name = time.strftime("B2Wave-backup-%Y%m%d-%H%M.zip")
+    return web.Response(body=blob, content_type="application/zip",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"', "Cache-Control": "no-store"})
+
+
+async def restore_handler(request):
+    if not _local(request):
+        raise web.HTTPForbidden(text="Restore is only allowed on the PC running B2Wave.")
+    blob = await request.read()
+    try:
+        if request.query.get("dry") == "1":
+            return web.json_response({"ok": True, **bk.inspect(blob)})
+        if runner.running or bulk_runner.running:
+            raise ValueError("Stop the running campaign / bulk SMS job before restoring.")
+        if modem.call.state != "idle":
+            raise ValueError("Finish the current call before restoring.")
+        mode = "replace" if request.query.get("mode") == "replace" else "merge"
+        # safety copy of the current data first
+        safe_dir = DATA / "backups"
+        safe_dir.mkdir(exist_ok=True)
+        safe = safe_dir / time.strftime("before-restore-%Y%m%d-%H%M%S.zip")
+        safe.write_bytes(await asyncio.to_thread(bk.build, _stores(), config.data, AUDIO, AGENT_DIR / ".env", True))
+        for old in sorted(safe_dir.glob("before-restore-*.zip"))[:-10]:
+            old.unlink()                                       # keep the last 10 safety copies
+        res = await asyncio.to_thread(bk.restore, blob, mode, _stores(), config, AUDIO, AGENT_DIR / ".env")
+        res["safety_copy"] = safe.name
+        log.info("restore (%s) done: %s", mode, res["restored"])
+        await broadcast({"type": "restored", "result": res})
+        reconnect_evt.set()                                    # re-apply connection settings
+        return web.json_response({"ok": True, **res})
+    except ValueError as e:
+        return web.json_response({"ok": False, "error": str(e)}, status=400)
+    except Exception as e:
+        log.exception("restore failed")
+        return web.json_response({"ok": False, "error": f"Restore failed: {e}"}, status=500)
+
+
 async def shutdown_handler(request):
     if request.remote not in ("127.0.0.1", "::1"):
         raise web.HTTPForbidden()
@@ -873,13 +970,15 @@ def main():
         if h is not fh:
             h.setLevel(logging.INFO)
 
-    app = web.Application()
+    app = web.Application(client_max_size=bk.MAX_ZIP)
     app.router.add_get("/", index)
     app.router.add_get("/ws", ws_handler)
     app.router.add_static("/static", STATIC)
     app.router.add_static("/doc", ROOT.parent / "doc")
     app.router.add_static("/audio", AUDIO)
     app.router.add_post("/api/shutdown", shutdown_handler)
+    app.router.add_get("/api/backup", backup_handler)
+    app.router.add_post("/api/restore", restore_handler)
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)
 

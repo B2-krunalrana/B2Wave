@@ -247,6 +247,20 @@ def operator_name(op: str) -> str:
     return op
 
 
+def normalize_number(num: str, ntype: str = "") -> str:
+    """'919824085934' (type 129/145) -> '+919824085934'; 10-digit Indian -> '+91...'."""
+    d = re.sub(r"[^\d+]", "", num or "")
+    if not d:
+        return ""
+    if d.startswith("+"):
+        return d
+    if str(ntype).strip() == "145" or (len(d) == 12 and d.startswith("91")):
+        return "+" + d
+    if len(d) == 10 and d[0] in "6789":
+        return "+91" + d
+    return d
+
+
 def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
@@ -274,6 +288,9 @@ class ModemStatus:
     signal: int = -1             # 0..31, 99 unknown
     signal_pct: int = 0
     phone: str = ""
+    phone_src: str = ""          # sim | manual
+    iccid: str = ""              # SIM card serial: changes when a different SIM is inserted
+    imsi: str = ""
 
 
 # ======================================================================= modem
@@ -401,12 +418,31 @@ class Modem:
         await self.cmd("AT+CSMP=17,167,0,0")
         self.status.model = " ".join(await self._q("AT+CGMM")) or "A7672S"
         self.status.imei = " ".join(await self._q("AT+CGSN"))
-        num = await self._q("AT+CNUM")
-        if num and num[0].startswith("+CNUM:"):
-            f = csv_fields(num[0][6:])
-            self.status.phone = f[1] if len(f) > 1 else ""
+        await self.read_sim_identity()
         await self.poll_status()
         await self.recover_call()
+
+    async def read_sim_identity(self):
+        """SIM serial (ICCID), IMSI and the SIM's own number (AT+CNUM, if the SIM stores it)."""
+        st = self.status
+        iccid = ""
+        for l in await self._q("AT+CICCID"):
+            mm = re.search(r"([0-9A-Fa-f]{18,22})", l)
+            if mm:
+                iccid = mm.group(1).upper()
+        imsi = next((l.strip() for l in await self._q("AT+CIMI") if l.strip().isdigit()), "")
+        phone = ""
+        for l in await self._q("AT+CNUM"):
+            if l.startswith("+CNUM:"):
+                f = csv_fields(l[6:])
+                if len(f) > 1 and re.sub(r"\D", "", f[1]):
+                    phone = normalize_number(f[1], f[2] if len(f) > 2 else "")
+                    break
+        if iccid != st.iccid:
+            st.phone, st.phone_src = "", ""
+        st.iccid, st.imsi = iccid, imsi
+        if phone:
+            st.phone, st.phone_src = phone, "sim"
 
     async def recover_call(self):
         """After an app restart, pick up a call that is still running on the module."""
@@ -421,7 +457,12 @@ class Modem:
     async def poll_status(self):
         st = self.status
         lines = await self._q("AT+CPIN?")
+        prev_sim = st.sim
         st.sim = lines[0].split(":", 1)[1].strip() if lines else "NO SIM / ERROR"
+        if "READY" not in st.sim:
+            st.iccid = st.imsi = st.phone = st.phone_src = ""          # SIM removed / locked
+        elif "READY" not in prev_sim or not st.iccid:
+            await self.read_sim_identity()                              # SIM (re)inserted
         for l in await self._q("AT+CSQ"):
             if l.startswith("+CSQ:"):
                 rssi = int(l[5:].split(",")[0])
