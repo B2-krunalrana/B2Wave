@@ -306,6 +306,7 @@ class Modem:
         self._connected_evt = asyncio.Event()
         self.local_hangup = False
         self.last_end: dict = {}
+        self._raw_sink = None             # bytearray while a binary download is in progress
 
     # ------------------------------------------------------------ low level
     async def _log(self, direction: str, line: str):
@@ -315,6 +316,9 @@ class Modem:
         while True:
             data = await self.transport.read()
             if not data:
+                continue
+            if self._raw_sink is not None:          # binary file download: bypass line parsing
+                self._raw_sink.extend(data)
                 continue
             self._buf += data
             # SMS prompt "> " arrives without a newline
@@ -808,6 +812,56 @@ class Modem:
                 size = int(a.split(":")[1].strip() or 0)
         if size != len(data):
             raise RuntimeError(f"file check failed: wrote {len(data)} bytes, module has {size}")
+
+    async def download_file(self, name: str, size_hint: int = 0) -> bytes:
+        """Read a file from the module's flash (AT+CFTRANTX). Binary-safe."""
+        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,40}", name):
+            raise ValueError("bad file name")
+        async with self._lock:
+            self._raw_sink = bytearray()
+            self._buf = b""
+            try:
+                cmd = f'AT+CFTRANTX="c:/{name}"'
+                await self._log("tx", cmd)
+                await self.transport.write((cmd + "\r").encode())
+                deadline = time.time() + 15 + size_hint / 4000
+                while time.time() < deadline:
+                    raw = bytes(self._raw_sink)
+                    if re.search(rb"\+CFTRANTX: 0\r\n\r\nOK\r\n$", raw) or re.search(rb"\r\n(ERROR|\+CME ERROR[^\r]*)\r\n$", raw):
+                        break
+                    await asyncio.sleep(0.05)
+                raw = bytes(self._raw_sink)
+            finally:
+                self._raw_sink = None
+        if re.search(rb"\r\n(ERROR|\+CME ERROR)", raw[-60:]) and b"+CFTRANTX: DATA" not in raw:
+            raise RuntimeError("module refused the download")
+        out, pos = bytearray(), 0
+        while True:                                  # "+CFTRANTX: DATA,<n>\r\n<n bytes>" blocks
+            i = raw.find(b"+CFTRANTX: DATA,", pos)
+            if i < 0:
+                break
+            j = raw.find(b"\r\n", i)
+            n = int(raw[i + 16:j])
+            out += raw[j + 2:j + 2 + n]
+            pos = j + 2 + n
+        await self._log("rx", f"<downloaded {len(out)} bytes of {name}>")
+        if size_hint and len(out) != size_hint:
+            raise RuntimeError(f"download incomplete: {len(out)} of {size_hint} bytes")
+        return bytes(out)
+
+    async def free_space(self) -> int:
+        for l in await self._q("AT+FSMEM"):
+            mm = re.search(r"\((\d+),(\d+)\)", l)
+            if mm:
+                return int(mm.group(1)) - int(mm.group(2))
+        return 0
+
+    async def record_start(self, name: str):
+        await self.cmd(f'AT+FSDEL="{name}"')
+        await self.cmd_ok(f'AT+CREC=1,"c:/{name}"')
+
+    async def record_stop(self):
+        await self.cmd("AT+CREC=0")
 
     async def delete_file(self, name: str):
         await self.cmd_ok(f'AT+FSDEL="{name}"')

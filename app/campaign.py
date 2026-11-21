@@ -1,5 +1,11 @@
 """
-Voice campaigns (batch IVR calls) with per-call analytics.
+Campaigns: calls, SMS, or both (with SMS rules based on the call result).
+
+  mode = "call"      IVR call only
+  mode = "sms"       personalised SMS only (bulk)
+  mode = "call_sms"  call, then send an SMS chosen by rules on the outcome
+                     (pressed 1 / pressed 2 / any key / no key / not answered / always)
+  mode = "sms_call"  send an SMS first, wait, then call
 
 For every number: dial -> wait for answer -> play audio / TTS into the call ->
 collect keypad presses -> hang up -> store a full report:
@@ -26,6 +32,7 @@ import uuid
 from typing import Awaitable, Callable
 
 import modem as m
+from bulksms import render as render_template
 
 Emit = Callable[[dict], Awaitable[None]]
 
@@ -54,6 +61,9 @@ class CampaignRunner:
         self._play_done = asyncio.Event()
         self._stop = False
         self.on_done = None                       # async (campaign) -> None, e.g. email report
+        self.record_sent = None                   # async (number, text, status, error) -> None
+        self.make_room = None                     # async (bytes_needed, keep_name) -> None
+        self.rec_dir = None                       # Path where call recordings are saved
 
     # ------------------------------------------------------------ live events from the modem
     @property
@@ -108,23 +118,43 @@ class CampaignRunner:
     async def start(self, cfg: dict) -> dict:
         if self.running:
             raise RuntimeError("a campaign is already running")
-        numbers = [re.sub(r"[^\d+]", "", n) for n in cfg.get("numbers", [])]
-        numbers = [n for n in numbers if len(n.lstrip("+")) >= 5]
-        if not numbers:
-            raise ValueError("add at least one phone number")
-        if not cfg.get("audio") and not cfg.get("tts"):
+        mode = cfg.get("mode") or "call"
+        if mode not in ("call", "sms", "call_sms", "sms_call"):
+            raise ValueError("unknown campaign type")
+        rows = cfg.get("rows") or [{"number": n} for n in cfg.get("numbers", [])]
+        seen, recips = set(), []
+        for r in rows:
+            num = re.sub(r"[^\d+]", "", str(r.get("number", "")))
+            if len(num.lstrip("+")) < 5 or num in seen:
+                continue
+            seen.add(num)
+            recips.append({**{k: str(v) for k, v in r.items()}, "number": num})
+        if not recips:
+            raise ValueError("add at least one valid phone number")
+        uses_call = mode != "sms"
+        if uses_call and not cfg.get("audio") and not cfg.get("tts"):
             raise ValueError("choose an audio file or enter text to speak")
+        sms = cfg.get("sms") or {}
+        if mode in ("sms", "sms_call") and not (sms.get("pre") or "").strip():
+            raise ValueError("write the SMS message")
+        rules = [r for r in (sms.get("rules") or []) if (r.get("text") or "").strip()]
+        if mode == "call_sms" and not rules:
+            raise ValueError("add at least one SMS rule (e.g. pressed 1)")
         camp = {
             "id": uuid.uuid4().hex[:10], "name": cfg.get("name") or time.strftime("Campaign %d %b %H:%M"),
-            "created": m.now_iso(), "status": "running",
+            "created": m.now_iso(), "status": "running", "mode": mode,
             "audio": cfg.get("audio", ""), "audio_size": int(cfg.get("audio_size", 0)),
             "tts": cfg.get("tts", ""), "repeat": max(1, min(5, int(cfg.get("repeat", 1)))),
             "ring_timeout": max(10, min(90, int(cfg.get("ring_timeout", 35)))),
             "key_wait": max(3, min(60, int(cfg.get("key_wait", 10)))),
             "gap": max(2, min(120, int(cfg.get("gap", 5)))),
             "stop_on_key": bool(cfg.get("stop_on_key", True)),
+            "record": bool(cfg.get("record")) and mode != "sms",
+            "keymap": {k: str(v)[:40] for k, v in (cfg.get("keymap") or {}).items() if str(v).strip()},
+            "sms": {"pre": (sms.get("pre") or "").strip(), "rules": rules,
+                    "delay": max(0, min(600, int(sms.get("delay", 30))))},
             "email_to": cfg.get("email_to", ""), "email_status": "",
-            "results": [self._blank(n) for n in numbers],
+            "results": [self._blank(r["number"], r) for r in recips],
         }
         self.store.data.insert(0, camp)
         self.store.data[:] = self.store.data[:50]
@@ -136,8 +166,9 @@ class CampaignRunner:
         return camp
 
     @staticmethod
-    def _blank(number: str) -> dict:
-        return {"number": number, "status": "pending", "outcome": "", "keys": "", "key_times": [],
+    def _blank(number: str, vars_: dict | None = None) -> dict:
+        return {"number": number, "vars": vars_ or {"number": number}, "sms": [],
+                "status": "pending", "outcome": "", "keys": "", "key_times": [],
                 "ring_s": None, "talk_s": 0, "duration": 0, "prompt": "", "ended_by": "", "holds": 0,
                 "cause": "", "cause_code": None, "end_code": "", "events": [], "time": "", "error": ""}
 
@@ -163,13 +194,18 @@ class CampaignRunner:
                 while self.modem.call.state != "idle":       # never interrupt a manual call
                     await asyncio.sleep(1)
                 try:
-                    await self._call_one(camp, r)
+                    await self._process(camp, r)
                 except Exception as e:
-                    r.update(status="failed", outcome="Failed", error=str(e))
+                    r.update(status="failed", outcome=r.get("outcome") or "Failed", error=str(e))
                 finally:
                     self._rec = None
                     r.pop("_playing", None)
                     r.pop("_stopped_by_key", None)
+                    if r.get("_rec_file"):                       # call ended by an error: still stop recording
+                        try:
+                            await self._rec_finish(camp, r)
+                        except Exception:
+                            pass
                 await self._push(camp)
                 if i < len(camp["results"]) - 1 and not self._stop:
                     await asyncio.sleep(camp["gap"])
@@ -187,6 +223,58 @@ class CampaignRunner:
                     pass
                 await self._push(camp)
 
+    async def _process(self, camp, r):
+        mode = camp.get("mode", "call")
+        sms = camp.get("sms") or {}
+        if mode in ("sms", "sms_call"):
+            await self._send_sms(camp, r, "before call" if mode == "sms_call" else "message", sms.get("pre", ""))
+            if mode == "sms":
+                ok = r["sms"] and r["sms"][-1]["status"] == "sent"
+                r.update(status="done", outcome="SMS sent" if ok else "SMS failed", time=r.get("time") or m.now_iso())
+                return
+            if sms.get("delay"):
+                r["status"] = f"waiting {sms['delay']} s"
+                await self._push(camp)
+                for _ in range(int(sms["delay"])):
+                    if self._stop:
+                        return
+                    await asyncio.sleep(1)
+        await self._call_one(camp, r)
+        if mode == "call_sms":
+            rule = pick_rule(sms.get("rules") or [], r)
+            if rule:
+                await self._send_sms(camp, r, rule_label(rule.get("when", "")), rule.get("text", ""))
+
+    async def _send_sms(self, camp, r, when: str, template: str):
+        vars_ = dict(r.get("vars") or {})
+        vars_.update(number=r["number"], key=r.get("keys", "")[:1], keys=r.get("keys", ""), outcome=r.get("outcome", ""),
+                     choice=(camp.get("keymap") or {}).get(r.get("keys", "")[:1], ""))
+        text = render_template(template, vars_).strip()
+        entry = {"when": when, "text": text, "status": "sending", "error": "", "time": m.now_iso(), "parts": 0}
+        r.setdefault("sms", []).append(entry)
+        r["status"] = "sending SMS"
+        await self._push(camp)
+        if not text:
+            entry.update(status="skipped", error="empty message")
+            return
+        while self.modem.call.state != "idle":
+            await asyncio.sleep(0.5)
+        for attempt in (1, 2):
+            try:
+                entry["parts"] = await self.modem.send_sms(r["number"], text)
+                entry.update(status="sent", error="")
+                break
+            except Exception as e:
+                entry.update(status="failed", error=str(e))
+                if attempt == 1:
+                    await asyncio.sleep(3)
+        if self.record_sent:
+            try:
+                await self.record_sent(r["number"], text, entry["status"], entry["error"])
+            except Exception:
+                pass
+        await self._push(camp)
+
     async def _wait_state(self, states: set, timeout: float) -> str:
         t0 = time.time()
         while time.time() - t0 < timeout and not self._stop:
@@ -195,10 +283,66 @@ class CampaignRunner:
             await asyncio.sleep(0.15)
         return self.modem.call.state
 
+    async def _rec_start(self, camp, r):
+        """Record the call on the module (AMR, ~1.6 KB/s); freed space is checked first."""
+        try:
+            idx = camp["results"].index(r)
+        except ValueError:
+            idx = 0
+        name = f"r{camp['id'][:6]}{idx}.amr"
+        play = wav_seconds(camp.get("audio_size", 0)) * camp.get("repeat", 1) if camp.get("audio") else len(camp.get("tts", "")) * 0.08
+        need = int((play + camp.get("key_wait", 10) + 20) * 1700) + 16384
+        try:
+            free = await self.modem.free_space()
+            if free < need and self.make_room:
+                await self.make_room(need, camp.get("audio", ""))
+                free = await self.modem.free_space()
+            if free < need:
+                r["rec_error"] = f"not recorded: module storage full ({free // 1024} KB free)"
+                self._ev("recording skipped", r["rec_error"])
+                return
+            await self.modem.record_start(name)
+            r["_rec_file"] = name
+            self._ev("recording started", "")
+        except Exception as e:
+            r["rec_error"] = f"recording failed: {e}"
+            self._ev("recording failed", str(e))
+
+    async def _rec_finish(self, camp, r):
+        name = r.pop("_rec_file", None)
+        if not name:
+            return
+        try:
+            await self.modem.record_stop()
+            await asyncio.sleep(0.6)
+            size = 0
+            for l in await self.modem._q(f'AT+FSATTRI="{name}"'):
+                if l.startswith("+FSATTRI:"):
+                    size = int(l.split(":")[1].strip() or 0)
+            data = await self.modem.download_file(name, size)
+            folder = self.rec_dir / camp["id"]
+            folder.mkdir(parents=True, exist_ok=True)
+            fname = f"{re.sub(r'[^0-9]', '', r['number'])}_{name}"
+            (folder / fname).write_bytes(data)
+            r["recording"] = f"{camp['id']}/{fname}"
+            r["rec_bytes"] = len(data)
+            r["rec_s"] = round(max(0, len(data) - 6) / 1600, 1)
+            self._ev("recording saved", f"{len(data) // 1024} KB")
+        except Exception as e:
+            r["rec_error"] = f"recording not saved: {e}"
+            self._ev("recording failed", str(e))
+        finally:
+            try:
+                await self.modem.delete_file(name)
+            except Exception:
+                pass
+
     async def _finish(self, r, answered_at: float | None):
         """Wait briefly for the network's end reason, then classify the call."""
         if self.modem.call.state != "idle":
             await self.modem.hangup()
+        if r.get("_rec_file") and self.current:
+            await self._rec_finish(self.current, r)
         try:
             await asyncio.wait_for(self._cause_evt.wait(), 4)
         except asyncio.TimeoutError:
@@ -214,7 +358,9 @@ class CampaignRunner:
         self._key_evt.clear()
         self._cause_evt.clear()
         self._play_done.clear()
+        keep = {"vars": r.get("vars") or {"number": r["number"]}, "sms": r.get("sms") or []}
         r.update(self._blank(r["number"]))
+        r.update(keep)
         r.update(status="dialing", time=m.now_iso())
         self._rec, self._t0 = r, time.time()
         self._ev("dialing", r["number"])
@@ -241,6 +387,8 @@ class CampaignRunner:
         r["status"] = "answered"
         self._ev("answered", f"after {r['ring_s']} s")
         await self._push(camp)
+        if camp.get("record"):
+            await self._rec_start(camp, r)
         await asyncio.sleep(0.8)                                  # let the voice path settle
 
         play_len = 0.0
@@ -314,6 +462,29 @@ def classify(r: dict, answered: bool) -> str:
     return "Not answered"
 
 
+RULE_LABELS = {"key:any": "pressed any key", "no_key": "answered, no key", "not_answered": "not answered",
+               "answered": "answered", "always": "always"}
+
+
+def rule_label(when: str) -> str:
+    if when.startswith("key:") and when != "key:any":
+        return f"pressed {when[4:]}"
+    return RULE_LABELS.get(when, when)
+
+
+def pick_rule(rules: list, r: dict):
+    """First matching rule wins (rules are checked in the order the user arranged them)."""
+    answered = r.get("ring_s") is not None
+    key = (r.get("keys") or "")[:1]
+    for rule in rules:
+        w = rule.get("when", "")
+        if (w == "always" or (w == "answered" and answered) or (w == "not_answered" and not answered)
+                or (w == "no_key" and answered and not key) or (w == "key:any" and key)
+                or (w.startswith("key:") and w != "key:any" and key and key == w[4:])):
+            return rule
+    return None
+
+
 def summarize(camp: dict) -> dict:
     res = [r for r in camp["results"] if r.get("status") == "done"]
     ans = [r for r in res if r.get("ring_s") is not None]
@@ -329,18 +500,26 @@ def summarize(camp: dict) -> dict:
         "avg_ring_s": round(sum(r["ring_s"] for r in ans) / len(ans), 1) if ans else 0,
         "avg_talk_s": round(sum(r["talk_s"] for r in ans) / len(ans), 1) if ans else 0,
         "outcomes": outcomes, "keys": keys,
+        "sms_sent": sum(1 for r in camp["results"] for s_ in r.get("sms", []) if s_.get("status") == "sent"),
+        "sms_failed": sum(1 for r in camp["results"] for s_ in r.get("sms", []) if s_.get("status") == "failed"),
     }
 
 
 def to_csv(camp: dict) -> str:
     out = io.StringIO()
     w = csv.writer(out)
-    w.writerow(["number", "outcome", "keys_pressed", "key_times", "ring_seconds", "talk_seconds", "prompt",
-                "ended_by", "holds", "network_reason", "time", "error", "timeline"])
+    keymap = camp.get("keymap") or {}
+    w.writerow(["number", "name", "outcome", "keys_pressed", "key_meaning", "key_times", "ring_seconds", "talk_seconds",
+                "prompt", "ended_by", "holds", "network_reason", "sms_sent", "sms_status", "recording", "time", "error", "timeline"])
     for r in camp["results"]:
-        w.writerow([r["number"], r.get("outcome") or r.get("status"), r.get("keys", ""),
+        sm = r.get("sms") or []
+        w.writerow([r["number"], (r.get("vars") or {}).get("name", ""), r.get("outcome") or r.get("status"), r.get("keys", ""),
+                    keymap.get((r.get("keys") or "")[:1], ""),
                     " ".join(f"{k['key']}@{k['t']}s" for k in r.get("key_times", [])),
                     r.get("ring_s") if r.get("ring_s") is not None else "", r.get("talk_s", 0), r.get("prompt", ""),
-                    r.get("ended_by", ""), r.get("holds", 0), r.get("cause", ""), r.get("time", ""), r.get("error", ""),
+                    r.get("ended_by", ""), r.get("holds", 0), r.get("cause", ""),
+                    " | ".join(f"[{s_['when']}] {s_['text']}" for s_ in sm), " | ".join(s_["status"] for s_ in sm),
+                    r.get("recording", "") or r.get("rec_error", ""),
+                    r.get("time", ""), r.get("error", ""),
                     " | ".join(f"{e['t']}s {e['ev']} {e['detail']}".strip() for e in r.get("events", []))])
     return out.getvalue()

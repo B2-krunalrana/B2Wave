@@ -18,7 +18,7 @@ import zipfile
 from pathlib import Path
 
 APP_VERSION = "1.0"
-STORE_FILES = ("messages.json", "calls.json", "campaigns.json", "bulk.json", "ai_calls.json")
+STORE_FILES = ("messages.json", "calls.json", "campaigns.json", "bulk.json", "ai_calls.json", "drafts.json", "sms_templates.json")
 SECRET_KEYS = {"smtp": ("password",), "ai": ("api_secret",)}
 MAX_ZIP = 300 * 1024 * 1024
 SAFE_AUDIO = re.compile(r"^(?!.*\.\.)[A-Za-z0-9_-][A-Za-z0-9_.-]{0,59}\.(wav|amr|mp3)$", re.I)
@@ -120,7 +120,7 @@ def restore(blob: bytes, mode: str, stores: dict, config_store, audio_dir: Path,
             result[name] = _merge_list(store.data, incoming, _key)
         if name == "messages":
             store.data.sort(key=lambda m: m.get("time", ""))
-        if name in ("campaigns", "bulk", "ai_calls"):
+        if name in ("campaigns", "bulk", "ai_calls", "drafts"):
             store.data.sort(key=lambda c: c.get("created") or c.get("started") or "", reverse=True)
         store.save()
 

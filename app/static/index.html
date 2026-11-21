@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="/static/vendor/notyf.min.css">
 <script src="/static/vendor/notyf.min.js"></script>
 <script src="/static/vendor/livekit-client.umd.min.js"></script>
+<script src="/static/vendor/BenzAMRRecorder.min.js"></script>
 <style>
 :root{
   --bg:#f4f5f7;--panel:#fff;--panel2:#f0f2f5;--line:#e3e6eb;--text:#14171c;--muted:#6b7280;
@@ -432,7 +433,7 @@ div:where(.swal2-container).swal2-backdrop-show{background:rgba(10,12,20,.55)!im
 .ochip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line)}
 .ochip.ok{background:var(--ok-soft);color:var(--ok-ink);border-color:transparent}.ochip.bad{background:var(--bad-soft);color:var(--bad-ink);border-color:transparent}
 .ochip.warn{background:var(--warn-soft);color:var(--warn-ink);border-color:transparent}
-.rtbl td{vertical-align:top}.rtbl td:nth-child(4),.rtbl td:nth-child(5){white-space:nowrap}
+.rtbl td{vertical-align:top}.rtbl td:nth-child(6),.rtbl td:nth-child(7){white-space:nowrap}
 .rtbl .rs{display:inline-flex;align-items:center;gap:5px}
 .kt{display:inline-flex;align-items:baseline;gap:2px;background:var(--accent-soft);color:var(--accent);border-radius:7px;padding:1px 7px;margin:0 3px 3px 0;font:700 14px ui-monospace,Consolas,monospace}
 .kt small{font:500 10px Inter,system-ui;color:var(--muted)}
@@ -712,6 +713,46 @@ input[type=checkbox],input[type=radio]{width:auto}
 .routeflow span{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .routeflow svg.lucide{width:15px;height:15px;color:var(--accent)}
 .routeflow.big{margin-top:6px;padding:12px;border-radius:12px;background:var(--accent-soft);color:var(--text);font-size:14px}
+
+/* campaigns 2.0 */
+#cTabs .tcount.live{background:var(--bad)}
+.stepper.sm button{min-width:120px;padding:8px 10px}.stepper.sm .sn{width:26px;height:26px}
+.ctypes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
+.ctypes button{position:relative;text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--panel);color:var(--text);transition:.12s}
+.ctypes button:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.ctypes button.on{border-color:var(--accent);background:var(--accent-soft)}
+.ctypes .eico,.draft .eico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--panel2);color:var(--accent);flex:none}
+.ctypes button.on .eico{background:var(--accent);color:#fff}
+.ctypes small{color:var(--muted);font-size:12.5px;line-height:1.45}
+.ctypes .tag{position:absolute;top:12px;right:12px;margin:0}
+.grid2c{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.keymap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kmap{display:flex;align-items:center;gap:8px}.kmap input{flex:1}
+.kbig.sm{width:32px;height:32px;font-size:16px;border-radius:9px;flex:none}
+.recchk{align-items:flex-start!important;padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.recchk small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.tplbar{display:flex;gap:8px;margin-bottom:6px}.tplbar select{max-width:260px}
+.rules{display:flex;flex-direction:column;gap:10px}
+.rule{padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.rhead2{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.rhead2 .rwhen{max-width:230px;font-weight:600}.rhead2 .tplpick{max-width:200px}
+.rnum{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:12px;font-weight:700;flex:none}
+.rvgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.rv{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.rv span{position:absolute;right:10px;top:10px;color:var(--accent)}.rv small{display:block;color:var(--muted);font-size:12px}.rv b{font-size:17px}
+.rvline{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:14px}.rvline svg.lucide{color:var(--accent);margin-top:2px}
+.draft{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--panel)}
+.draft>div{flex:1;min-width:0}.draft small{display:block;color:var(--muted);font-size:12.5px}
+.tplrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--panel)}
+.tplrow:hover,.tplrow.on{border-color:var(--accent)}.tplrow>div{flex:1;min-width:0}.tplrow small{display:block;color:var(--muted);font-size:12.5px}
+.typeb{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.smsb{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:2px 7px;border-radius:8px;margin:0 3px 3px 0;background:var(--panel2);white-space:nowrap}
+.smsb.sent{background:var(--ok-soft);color:var(--ok-ink)}.smsb.failed{background:var(--bad-soft);color:var(--bad-ink)}
+.smsb svg.lucide{width:12px;height:12px}
+a.iconbtn{text-decoration:none}
+@media (max-width:860px){.ctypes,.grid4{grid-template-columns:1fr 1fr}.keymap{grid-template-columns:1fr 1fr}}
+.tbl td.keys small{font:500 12px Inter,system-ui,sans-serif;letter-spacing:0}
 </style>
 </head>
 <body>
@@ -734,7 +775,6 @@ input[type=checkbox],input[type=radio]{width:auto}
       <button data-v="home" title="Home"><i data-lucide="layout-dashboard"></i><span>Home</span></button>
       <div class="ngroup">Communicate</div>
       <button data-v="messages" title="Messages"><i data-lucide="message-square-text"></i><span>Messages</span><em class="badge" id="unreadBadge" hidden></em></button>
-      <button data-v="bulk" title="Bulk SMS"><i data-lucide="send"></i><span>Bulk SMS</span></button>
       <button data-v="phone" title="Phone"><i data-lucide="phone"></i><span>Phone</span></button>
       <button data-v="campaigns" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></button>
       <button data-v="ai" title="AI voice agent"><i data-lucide="bot"></i><span>AI voice agent</span><em class="newtag">AI</em></button>
@@ -842,7 +882,7 @@ input[type=checkbox],input[type=radio]{width:auto}
           <div class="card stat kpi2" data-go="messages"><span class="sic"><i data-lucide="message-square-text"></i></span><span class="sl">Messages</span><b id="kMsg">0</b><small id="kMsgS"></small></div>
           <div class="card stat kpi2" data-go="phone"><span class="sic"><i data-lucide="phone-call"></i></span><span class="sl">Calls · 7 days</span><b id="kCall">0</b><small id="kCallS"></small></div>
           <div class="card stat kpi2" data-go="campaigns"><span class="sic"><i data-lucide="megaphone"></i></span><span class="sl">Last campaign</span><b id="kCamp">—</b><small id="kCampS">No campaigns yet</small></div>
-          <div class="card stat kpi2" data-go="bulk"><span class="sic"><i data-lucide="send"></i></span><span class="sl">Last bulk SMS</span><b id="kBulk">—</b><small id="kBulkS">No bulk jobs yet</small></div>
+          <div class="card stat kpi2" data-go="campaigns"><span class="sic"><i data-lucide="send"></i></span><span class="sl">Last bulk SMS</span><b id="kBulk">—</b><small id="kBulkS">No bulk jobs yet</small></div>
         </div>
 
         <div class="grid2 top">
@@ -866,7 +906,7 @@ input[type=checkbox],input[type=radio]{width:auto}
           <div class="hpanel" data-hp="start" hidden>
             <div class="quickacts" style="margin-top:12px">
               <button class="qa" data-go="messages"><span><i data-lucide="mail"></i></span><b>Send SMS</b><small>Chat-style messages, Unicode ok</small></button>
-              <button class="qa" data-go="bulk"><span><i data-lucide="send"></i></span><b>Bulk SMS</b><small>One message to many numbers</small></button>
+              <button class="qa" data-go="campaigns"><span><i data-lucide="send"></i></span><b>SMS campaign</b><small>Personalised SMS to many people</small></button>
               <button class="qa" data-go="campaigns"><span><i data-lucide="megaphone"></i></span><b>Voice campaign</b><small>Play audio, capture 1 / 2</small></button>
               <button class="qa" data-go="ai"><span><i data-lucide="bot"></i></span><b>AI voice agent</b><small>LiveKit agent talks on calls</small></button>
               <button class="qa" data-go="audio"><span><i data-lucide="headphones"></i></span><b>Talk on calls</b><small>Headset, speaker, PC bridge</small></button>
@@ -983,15 +1023,16 @@ input[type=checkbox],input[type=radio]{width:auto}
           </ul>
         </details>
 
-        <details class="hsec"><summary><span><i data-lucide="megaphone"></i></span> Voice campaigns (play audio, capture 1 / 2)</summary>
+        <details class="hsec"><summary><span><i data-lucide="megaphone"></i></span> Campaigns: calls, SMS or both</summary>
           <ol class="plain">
-            <li><b>Campaigns → Upload</b> any audio (MP3, WAV, M4A). It's converted to telephone quality and <b>kept on this PC</b>.</li>
-            <li>It's copied to the 4G module automatically (8 KB chunks, size-checked). The module holds about 20 s of audio at a time, and older prompts are swapped out automatically.</li>
-            <li>Paste numbers, choose the prompt, click <b>Start campaign</b>. Each answered call hears the prompt.</li>
-            <li>When someone presses <b>1, 2…</b>, it appears under <b>Live key presses</b> and in the results table. Download the results as CSV.</li>
-            <li>Test with your own number first ("Test with one number").</li>
+            <li><b>Campaigns, then New campaign.</b> Pick a type: <b>Call only</b>, <b>SMS only</b>, <b>Call, then SMS by response</b>, or <b>SMS, then call</b>.</li>
+            <li><b>Audience:</b> paste numbers or upload a CSV. Extra columns become variables like {name} or {order}.</li>
+            <li><b>Call:</b> pick an audio prompt (Audio library) or type text-to-speech, write what each key means (1 = Yes, 2 = No), and tick <b>Record calls</b> if needed.</li>
+            <li><b>SMS:</b> write the message, or rules for "call then SMS": pressed 1, pressed 2, no key, not answered… The first match sends. Use {choice} for the key's meaning and {name|there} for fallbacks. Save favourites as templates.</li>
+            <li><b>Review:</b> check the summary and estimate, <b>Test with my number</b>, then <b>Launch</b>, or <b>Save draft</b> for later.</li>
+            <li><b>Reports:</b> live progress, outcomes, keys (with meanings), SMS delivery, recordings (play or download), timeline, CSV, email, "Re-run unanswered".</li>
           </ol>
-          <div class="note" style="margin-top:10px">Script tip: <i>"Hello from B2Wave. Press 1 to confirm. Press 2 to cancel."</i> Keep it under 15 seconds.</div>
+          <div class="note" style="margin-top:10px"><b>Recording:</b> calls are recorded on the module in AMR (about 100 KB per minute), then moved to this PC (<code>app/data/recordings</code>), so module storage never fills up. Tell people calls may be recorded.</div>
         </details>
 
         <details class="hsec"><summary><span><i data-lucide="headphones"></i></span> Talk from your PC (wiring)</summary>
@@ -1324,12 +1365,133 @@ input[type=checkbox],input[type=radio]{width:auto}
       </div>
     </section>
 
-    <!-- CAMPAIGNS / IVR -->
+    <!-- CAMPAIGNS (calls + SMS) -->
     <section class="view" id="v-campaigns">
-      <div class="wiz" style="max-width:1100px">
-        <div class="grid2 top">
+      <div class="wiz" style="max-width:1150px">
+        <div class="tabs" id="cTabs" role="tablist">
+          <button data-c="new" class="on"><i data-lucide="circle-plus"></i> New campaign</button>
+          <button data-c="reports"><i data-lucide="chart-column"></i> Reports <em class="tcount live" id="cRunBadge" hidden>live</em></button>
+          <button data-c="drafts"><i data-lucide="file-pen"></i> Drafts <em class="tcount" id="cDraftCount" hidden></em></button>
+          <button data-c="audio"><i data-lucide="file-audio"></i> Audio library</button>
+          <button data-c="templates"><i data-lucide="message-square-quote"></i> SMS templates</button>
+        </div>
+
+        <!-- ========== NEW CAMPAIGN WIZARD ========== -->
+        <div class="cpanel" data-cp="new">
+          <div class="stepper sm" id="cwSteps">
+            <button data-s="1" class="on"><span class="sn">1</span><span class="st"><b>Type</b><small id="cwS1">Calls, SMS or both</small></span></button>
+            <button data-s="2"><span class="sn">2</span><span class="st"><b>Audience</b><small id="cwS2">Who to contact</small></span></button>
+            <button data-s="3"><span class="sn">3</span><span class="st"><b>Call</b><small id="cwS3">Audio and keys</small></span></button>
+            <button data-s="4"><span class="sn">4</span><span class="st"><b>SMS</b><small id="cwS4">Messages and rules</small></span></button>
+            <button data-s="5"><span class="sn">5</span><span class="st"><b>Review</b><small>Launch or save</small></span></button>
+          </div>
+
+          <!-- step 1: type -->
+          <div class="card cwp" data-p="1">
+            <div class="cardhead"><span class="cicon"><i data-lucide="shapes"></i></span><div style="flex:1"><h3>What kind of campaign?</h3><small>You can change this later</small></div><span class="muted" id="cwDraftTag"></span></div>
+            <div class="ctypes" id="cwTypes">
+              <button data-m="call"><span class="eico"><i data-lucide="phone-call"></i></span><b>Call only</b><small>Call each person, play a message, capture key presses (1, 2…).</small></button>
+              <button data-m="sms"><span class="eico"><i data-lucide="message-square-text"></i></span><b>SMS only</b><small>Send a personalised SMS to everyone. Works like bulk SMS.</small></button>
+              <button data-m="call_sms"><span class="eico"><i data-lucide="git-branch"></i></span><b>Call, then SMS by response</b><span class="tag">Popular</span><small>Call first, then send a different SMS depending on the answer: pressed 1, pressed 2, no answer…</small></button>
+              <button data-m="sms_call"><span class="eico"><i data-lucide="send"></i></span><b>SMS, then call</b><small>Send a heads-up SMS ("we'll call you in a minute"), then call.</small></button>
+            </div>
+            <label>Campaign name</label><input id="cName" placeholder="e.g. Diwali offer confirmation">
+            <div class="actions"><span class="spacer"></span><button class="btn" data-cw="2">Next: Audience <i data-lucide="arrow-right"></i></button></div>
+          </div>
+
+          <!-- step 2: audience -->
+          <div class="card cwp" data-p="2" hidden>
+            <div class="cardhead"><span class="cicon"><i data-lucide="users"></i></span><div style="flex:1"><h3>Who should we contact?</h3><small>Paste numbers or upload a CSV. Extra columns become variables like {name} or {order}.</small></div><span class="pill" id="cwCount">0 people</span></div>
+            <textarea id="cNums" rows="7" placeholder="9800000001, Ravi&#10;9800000002, Priya&#10;+919800000003"></textarea>
+            <div class="actions" style="margin-top:8px">
+              <label class="btn ghost sm filebtn"><i data-lucide="file-spreadsheet"></i> Upload CSV<input type="file" id="cwCsv" accept=".csv,.txt,text/csv" hidden></label>
+              <button class="btn ghost sm" id="cwClear"><i data-lucide="eraser"></i> Clear</button>
+              <span class="muted" id="cwWarn" style="font-size:13px"></span>
+            </div>
+            <div id="cwPrevWrap" hidden><div class="tblwrap" style="margin-top:10px"><table class="tbl" id="cwPrev"></table></div></div>
+            <div class="actions"><button class="btn ghost" data-cw="1"><i data-lucide="arrow-left"></i> Back</button><span class="spacer"></span><button class="btn" data-cwnext="2">Next <i data-lucide="arrow-right"></i></button></div>
+          </div>
+
+          <!-- step 3: call -->
+          <div class="card cwp" data-p="3" hidden>
+            <div class="cardhead"><span class="cicon"><i data-lucide="phone-call"></i></span><div><h3>Call setup</h3><small>What the person hears and what their keys mean</small></div></div>
+            <label>What the person hears</label>
+            <div class="grid2c"><select id="cAudio"></select><button class="btn ghost sm" data-ctab="audio"><i data-lucide="upload"></i> Upload audio</button></div>
+            <textarea id="cwTts" rows="2" placeholder="Text-to-speech (English): Hello {name}, press 1 to confirm, press 2 to cancel." hidden style="margin-top:8px"></textarea>
+            <label>What each key means <span class="muted">(shown in reports and usable in SMS as {choice})</span></label>
+            <div class="keymap" id="cwKeymap"></div>
+            <div class="grid4">
+              <div><label>Play times</label><input id="cRepeat" type="number" value="1" min="1" max="5"></div>
+              <div><label>Ring timeout (s)</label><input id="cRing" type="number" value="35" min="10" max="90"></div>
+              <div><label>Wait for key (s)</label><input id="cWait" type="number" value="10" min="3" max="60"></div>
+              <div><label>Gap between people (s)</label><input id="cGap" type="number" value="5" min="2" max="120"></div>
+            </div>
+            <label class="chk"><input type="checkbox" id="cStopKey" checked> Hang up after the first key press</label>
+            <label class="chk recchk"><input type="checkbox" id="cwRecord"> <span><b>Record calls</b><small>Each answered call is recorded on the module, then saved to this PC and playable in Reports. Small AMR files, about 100 KB per minute. Let people know calls may be recorded.</small></span></label>
+            <div class="actions"><button class="btn ghost" data-cwprev="3"><i data-lucide="arrow-left"></i> Back</button><span class="spacer"></span><button class="btn" data-cwnext="3">Next <i data-lucide="arrow-right"></i></button></div>
+          </div>
+
+          <!-- step 4: sms -->
+          <div class="card cwp" data-p="4" hidden>
+            <div class="cardhead"><span class="cicon"><i data-lucide="message-square-text"></i></span><div style="flex:1"><h3>SMS setup</h3><small id="cwSmsSub">Personalise with variables. Click a chip to insert it.</small></div></div>
+            <div id="cwPreBox">
+              <label id="cwPreLabel">Message</label>
+              <div class="tplbar"><select class="tplpick" data-for="cwPre"><option value="">Use a template…</option></select><button class="btn ghost sm" data-savetpl="cwPre"><i data-lucide="bookmark-plus"></i> Save as template</button></div>
+              <textarea id="cwPre" rows="4" placeholder="Hi {name}, our team will call you in a minute about your order {order}."></textarea>
+              <div class="varbar"><span class="muted" style="font-size:12px">Insert:</span><span class="cwvars" data-for="cwPre"></span><span class="spacer"></span><span class="muted cnt" data-for="cwPre"></span></div>
+              <div id="cwDelayBox" hidden><label>Wait before calling (s)</label><input id="cwDelay" type="number" value="30" min="0" max="600" style="max-width:160px"></div>
+            </div>
+            <div id="cwRulesBox" hidden>
+              <label>Send this SMS after the call when…</label>
+              <div id="cwRules" class="rules"></div>
+              <div class="actions" style="margin-top:8px"><button class="btn ghost sm" id="cwAddRule"><i data-lucide="plus"></i> Add rule</button><span class="hint" style="margin:0">Rules are checked top to bottom. The first match sends its SMS (one SMS per person).</span></div>
+            </div>
+            <div class="bkpreview" style="margin-top:12px"><small class="muted" id="cwPrevLabel">Preview for the first person</small><div class="b out" id="cwPreview">Your message preview appears here</div></div>
+            <div class="actions"><button class="btn ghost" data-cwprev="4"><i data-lucide="arrow-left"></i> Back</button><span class="spacer"></span><button class="btn" data-cw="5">Next: Review <i data-lucide="arrow-right"></i></button></div>
+          </div>
+
+          <!-- step 5: review -->
+          <div class="card cwp" data-p="5" hidden>
+            <div class="cardhead"><span class="cicon"><i data-lucide="rocket"></i></span><div><h3>Review &amp; launch</h3><small>Check everything, then launch or save as a draft</small></div></div>
+            <div class="review" id="cwReview"></div>
+            <label>Email the report to (when it finishes)</label>
+            <input id="cEmail" placeholder="you@company.com, manager@company.com">
+            <div id="cSmtpNote"></div>
+            <div class="actions">
+              <button class="btn ghost" data-cw="4"><i data-lucide="arrow-left"></i> Back</button><span class="spacer"></span>
+              <button class="btn ghost" id="cwSaveDraft"><i data-lucide="save"></i> Save draft</button>
+              <button class="btn ghost" id="cMine"><i data-lucide="flask-conical"></i> Test with my number</button>
+              <button class="btn green" id="cStart"><i data-lucide="rocket"></i> Launch campaign</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== REPORTS ========== -->
+        <div class="cpanel" data-cp="reports" hidden>
+          <div class="card" id="cLive" hidden>
+            <div class="cardhead"><span class="cicon"><i data-lucide="radio"></i></span><div style="flex:1"><h3>Running now</h3><small id="cLiveSub">Live progress</small></div><button class="btn red sm" id="cStop"><i data-lucide="square"></i> Stop campaign</button></div>
+            <div id="dtmfFeed" class="dfeed"><div class="empty" style="padding:10px">Key presses appear here live.</div></div>
+          </div>
           <div class="card">
-            <h3 style="margin-top:0">1 · Audio prompts on the module</h3>
+            <div class="cardhead"><span class="cicon"><i data-lucide="chart-column"></i></span><div style="flex:1"><h3>Campaign reports</h3><small>Outcomes, key presses, SMS delivery and a call-by-call timeline</small></div>
+              <select id="cFilter" style="max-width:190px"><option value="">All types</option><option value="call">Call only</option><option value="sms">SMS only</option><option value="call_sms">Call → SMS</option><option value="sms_call">SMS → call</option></select></div>
+            <div id="campList"><div class="empty">No campaigns yet</div></div>
+            <div class="hint" id="cLegacy" style="margin-top:10px"></div>
+          </div>
+        </div>
+
+        <!-- ========== DRAFTS ========== -->
+        <div class="cpanel" data-cp="drafts" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="file-pen"></i></span><div><h3>Drafts</h3><small>Saved campaigns you can open, edit and launch any time</small></div></div>
+            <div id="draftList"><div class="empty">No drafts yet. Use "Save draft" in the last step.</div></div>
+          </div>
+        </div>
+
+        <!-- ========== AUDIO LIBRARY ========== -->
+        <div class="cpanel" data-cp="audio" hidden>
+          <div class="card">
+            <div class="cardhead"><span class="cicon"><i data-lucide="file-audio"></i></span><div><h3>Audio library</h3><small>Prompts kept on this PC and copied to the 4G module automatically</small></div></div>
             <p class="sub" style="margin-bottom:8px">Upload any audio file (MP3, WAV, M4A…). It's converted to telephone quality (8 kHz mono) and stored on the 4G module. Example script: <i>"Press 1 for yes, press 2 for no."</i></p>
             <div id="fileList" class="flist"></div>
             <div id="fileSpace" style="font-size:12px;color:var(--muted);margin:6px 0 12px"></div>
@@ -1342,37 +1504,24 @@ input[type=checkbox],input[type=radio]{width:auto}
               <div class="actions"><button class="btn ghost" id="ttsLocal">Speak on board</button><button class="btn ghost" id="ttsCall">Speak into current call</button></div>
             </details>
           </div>
+        </div>
 
-          <div class="card">
-            <h3 style="margin-top:0">2 · Batch call campaign</h3>
-            <label>Campaign name</label><input id="cName" placeholder="Order confirmation">
-            <label>Phone numbers (one per line, or comma-separated)</label>
-            <textarea id="cNums" rows="4" placeholder="+919800000001&#10;9800000002"></textarea>
-            <div class="actions" style="margin-top:6px"><button class="btn ghost" id="cMine" style="padding:6px 10px;font-size:13px">Test with one number</button><span id="cCount" style="font-size:13px;color:var(--muted)"></span></div>
-            <label>What the person hears</label>
-            <select id="cAudio"></select>
-            <div class="grid3">
-              <div><label>Play times</label><input id="cRepeat" type="number" value="1" min="1" max="5"></div>
-              <div><label>Ring timeout (s)</label><input id="cRing" type="number" value="35" min="10" max="90"></div>
-              <div><label>Wait for key (s)</label><input id="cWait" type="number" value="10" min="3" max="60"></div>
-              <div><label>Gap between calls (s)</label><input id="cGap" type="number" value="5" min="2" max="120"></div>
+        <!-- ========== SMS TEMPLATES ========== -->
+        <div class="cpanel" data-cp="templates" hidden>
+          <div class="grid2 top">
+            <div class="card">
+              <div class="cardhead"><span class="cicon"><i data-lucide="message-square-quote"></i></span><div><h3 id="tplEditTitle">New template</h3><small>Reusable messages for campaigns</small></div></div>
+              <label>Template name</label><input id="tplName" placeholder="e.g. Order confirmed">
+              <label>Message</label><textarea id="tplText" rows="5" placeholder="Hi {name|there}, your order {order} is confirmed. Thank you!"></textarea>
+              <div class="varbar"><span class="muted" style="font-size:12px">Common variables:</span><span id="tplVars"></span><span class="spacer"></span><span class="muted" id="tplCnt" style="font-size:12px"></span></div>
+              <p class="hint">{name|there} uses "there" when the name is empty. {choice} is the meaning of the key the person pressed (from the call setup). {outcome} is the call result.</p>
+              <div class="actions"><button class="btn" id="tplSave"><i data-lucide="save"></i> Save template</button><button class="btn ghost" id="tplNew"><i data-lucide="plus"></i> New</button></div>
             </div>
-            <label class="chk"><input type="checkbox" id="cStopKey" checked> Hang up after the first key press</label>
-            <label>Email the report to (when the campaign ends)</label>
-            <input id="cEmail" placeholder="you@company.com, manager@company.com">
-            <div id="cSmtpNote"></div>
-            <div class="actions"><button class="btn green" id="cStart">Start campaign</button><button class="btn red" id="cStop" disabled>Stop</button></div>
+            <div class="card">
+              <div class="cardhead"><span class="cicon"><i data-lucide="library"></i></span><div><h3>Saved templates</h3><small>Click to edit</small></div></div>
+              <div id="tplList"></div>
+            </div>
           </div>
-        </div>
-
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">3 · Live key presses</h3><span style="font-size:12px;color:var(--muted)">Captured from any call: campaign or manual</span></div>
-          <div id="dtmfFeed" class="dfeed"><div class="empty" style="padding:14px">No key presses yet. During a call, the keys the other person presses show up here.</div></div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin-top:0">4 · Results</h3>
-          <div id="campList"><div class="empty">No campaigns yet</div></div>
         </div>
       </div>
     </section>
@@ -1729,7 +1878,7 @@ function handle(e){
       renderAll();
       Splash.msg(e.status.connected?'Connected to the board':'Server ready, looking for the board…'); Splash.hide();
       if(!window._aiAuto){ window._aiAuto=1; aiAutoStart(); }
-      if(!S.booted){ S.booted=true; const hv=location.hash.slice(1); show(hv&&document.getElementById('v-'+hv)?hv:(S.config.setup_done?'home':'setup')); }
+      if(!S.booted){ S.booted=true; const [hv,sub,st]=location.hash.slice(1).split('/'); show(hv&&document.getElementById('v-'+hv)?hv:(S.config.setup_done?'home':'setup')); if(sub&&hv==='campaigns'){ cTab(sub); if(sub==='new'&&st) setTimeout(()=>cwGo(+st),300); } }
       break;
     case 'status': S.status=e.status; const prev=S.call.state; S.call=e.call; renderStatus(); renderHome(); renderCall(prev); W.onStatus(); if(prev!==S.call.state) Bridge.onCall(S.call.state); break;
     case 'wizard': W.onEvent(e); break;
@@ -1771,14 +1920,14 @@ function show(v){
   S.view=v;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Voice campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS',ai:'AI voice agent'}[v];
+  $('#title').textContent={messages:'Messages',phone:'Phone',console:'AT Console',settings:'Settings',setup:'Board setup',audio:'Talk on calls',campaigns:'Campaigns',home:'Home',help:'Help & guide',bulk:'Bulk SMS',ai:'AI voice agent'}[v];
   if(v==='ai') loadAi(); if(v==='audio') loadAudioCtl();
   if(v==='bulk') loadBulk(); if(v==='settings'||v==='campaigns') loadSmtp(); if(v==='settings') loadBackupInfo();
   if(v==='home') renderHome();
   if(location.hash!=='#'+v) history.replaceState(null,'','#'+v);
   $('#subtitle').textContent=SUBTITLES[v]||'';
   if(v==='home'){ loadHomeData(); setTimeout(()=>renderCharts(),30); }
-  if(v==='campaigns'){ loadFiles(); loadCampaigns(); }
+  if(v==='campaigns'){ cTab(lsGet('cTab')||'new'); loadCampaignsAll(); }
   document.title='B2Wave · '+$('#title').textContent;
   if(v==='console') $('#log').scrollTop=1e9;
 }
@@ -2430,11 +2579,11 @@ $('#cStop').onclick=()=>api('campaign_stop').then(()=>toast('Stopping…')).catc
 async function loadCampaigns(){ try{ const r=await api('campaigns_list'); C.campaigns=r.campaigns; C.running=r.running; C.dtmf=r.dtmf||[]; renderCampaigns(); renderDtmf(); }catch{} }
 function onCampaign(c){ const i=C.campaigns.findIndex(x=>x.id===c.id); if(i>=0) C.campaigns[i]=c; else C.campaigns.unshift(c); C.running=c.status==='running'||C.campaigns.some(x=>x.status==='running'); renderCampaigns(); }
 const OUTCOME_STYLE={'Responded':'ok','Listened, no response':'warn','No response':'warn','Hung up during prompt':'bad','No answer':'',
-  'Busy':'bad','Rejected':'bad','Unreachable':'bad','Invalid number':'bad','Network error':'bad','Failed':'bad','Not answered':'','Skipped':''};
+  'Busy':'bad','Rejected':'bad','Unreachable':'bad','Invalid number':'bad','Network error':'bad','Failed':'bad','Not answered':'','Skipped':'','SMS sent':'ok','SMS failed':'bad'};
 const OUTCOME_ICON={'Responded':'circle-check','Listened, no response':'ear','No response':'circle-minus','Hung up during prompt':'phone-off','No answer':'phone-missed',
   'Busy':'phone-forwarded','Rejected':'ban','Unreachable':'signal-zero','Invalid number':'hash','Network error':'triangle-alert','Failed':'circle-x','Not answered':'phone-missed','Skipped':'skip-forward'};
 const EV_ICON={'dialing':'phone-outgoing','answered':'phone-call','prompt started':'play','prompt finished':'square','prompt stopped':'square','key pressed':'grid-3x3',
-  'put on hold':'pause','resumed':'play','other side hung up':'phone-off','end reason':'info','network said':'radio-tower','no answer':'phone-missed','dial failed':'circle-x','network info':'info','state':'activity'};
+  'put on hold':'pause','resumed':'play','other side hung up':'phone-off','end reason':'info','network said':'radio-tower','no answer':'phone-missed','dial failed':'circle-x','network info':'info','state':'activity','recording started':'disc-3','recording saved':'save','recording failed':'mic-off','recording skipped':'mic-off'};
 function liveSummary(c){
   const res=c.results.filter(r=>r.status==='done'), ans=res.filter(r=>r.ring_s!=null);
   const outcomes={}, keys={}; res.forEach(r=>{ outcomes[r.outcome]=(outcomes[r.outcome]||0)+1; if(r.keys) keys[r.keys[0]]=(keys[r.keys[0]]||0)+1; });
@@ -2444,43 +2593,51 @@ function liveSummary(c){
 }
 function renderCampaigns(){
   $('#cStart').disabled=C.running; $('#cStop').disabled=!C.running;
-  if(!C.campaigns.length){ $('#campList').innerHTML='<div class="empty">No campaigns yet. Results with a full call-by-call analysis appear here.</div>'; return; }
+  cRunState();
+  const flt=($('#cFilter')||{}).value||''; const list=C.campaigns.filter(c=>!flt||(c.mode||'call')===flt);
+  if(!list.length){ $('#campList').innerHTML='<div class="empty">'+(C.campaigns.length?'No campaigns of this type yet.':'No campaigns yet. Create one in <b>New campaign</b>.')+'</div>'; return; }
   const openIds=new Set([...document.querySelectorAll('#campList details.camp[open]')].map(d=>d.dataset.id));
   const openRows=new Set([...document.querySelectorAll('#campList tr.tl:not([hidden])')].map(r=>r.dataset.k));
-  $('#campList').innerHTML=C.campaigns.map((c,ci)=>{
-    const sm=liveSummary(c), total=c.results.length;
+  $('#campList').innerHTML=list.map((c,ci)=>{
+    const sm=liveSummary(c), total=c.results.length, mi=MODE_INFO[c.mode||'call'], km=c.keymap||{};
+    const smsSent=c.results.reduce((n,r)=>n+(r.sms||[]).filter(s=>s.status==='sent').length,0), smsFail=c.results.reduce((n,r)=>n+(r.sms||[]).filter(s=>s.status==='failed').length,0), recs=c.results.filter(r=>r.recording).length;
     const inFlight=c.results.filter(r=>['dialing','ringing','answered'].includes(r.status)).length;
     const kpi=(icon,label,val,sub='')=>`<div class="kpi"><span class="sic"><i data-lucide="${icon}"></i></span><small>${label}</small><b>${val}</b>${sub?`<em>${sub}</em>`:''}</div>`;
     const chips=Object.entries(sm.outcomes).sort((a,b)=>b[1]-a[1]).map(([o,n])=>`<span class="ochip ${OUTCOME_STYLE[o]||''}">${ICON(OUTCOME_ICON[o]||'circle')} ${esc(o)} <b>${n}</b></span>`).join('');
-    const kchips=Object.keys(sm.keys).sort().map(k=>`<span class="ochip ok">${ICON('grid-3x3')} Pressed <b>${esc(k)}</b> × ${sm.keys[k]}</span>`).join('');
+    const kchips=Object.keys(sm.keys).sort().map(k=>`<span class="ochip ok">${ICON('grid-3x3')} Pressed <b>${esc(k)}</b>${km[k]?` (${esc(km[k])})`:''} × ${sm.keys[k]}</span>`).join('');
     const rows=c.results.map((r,ri)=>{
       const k=c.id+':'+ri, live=['dialing','ringing','answered'].includes(r.status);
       const out=r.outcome||(live?r.status:r.status==='pending'?'Waiting':r.status);
       const cls=live?'run':(OUTCOME_STYLE[r.outcome]??'');
       const keysT=(r.key_times||[]).map(x=>`<span class="kt">${esc(x.key)}<small>${x.t}s</small></span>`).join('')||(r.keys?esc(r.keys):'<span class="muted">—</span>');
       const tl=(r.events||[]).map(e=>`<li><span class="tt">${e.t}s</span>${ICON(EV_ICON[e.ev]||'dot')}<b>${esc(e.ev)}</b><span class="muted">${esc(e.detail||'')}</span></li>`).join('');
-      return `<tr class="rrow" data-k="${k}"><td><b>${esc(r.number)}</b><br><small class="muted">${r.time?fmtTime(r.time,true):''}</small></td>
+      return `<tr class="rrow" data-k="${k}"><td><b>${esc(r.number)}</b><br><small class="muted">${esc((r.vars||{}).name||'')}${(r.vars||{}).name&&r.time?' · ':''}${r.time?fmtTime(r.time,true):''}</small></td>
         <td><span class="rs ${cls}">${live?ICON('loader-circle','spin'):ICON(OUTCOME_ICON[r.outcome]||'circle')} ${esc(out)}</span>${r.error?`<br><small style="color:var(--bad)">${esc(r.error)}</small>`:''}</td>
-        <td class="keys">${keysT}</td><td>${r.ring_s!=null?r.ring_s+' s':'—'}</td><td>${r.talk_s?r.talk_s+' s':'—'}</td>
+        <td class="keys">${keysT}${r.keys&&km[r.keys[0]]?`<br><small class="muted">${esc(km[r.keys[0]])}</small>`:''}</td>
+        <td>${(r.sms||[]).map(s=>`<span class="smsb ${s.status}" title="${esc(s.text)}">${ICON(s.status==='sent'?'circle-check-big':s.status==='failed'?'message-square-x':'message-square')} ${esc(s.when)}</span>`).join('')||'<span class="muted">—</span>'}</td>
+        <td>${r.recording?`<button class="iconbtn sm" data-rec="/recordings/${esc(r.recording)}" title="Play recording">${ICON('play')}</button><a class="iconbtn sm" href="/recordings/${esc(r.recording)}" download title="Download (.amr)">${ICON('download')}</a>`:(r.rec_error?`<small class="muted" title="${esc(r.rec_error)}">${ICON('mic-off')}</small>`:'')}</td>
+        <td>${r.ring_s!=null?r.ring_s+' s':'—'}</td><td>${r.talk_s?r.talk_s+' s':'—'}</td>
         <td><small>${esc(r.prompt||'—')}</small></td><td><small>${esc(r.ended_by||'—')}</small>${r.holds?`<br><small class="warnTxt">${ICON('pause')} held ×${r.holds}</small>`:''}</td>
         <td><small class="muted">${esc(r.cause||'')}</small></td>
         <td>${tl?`<button class="btn ghost sm tlbtn" data-k="${k}" title="Show timeline">${ICON('list-tree')}</button>`:''}</td></tr>
-        ${tl?`<tr class="tl" data-k="${k}" ${openRows.has(k)?'':'hidden'}><td colspan="9"><ol class="timeline">${tl}</ol></td></tr>`:''}`;
+        ${tl?`<tr class="tl" data-k="${k}" ${openRows.has(k)?'':'hidden'}><td colspan="11"><ol class="timeline">${tl}</ol></td></tr>`:''}`;
     }).join('');
     const isOpen=openIds.size?openIds.has(c.id):ci===0;
     return `<details class="camp" data-id="${c.id}" ${isOpen||c.status==='running'?'open':''}>
-      <summary><span class="ctitle">${ICON('megaphone')} <b>${esc(c.name)}</b></span><span class="cst ${c.status==='running'?'run':''}">${c.status==='running'?ICON('loader-circle','spin')+' ':''}${esc(c.status)}</span>
+      <summary><span class="ctitle">${ICON(mi.icon)} <b>${esc(c.name)}</b></span><span class="typeb">${esc(mi.label)}</span><span class="cst ${c.status==='running'?'run':''}">${c.status==='running'?ICON('loader-circle','spin')+' ':''}${esc(c.status)}</span>
         <span class="muted" style="font-size:13px">${sm.called}/${total} called${inFlight?' · calling now':''} · ${new Date(c.created).toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></summary>
       <div class="prog"><i style="width:${total?sm.called*100/total:0}%"></i></div>
       <div class="kpis">${kpi('phone-call','Answered',`${sm.answered}/${sm.called}`,`${sm.answer_rate}%`)}${kpi('grid-3x3','Responded',sm.responded,sm.answered?Math.round(100*sm.responded/sm.answered)+'% of answered':'')}
-        ${kpi('timer','Avg ring',sm.avg_ring_s+' s')}${kpi('clock','Avg talk',sm.avg_talk_s+' s')}</div>
+        ${mi.sms?kpi('circle-check-big','SMS sent',smsSent,smsFail?smsFail+' failed':''):kpi('timer','Avg ring',sm.avg_ring_s+' s')}${c.record?kpi('disc-3','Recordings',recs):kpi('clock','Avg talk',sm.avg_talk_s+' s')}</div>
       <div class="chips">${chips}${kchips}${!chips&&!kchips?'<span class="muted" style="font-size:13px">Results appear as calls complete</span>':''}</div>
-      <div class="tblwrap"><table class="tbl rtbl"><thead><tr><th>Number</th><th>Outcome</th><th>Keys (time)</th><th>Ring</th><th>Talk</th><th>Prompt</th><th>Ended by</th><th>Network reason</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="tblwrap"><table class="tbl rtbl"><thead><tr><th>Number</th><th>Outcome</th><th>Keys (time)</th><th>SMS</th><th>Rec</th><th>Ring</th><th>Talk</th><th>Prompt</th><th>Ended by</th><th>Network reason</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
       ${c.email_status?`<div class="note ${/^sent/.test(c.email_status)?'good':'bad'}" style="margin:8px 0;display:flex;gap:8px;align-items:center">${ICON('mail')}<span>Email report: ${esc(c.email_status)}</span></div>`:''}
-      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">${ICON('download')} Download CSV</button><button class="btn ghost sm" data-cmail="${c.id}">${ICON('mail')} Email report</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">${ICON('trash-2')} Delete</button>`:''}</div></details>`;
+      <div class="actions"><button class="btn ghost sm" data-csv="${c.id}">${ICON('download')} Download CSV</button>${c.status!=='running'?`<button class="btn ghost sm" data-rerun="${c.id}" data-w="unanswered">${ICON('rotate-ccw')} Re-run unanswered</button><button class="btn ghost sm" data-rerun="${c.id}" data-w="all">${ICON('copy')} Run again</button>`:''}<button class="btn ghost sm" data-cmail="${c.id}">${ICON('mail')} Email report</button>${c.status!=='running'?`<button class="btn ghost sm" data-cdel="${c.id}">${ICON('trash-2')} Delete</button>`:''}</div></details>`;
   }).join('');
   const L=$('#campList');
   L.querySelectorAll('[data-cmail]').forEach(b=>b.onclick=()=>emailReport('campaign',b.dataset.cmail,(C.campaigns.find(x=>x.id===b.dataset.cmail)||{}).email_to));
+  L.querySelectorAll('[data-rec]').forEach(b=>b.onclick=()=>playRec(b.dataset.rec,b));
+  L.querySelectorAll('[data-rerun]').forEach(b=>b.onclick=()=>cRerun(C.campaigns.find(x=>x.id===b.dataset.rerun),b.dataset.w));
   L.querySelectorAll('.tlbtn').forEach(b=>b.onclick=()=>{ const r=L.querySelector(`tr.tl[data-k="${b.dataset.k}"]`); if(r) r.hidden=!r.hidden; });
   L.querySelectorAll('[data-csv]').forEach(b=>b.onclick=async()=>{ const r=await api('campaign_csv',{id:b.dataset.csv}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+r.csv],{type:'text/csv'})); a.download=r.name.replace(/[^\w-]+/g,'_')+'.csv'; a.click(); toast('CSV downloaded'); });
   L.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete campaign?','Its results are removed permanently.',{danger:true,confirm:'Delete'})){ const r=await api('campaign_delete',{id:b.dataset.cdel}); C.campaigns=r.campaigns; renderCampaigns(); } });
@@ -2600,7 +2757,7 @@ function renderFiles(r){
   L.querySelectorAll('[data-push]').forEach(b=>b.onclick=async()=>{ b.disabled=true; b.textContent='Copying…'; try{ renderFiles(await api('file_push',{name:b.dataset.push})); toast('Copied to the module'); }catch(e){ toast(e.message); b.disabled=false; b.innerHTML=ICON('upload')+' Module'; } });
   L.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(!await ask('Delete audio?',`<b>${esc(b.dataset.del)}</b> is removed from this PC and the 4G module. This can't be undone.`,{danger:true,confirm:'Delete'})) return; try{ renderFiles(await api('file_delete',{name:b.dataset.del})); }catch(e){ toast(e.message); } });
   const sel=$('#cAudio'), prev=sel.value;
-  sel.innerHTML='<option value="">Choose…</option>'+r.files.map(f=>`<option value="file:${esc(f.name)}" data-size="${f.size}">${esc(f.name)}${f.on_module?'':' (will be copied to the module)'}</option>`).join('')+'<option value="tts">Text-to-speech (from the box on the left)</option>';
+  sel.innerHTML='<option value="">Choose…</option>'+r.files.map(f=>`<option value="file:${esc(f.name)}" data-size="${f.size}">${esc(f.name)}${f.on_module?'':' (will be copied to the module)'}</option>`).join('')+'<option value="tts">Text-to-speech (type the message below)</option>';
   if(prev) sel.value=prev;
 }
 function onUploadProgress(e){
@@ -2614,7 +2771,7 @@ document.querySelectorAll('#helpBody [data-go]').forEach(a=>a.onclick=ev=>{ ev.p
 
 // ================================================================ v2 shell: theme, drawer, toasts, dialogs, charts
 const SUBTITLES={home:'Overview of your board, SIM and activity',messages:'Send and receive SMS in any language',phone:'Dial, answer and review calls',
-  campaigns:'Batch calls with audio prompts and key-press capture',setup:'Detect, flash and test the board layer by layer',audio:'Wiring options and the PC audio bridge',
+  campaigns:'Calls, SMS or both: create, run and analyse campaigns',setup:'Detect, flash and test the board layer by layer',audio:'Wiring options and the PC audio bridge',
   console:'Talk to the 4G module directly with AT commands',help:'Everything about B2Wave in one place',settings:'Connection, email, device info and notifications',bulk:'Send one personalised message to many numbers',ai:'Let a LiveKit AI agent talk to the person on the call'};
 function applyTheme(t){
   const sys=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
@@ -3404,6 +3561,228 @@ $('#aiTone').onclick=async()=>{
     toast(S.call.state==='active'?'Beep sent into the call: the other phone should hear it':'Beep sent to '+r.outLabel+'. Tip: start a normal call to your own phone first, then press this to hear it there.');
   }catch(e){ toast('Could not play to that device: '+e.message); }
 };
+
+// ================================================================ Campaigns 2.0: calls + SMS, wizard, drafts, templates
+const MODE_INFO={call:{label:'Call only',icon:'phone-call',call:true,sms:false},sms:{label:'SMS only',icon:'message-square-text',call:false,sms:true},
+  call_sms:{label:'Call → SMS',icon:'git-branch',call:true,sms:true},sms_call:{label:'SMS → call',icon:'send',call:true,sms:true}};
+const RULE_WHEN=[['key:1','Pressed 1'],['key:2','Pressed 2'],['key:3','Pressed 3'],['key:4','Pressed 4'],['key:5','Pressed 5'],['key:0','Pressed 0'],
+  ['key:any','Pressed any key'],['no_key','Answered, no key'],['not_answered','Not answered / busy'],['answered','Answered (any)'],['always','Always']];
+const CW_KEYS=['1','2','3','4','5','0'];
+const CW={ step:1, mode:'call_sms', rows:[], headers:['number','name'], invalid:0, dupes:0, draftId:null,
+  rules:[{when:'key:1',text:'Thank you {name|}! We have recorded your answer: {choice|yes}.'},{when:'key:2',text:'Thanks {name|}. We noted: {choice|no}. Reply if you need help.'},{when:'not_answered',text:'Hello {name|there}, we tried to call you today. Please call us back.'}] };
+let TPL=[];
+
+// ---------- tabs
+function cTab(t){ document.querySelectorAll('#cTabs button').forEach(b=>b.classList.toggle('on',b.dataset.c===t));
+  document.querySelectorAll('#v-campaigns .cpanel').forEach(p=>p.hidden=p.dataset.cp!==t); lsSet('cTab',t);
+  if(t==='reports') loadCampaigns(); if(t==='drafts') loadDrafts(); if(t==='audio') loadFiles(); if(t==='templates') loadTemplates(); }
+document.querySelectorAll('#cTabs button').forEach(b=>b.onclick=()=>cTab(b.dataset.c));
+document.querySelectorAll('[data-ctab]').forEach(b=>b.onclick=()=>cTab(b.dataset.ctab));
+
+// ---------- wizard navigation
+function cwSteps(){ const mi=MODE_INFO[CW.mode]; return [1,2].concat(mi.call?[3]:[],mi.sms?[4]:[],[5]); }
+function cwGo(n){
+  const steps=cwSteps(); if(!steps.includes(n)) n=steps.find(s=>s>n)||5;
+  CW.step=n;
+  document.querySelectorAll('#cwSteps button').forEach(b=>{ const s=+b.dataset.s; b.classList.toggle('on',s===n); b.hidden=!steps.includes(s);
+    b.classList.toggle('done',s<n&&steps.includes(s)); b.querySelector('.sn').innerHTML=s<n&&steps.includes(s)?ICON('check'):String(steps.indexOf(s)+1); });
+  document.querySelectorAll('#v-campaigns .cwp').forEach(p=>p.hidden=+p.dataset.p!==n);
+  if(n===4) cwSmsSetup(); if(n===5) cwReview(); if(n===3){ cwKeymapRender(); if($('#cAudio').options.length<=1) loadFiles(); }
+  document.querySelector('#v-campaigns .wiz').scrollIntoView({block:'start',behavior:'smooth'});
+}
+document.querySelectorAll('#cwSteps button').forEach(b=>b.onclick=()=>cwGo(+b.dataset.s));
+document.querySelectorAll('[data-cw]').forEach(b=>b.onclick=()=>cwGo(+b.dataset.cw));
+document.querySelectorAll('[data-cwnext]').forEach(b=>b.onclick=()=>{ const st=cwSteps(), i=st.indexOf(+b.dataset.cwnext); if(+b.dataset.cwnext===2&&!CW.rows.length){ toast('Add at least one phone number'); return; } cwGo(st[i+1]); });
+document.querySelectorAll('[data-cwprev]').forEach(b=>b.onclick=()=>{ const st=cwSteps(), i=st.indexOf(+b.dataset.cwprev); cwGo(st[i-1]); });
+
+// ---------- step 1: type
+function cwMode(m){ CW.mode=m; document.querySelectorAll('#cwTypes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  $('#cwS1').textContent=MODE_INFO[m].label; cwGo(CW.step===1?1:CW.step); }
+document.querySelectorAll('#cwTypes button').forEach(b=>b.onclick=()=>cwMode(b.dataset.m));
+
+// ---------- step 2: audience (CSV aware)
+function cwParse(){
+  const lines=csvParse($('#cNums').value); let headers=['number','name'], data=lines;
+  if(lines.length && !/\d{5,}/.test(lines[0].join(''))){ headers=lines[0].map(h=>h.toLowerCase().replace(/[^a-z0-9_]+/g,'_')||'col'); data=lines.slice(1); }
+  let ni=headers.findIndex(h=>/^(number|phone|mobile|msisdn|contact|mobile_no|phone_number)$/.test(h)); if(ni<0) ni=0;
+  if(ni!==0){ headers=[headers[ni],...headers.filter((_,i)=>i!==ni)]; data=data.map(r=>[r[ni],...r.filter((_,i)=>i!==ni)]); }
+  headers[0]='number'; const seen=new Set(); CW.invalid=0; CW.dupes=0; CW.rows=[];
+  for(const r of data){ const num=(r[0]||'').replace(/[^\d+]/g,''); if(num.replace('+','').length<5){ if((r[0]||'').trim()) CW.invalid++; continue; }
+    if(seen.has(num)){ CW.dupes++; continue; } seen.add(num); const o={}; headers.forEach((h,i)=>o[h]=i===0?num:(r[i]||'')); CW.rows.push(o); }
+  CW.headers=headers; cwAudience();
+}
+function cwAudience(){
+  const n=CW.rows.length; $('#cwCount').textContent=`${n} ${n===1?'person':'people'}`; $('#cwCount').className='pill'+(n?' ok':''); $('#cwS2').textContent=n?`${n} ${n===1?'person':'people'}`:'Who to contact';
+  const w=[]; if(CW.invalid) w.push(`${CW.invalid} invalid skipped`); if(CW.dupes) w.push(`${CW.dupes} duplicates removed`); $('#cwWarn').textContent=w.join(' · ');
+  $('#cwPrevWrap').hidden=!n;
+  if(n) $('#cwPrev').innerHTML=`<thead><tr>${CW.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${CW.rows.slice(0,5).map(r=>`<tr>${CW.headers.map(h=>`<td>${esc(r[h])}</td>`).join('')}</tr>`).join('')}${n>5?`<tr><td colspan="${CW.headers.length}" class="muted">+ ${n-5} more</td></tr>`:''}</tbody>`;
+}
+$('#cNums').oninput=cwParse;
+$('#cwClear').onclick=()=>{ $('#cNums').value=''; cwParse(); };
+$('#cwCsv').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; $('#cNums').value=(await f.text()).replace(/^﻿/,''); cwParse(); toast(`Loaded ${CW.rows.length} people from ${f.name}`); e.target.value=''; };
+
+// ---------- step 3: call
+function cwKeymapRender(keep){
+  const cur=keep||cwKeymapGet(); const defaults={'1':'Yes','2':'No'};
+  $('#cwKeymap').innerHTML=CW_KEYS.map(k=>`<div class="kmap"><span class="kbig sm">${k}</span><input data-key="${k}" placeholder="${defaults[k]||'meaning (optional)'}" value="${esc(cur[k]??(defaults[k]&&!keep?defaults[k]:''))}"></div>`).join('');
+}
+function cwKeymapGet(){ const o={}; document.querySelectorAll('#cwKeymap input').forEach(i=>{ if(i.value.trim()) o[i.dataset.key]=i.value.trim(); }); return o; }
+$('#cAudio').addEventListener('change',()=>{ $('#cwTts').hidden=$('#cAudio').value!=='tts'; });
+
+// ---------- step 4: SMS (message, rules, templates, variables, preview)
+function cwVarList(){ const v=[...CW.headers]; if(CW.mode==='call_sms') v.push('choice','key','outcome'); return [...new Set(v)]; }
+function insertAt(ta,text){ const s=ta.selectionStart??ta.value.length; ta.value=ta.value.slice(0,s)+text+ta.value.slice(ta.selectionEnd??s); ta.focus(); ta.selectionStart=ta.selectionEnd=s+text.length; ta.dispatchEvent(new Event('input')); }
+function smsCount(t){ if(!t) return ''; const uni=!GSM.test(t), lim=uni?70:160; return `${t.length} chars · ${Math.ceil(t.length/lim)} SMS${uni?' · Unicode':''}`; }
+function cwBindTextarea(ta){
+  const id=ta.id||ta.dataset.rid;
+  ta.oninput=()=>{ const c=document.querySelector(`.cnt[data-for="${id}"]`); if(c) c.textContent=smsCount(cwRenderPreview(ta.value)); cwPreview(ta.value); };
+  ta.onfocus=()=>cwPreview(ta.value);
+}
+function cwRenderPreview(tpl){ const row=CW.rows[0]||{number:'9800000000',name:'Ravi'}; const km=cwKeymapGet(); return bkRenderText(tpl,{...row,choice:km['1']||'Yes',key:'1',outcome:'Responded'}); }
+function cwPreview(tpl){ $('#cwPreview').textContent=cwRenderPreview(tpl||'')||'Your message preview appears here'; }
+function cwTplOptions(){ return '<option value="">Use a template…</option>'+TPL.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join(''); }
+function cwWireExtras(root){
+  root.querySelectorAll('.cwvars').forEach(s=>{ const ta=document.getElementById(s.dataset.for)||root.querySelector(`textarea[data-rid="${s.dataset.for}"]`);
+    s.innerHTML=cwVarList().map(v=>`<button class="varchip" type="button">{${esc(v)}}</button>`).join(''); s.querySelectorAll('button').forEach(b=>b.onclick=()=>insertAt(ta,b.textContent)); });
+  root.querySelectorAll('.tplpick').forEach(sel=>{ sel.innerHTML=cwTplOptions(); sel.onchange=()=>{ const t=TPL.find(x=>x.id===sel.value); const ta=document.getElementById(sel.dataset.for)||root.querySelector(`textarea[data-rid="${sel.dataset.for}"]`); if(t&&ta){ ta.value=t.text; ta.dispatchEvent(new Event('input')); } sel.value=''; }; });
+  root.querySelectorAll('[data-savetpl]').forEach(b=>b.onclick=async()=>{ const ta=document.getElementById(b.dataset.savetpl)||root.querySelector(`textarea[data-rid="${b.dataset.savetpl}"]`);
+    if(!ta||!ta.value.trim()){ toast('Write the message first'); return; } const name=await askText('Save as template','Template name',''); if(!name) return;
+    const r=await api('template_save',{name,text:ta.value}); TPL=r.templates; toast('Template saved'); cwSmsSetup(); });
+}
+function cwRulesRender(){
+  $('#cwRules').innerHTML=CW.rules.map((r,i)=>`<div class="rule" data-i="${i}">
+    <div class="rhead2"><span class="rnum">${i+1}</span><select class="rwhen">${RULE_WHEN.map(([v,l])=>`<option value="${v}" ${v===r.when?'selected':''}>${l}${v.startsWith('key:')&&cwKeymapGet()[v.slice(4)]?` (${esc(cwKeymapGet()[v.slice(4)])})`:''}</option>`).join('')}</select>
+      <select class="tplpick" data-for="r${i}"></select><span class="spacer"></span>
+      <button class="iconbtn sm" data-up="${i}" title="Move up">${ICON('arrow-up')}</button><button class="iconbtn sm" data-del="${i}" title="Remove">${ICON('trash-2')}</button></div>
+    <textarea rows="2" data-rid="r${i}">${esc(r.text)}</textarea>
+    <div class="varbar"><span class="cwvars" data-for="r${i}"></span><span class="spacer"></span><button class="btn ghost sm" data-savetpl="r${i}">${ICON('bookmark-plus')} Save as template</button><span class="muted cnt" data-for="r${i}">${smsCount(cwRenderPreview(r.text))}</span></div></div>`).join('');
+  $('#cwRules').querySelectorAll('.rule').forEach(div=>{ const i=+div.dataset.i;
+    div.querySelector('.rwhen').onchange=e=>CW.rules[i].when=e.target.value;
+    const ta=div.querySelector('textarea'); cwBindTextarea(ta); ta.addEventListener('input',()=>CW.rules[i].text=ta.value); });
+  $('#cwRules').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ CW.rules.splice(+b.dataset.del,1); cwRulesRender(); });
+  $('#cwRules').querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.up; if(i>0){ [CW.rules[i-1],CW.rules[i]]=[CW.rules[i],CW.rules[i-1]]; cwRulesRender(); } });
+  cwWireExtras($('#cwRules'));
+}
+$('#cwAddRule').onclick=()=>{ CW.rules.push({when:'always',text:''}); cwRulesRender(); };
+async function cwSmsSetup(){
+  if(!TPL.length){ try{ TPL=(await api('templates_list')).templates; }catch{} }
+  const m=CW.mode;
+  $('#cwPreBox').hidden=!(m==='sms'||m==='sms_call'); $('#cwRulesBox').hidden=m!=='call_sms'; $('#cwDelayBox').hidden=m!=='sms_call';
+  $('#cwPreLabel').textContent=m==='sms_call'?'SMS sent before the call':'Message';
+  $('#cwSmsSub').textContent=m==='call_sms'?'Each person gets one SMS after the call, chosen by what happened. Use {choice} for the meaning of their key.':'Personalise with variables. Click a chip to insert it.';
+  cwBindTextarea($('#cwPre')); cwWireExtras($('#cwPreBox')); if(m==='call_sms') cwRulesRender();
+  cwPreview(m==='call_sms'?(CW.rules[0]||{}).text:$('#cwPre').value);
+  $('#cwS4').textContent=m==='call_sms'?`${CW.rules.filter(r=>r.text.trim()).length} rules`:($('#cwPre').value.trim()?'Message ready':'Messages and rules');
+}
+
+// ---------- step 5: review + payload
+function cwPayload(){
+  const a=$('#cAudio').value, size=+(($('#cAudio').selectedOptions[0]||{}).dataset?.size||0);
+  return {name:$('#cName').value.trim(),mode:CW.mode,rows:CW.rows,audio:a.startsWith('file:')?a.slice(5):'',audio_size:size,tts:a==='tts'?$('#cwTts').value.trim():'',
+    repeat:+$('#cRepeat').value,ring_timeout:+$('#cRing').value,key_wait:+$('#cWait').value,gap:+$('#cGap').value,stop_on_key:$('#cStopKey').checked,record:$('#cwRecord').checked,
+    keymap:cwKeymapGet(),sms:{pre:$('#cwPre').value.trim(),rules:CW.rules.filter(r=>(r.text||'').trim()),delay:+$('#cwDelay').value||0},email_to:$('#cEmail').value.trim(),
+    _audioSel:a,_tts:$('#cwTts').value,_raw:$('#cNums').value};
+}
+function cwProblems(p){
+  const x=[], mi=MODE_INFO[p.mode];
+  if(!p.rows.length) x.push([2,'Add at least one phone number']);
+  if(mi.call&&!p.audio&&!p.tts) x.push([3,'Choose what the person hears (audio or text-to-speech)']);
+  if((p.mode==='sms'||p.mode==='sms_call')&&!p.sms.pre) x.push([4,'Write the SMS message']);
+  if(p.mode==='call_sms'&&!p.sms.rules.length) x.push([4,'Add at least one SMS rule']);
+  return x;
+}
+function cwReview(){
+  const p=cwPayload(), mi=MODE_INFO[p.mode], n=p.rows.length, probs=cwProblems(p);
+  const play=p.audio?Math.max(1,(p.audio_size-44)/16000)*p.repeat:p.tts.length*0.08;
+  const perCall=mi.call?(15+play+p.key_wait+p.gap+4):0, perSms=mi.sms?(4+(p.mode==='sms'?p.gap:0)):0;
+  const secs=n*(perCall+perSms)+(p.mode==='sms_call'?n*(p.sms.delay||0):0);
+  const smsMax=p.mode==='sms'||p.mode==='sms_call'?n:p.mode==='call_sms'?n:0;
+  const row=(icon,label,val)=>`<div class="rv"><span>${ICON(icon)}</span><small>${label}</small><b>${val}</b></div>`;
+  $('#cwReview').innerHTML=`<div class="rvgrid">${row(mi.icon,'Type',mi.label)}${row('users','People',n)}${mi.call?row('phone-call','Calls',n):''}${smsMax?row('message-square-text','SMS (up to)',smsMax):''}${row('timer','Estimated time',secs<90?Math.round(secs)+' s':Math.ceil(secs/60)+' min')}${mi.call?row('disc-3','Recording',p.record?'On':'Off'):''}</div>
+    ${mi.call?`<div class="rvline">${ICON('volume-2')} <b>Plays:</b> ${esc(p.audio||('Text-to-speech: '+p.tts.slice(0,80)))} ×${p.repeat} · ring ${p.ring_timeout}s · wait ${p.key_wait}s for a key${Object.keys(p.keymap).length?` · keys: ${Object.entries(p.keymap).map(([k,v])=>`<b>${esc(k)}</b> = ${esc(v)}`).join(', ')}`:''}</div>`:''}
+    ${p.sms.pre&&(p.mode==='sms'||p.mode==='sms_call')?`<div class="rvline">${ICON('message-square-text')} <b>SMS:</b> ${esc(cwRenderPreview(p.sms.pre))}</div>`:''}
+    ${p.mode==='call_sms'?p.sms.rules.map((r,i)=>`<div class="rvline">${ICON('git-branch')} <b>${i+1}. ${esc((RULE_WHEN.find(w=>w[0]===r.when)||[0,r.when])[1])}</b> → ${esc(cwRenderPreview(r.text))}</div>`).join(''):''}
+    ${probs.length?`<div class="note bad" style="margin-top:10px">${ICON('circle-alert')} Fix before launching: ${probs.map(([s,t])=>`<a href="#" data-fix="${s}">${esc(t)}</a>`).join(' · ')}</div>`:`<div class="note good" style="margin-top:10px">${ICON('circle-check')} Ready to launch.</div>`}`;
+  $('#cwReview').querySelectorAll('[data-fix]').forEach(a=>a.onclick=e=>{ e.preventDefault(); cwGo(+a.dataset.fix); });
+  $('#cStart').disabled=!!probs.length||C.running; smtpNotes();
+}
+async function cwLaunch(test){
+  const p=cwPayload(); const probs=cwProblems(test?{...p,rows:[{number:'1'}]}:p);
+  if(probs.length){ toast(probs[0][1]); cwGo(probs[0][0]); return; }
+  if(!S.status.connected){ toast('Board is offline'); return; }
+  let payload={...p};
+  if(test){ const num=await askText('Test with your number','B2Wave runs this campaign for one number only','+91 98xxxxxxxx','tel'); if(!num) return;
+    payload={...p,name:(p.name||'Campaign')+' (test)',rows:[{...(CW.rows[0]||{}),number:num,name:(CW.rows[0]||{}).name||'Test'}]}; }
+  else if(!await ask('Launch campaign?',`${MODE_INFO[p.mode].label} to <b>${p.rows.length}</b> ${p.rows.length===1?'person':'people'}. You can stop it any time from Reports.`,{confirm:'Launch'})) return;
+  try{ await api('campaign_start',payload); toast(test?'Test campaign started':'Campaign launched'); cTab('reports'); }catch(e){ toast(e.message); }
+}
+$('#cStart').onclick=()=>cwLaunch(false);
+$('#cMine').onclick=()=>cwLaunch(true);
+$('#cStop').onclick=()=>api('campaign_stop').then(()=>toast('Stopping…')).catch(e=>toast(e.message));
+
+// ---------- drafts
+$('#cwSaveDraft').onclick=async()=>{ const p=cwPayload(); const r=await api('draft_save',{draft:{...p,id:CW.draftId,rules:CW.rules}}); CW.draftId=r.draft.id; $('#cwDraftTag').textContent='Draft saved'; toast('Draft saved'); renderDraftCount(r.drafts); };
+function renderDraftCount(list){ const b=$('#cDraftCount'); b.textContent=list.length||''; b.hidden=!list.length; }
+async function loadDrafts(){ try{ const r=await api('drafts_list'); renderDrafts(r.drafts); }catch{} }
+function renderDrafts(list){
+  renderDraftCount(list);
+  $('#draftList').innerHTML=list.length?list.map(d=>{ const mi=MODE_INFO[d.mode]||MODE_INFO.call; return `<div class="draft"><span class="eico">${ICON(mi.icon)}</span><div><b>${esc(d.name||'Untitled campaign')}</b><small>${mi.label} · ${(d.rows||[]).length} people · edited ${d.updated?fmtTime(d.updated)+' '+fmtTime(d.updated,true):''}</small></div>
+    <button class="btn sm" data-open="${d.id}">${ICON('pencil')} Open</button><button class="btn ghost sm" data-dup="${d.id}">${ICON('copy')} Duplicate</button><button class="iconbtn sm" data-ddel="${d.id}" title="Delete">${ICON('trash-2')}</button></div>`; }).join(''):'<div class="empty">No drafts yet. Use "Save draft" in the last step.</div>';
+  $('#draftList').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>cwLoad(list.find(x=>x.id===b.dataset.open),false));
+  $('#draftList').querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>cwLoad(list.find(x=>x.id===b.dataset.dup),true));
+  $('#draftList').querySelectorAll('[data-ddel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete draft?','It is removed permanently.',{danger:true,confirm:'Delete'})){ renderDrafts((await api('draft_delete',{id:b.dataset.ddel})).drafts); } });
+}
+function cwLoad(d,asCopy){
+  if(!d) return;
+  CW.draftId=asCopy?null:d.id; $('#cName').value=(d.name||'')+(asCopy?' (copy)':'');
+  cwMode(d.mode||'call');
+  $('#cNums').value=d._raw||(d.rows||[]).map(r=>Object.values(r).join(', ')).join('\n'); cwParse();
+  if(d._audioSel) $('#cAudio').value=d._audioSel; $('#cwTts').value=d._tts||d.tts||''; $('#cwTts').hidden=$('#cAudio').value!=='tts';
+  $('#cRepeat').value=d.repeat||1; $('#cRing').value=d.ring_timeout||35; $('#cWait').value=d.key_wait||10; $('#cGap').value=d.gap||5; $('#cStopKey').checked=d.stop_on_key!==false; $('#cwRecord').checked=!!d.record;
+  cwKeymapRender(d.keymap||{}); $('#cwPre').value=(d.sms||{}).pre||''; $('#cwDelay').value=(d.sms||{}).delay??30;
+  CW.rules=(d.rules||(d.sms||{}).rules||CW.rules).map(r=>({...r})); $('#cEmail').value=d.email_to||'';
+  $('#cwDraftTag').textContent=asCopy?'Copy of a draft':'Editing draft';
+  cTab('new'); cwGo(5);
+}
+
+// ---------- SMS templates page
+async function loadTemplates(){ try{ TPL=(await api('templates_list')).templates; renderTemplates(); }catch{} }
+let TPL_EDIT=null;
+function renderTemplates(){
+  $('#tplList').innerHTML=TPL.length?TPL.map(t=>`<div class="tplrow ${TPL_EDIT===t.id?'on':''}" data-id="${esc(t.id)}"><div><b>${esc(t.name)}</b><small>${esc(t.text.slice(0,110))}${t.text.length>110?'…':''}</small></div><button class="iconbtn sm" data-tdel="${esc(t.id)}" title="Delete">${ICON('trash-2')}</button></div>`).join(''):'<div class="empty">No templates yet</div>';
+  $('#tplList').querySelectorAll('.tplrow').forEach(r=>r.onclick=e=>{ if(e.target.closest('[data-tdel]')) return; const t=TPL.find(x=>x.id===r.dataset.id); TPL_EDIT=t.id; $('#tplName').value=t.name; $('#tplText').value=t.text; $('#tplEditTitle').textContent='Edit template'; tplCount(); renderTemplates(); });
+  $('#tplList').querySelectorAll('[data-tdel]').forEach(b=>b.onclick=async()=>{ if(await ask('Delete template?','',{danger:true,confirm:'Delete'})){ TPL=(await api('template_delete',{id:b.dataset.tdel})).templates; if(TPL_EDIT===b.dataset.tdel) $('#tplNew').click(); renderTemplates(); } });
+  $('#tplVars').innerHTML=['name','number','choice','key','outcome','name|there'].map(v=>`<button class="varchip" type="button">{${v}}</button>`).join('');
+  $('#tplVars').querySelectorAll('button').forEach(b=>b.onclick=()=>insertAt($('#tplText'),b.textContent));
+}
+function tplCount(){ $('#tplCnt').textContent=smsCount($('#tplText').value); }
+$('#tplText').oninput=tplCount;
+$('#tplSave').onclick=async()=>{ try{ TPL=(await api('template_save',{id:TPL_EDIT,name:$('#tplName').value,text:$('#tplText').value})).templates; TPL_EDIT=TPL[0].id; toast('Template saved'); renderTemplates(); }catch(e){ toast(e.message); } };
+$('#tplNew').onclick=()=>{ TPL_EDIT=null; $('#tplName').value=''; $('#tplText').value=''; $('#tplEditTitle').textContent='New template'; tplCount(); renderTemplates(); };
+
+// ---------- reports: filter, live card, re-run, recordings
+$('#cFilter').onchange=()=>renderCampaigns();
+function cRunState(){ $('#cRunBadge').hidden=!C.running; $('#cLive').hidden=!C.running; const cur=C.campaigns.find(c=>c.status==='running');
+  if(cur){ const done=cur.results.filter(r=>!['pending'].includes(r.status)&&!/^(dialing|ringing|answered|sending|waiting)/.test(r.status)).length; $('#cLiveSub').textContent=`${cur.name} · ${MODE_INFO[cur.mode||'call'].label} · ${done}/${cur.results.length} done`; } }
+function cRerun(c,which){
+  const pick=c.results.filter(r=>which==='all'||(which==='unanswered'?(r.ring_s==null&&(MODE_INFO[c.mode||'call'].call)):(r.outcome||'').match(/fail/i)));
+  if(!pick.length){ toast('Nobody matches'); return; }
+  cwLoad({...c,id:null,name:c.name+' (re-run)',rows:pick.map(r=>({...(r.vars||{}),number:r.number})),_raw:'',_audioSel:c.audio?'file:'+c.audio:(c.tts?'tts':''),_tts:c.tts,rules:(c.sms||{}).rules,email_to:c.email_to},true);
+  toast(`${pick.length} people loaded into a new campaign. Review and launch.`);
+}
+let _amr=null;
+function playRec(url,btn){
+  if(_amr){ try{ _amr.stop(); }catch{} if(_amr._btn===btn){ btn.innerHTML=ICON('play'); _amr=null; return; } if(_amr._btn) _amr._btn.innerHTML=ICON('play'); }
+  if(!window.BenzAMRRecorder){ window.open(url); return; }
+  const a=new BenzAMRRecorder(); a._btn=btn; _amr=a; btn.innerHTML=ICON('loader-circle','spin');
+  a.initWithUrl(url).then(()=>{ btn.innerHTML=ICON('square'); a.onEnded(()=>{ btn.innerHTML=ICON('play'); if(_amr===a) _amr=null; }); a.play(); }).catch(()=>{ btn.innerHTML=ICON('play'); toast('Could not play this recording'); });
+}
+async function loadCampaignsAll(){ await loadCampaigns(); try{ const b=await api('bulk_list'); BK.jobs=b.jobs; $('#cLegacy').innerHTML=b.jobs.length?`${ICON('history')} ${b.jobs.length} older bulk SMS job${b.jobs.length>1?'s':''} from before campaigns supported SMS. <a href="#" id="cLegacyGo">View them</a>`:''; const g=$('#cLegacyGo'); if(g) g.onclick=e=>{ e.preventDefault(); show('bulk'); }; }catch{} }
+
+// ---------- init
+cwMode('call_sms'); cwKeymapRender(); cwParse();
+$('#cAudio').innerHTML='<option value="">Choose…</option><option value="tts">Text-to-speech (type the message below)</option>';
+api && setTimeout(async()=>{ try{ renderDraftCount((await api('drafts_list')).drafts); }catch{} },1500);
 
 function renderAll(){ renderIcons(); renderHome(); renderStatus(); renderThreads(); renderConv(); renderCalls(); renderCall(); renderSettings(); }
 connect();

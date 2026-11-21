@@ -21,9 +21,8 @@ PC. There is no cloud and no account.
 |---|---|
 | **Home** | Live board / SIM / network status, contextual guidance, 7-day activity chart, campaign outcome chart |
 | **Messages** | Chat-style SMS threads, Unicode (Gujarati, Hindi, emoji), auto-split long texts, desktop notifications |
-| **Bulk SMS** | Paste numbers or upload CSV, personalised templates (`{name}`, `{order}`, `{name\|Customer}` fallback), throttling, auto-retry, stop, per-number delivery report, CSV, retry failed |
 | **Phone** | Dialer, answer/decline, in-call keypad (DTMF), call log with network end reason |
-| **Voice campaigns** | Upload any audio (converted to 8 kHz in the browser, kept on the PC, auto-copied to the module), batch calls, **key-press capture (1 / 2 …)**, per-call analytics |
+| **Campaigns** | One place for calls and SMS: **Call only**, **SMS only**, **Call → SMS by response** (rules: pressed 1 / pressed 2 / no key / not answered…), **SMS → call**. 5-step wizard (type, audience with CSV variables, call setup with key meanings, SMS/rules with templates, review), drafts, SMS template library, audio library, optional **call recording** (AMR on the module, moved to the PC, playable in reports), test with my number, re-run unanswered |
 | **Call analytics** | Outcome (Responded, Listened no response, Hung up during prompt, No answer, Busy, Rejected, Unreachable, Invalid number, Network error), who ended the call, ring/talk time, prompt played fully/partly/stopped by key, key timestamps, hold/resume, network cause (AT+CEER), full timeline, CSV |
 | **AI voice agent** | LiveKit agent talks on B2Wave calls. Engines: **LiveKit Inference** (no extra keys: Deepgram/AssemblyAI STT, GPT-4.1/Gemini LLM, Cartesia/ElevenLabs TTS), **agent hosted on LiveKit Cloud**, or **own OpenAI key** (Realtime). Paste-the-env setup, step tabs, B2Wave installs/starts/stops the worker, PC test mode, live transcript, history |
 | **SIM number** | The SIM's own number is detected (AT+CNUM) and shown at the top of every page; SIM swaps are detected by ICCID; manual number for SIMs that don't store it |

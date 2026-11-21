@@ -42,6 +42,8 @@ STATIC = ROOT / "static"
 DATA.mkdir(exist_ok=True)
 AUDIO = DATA / "audio"          # PC-side prompt library (source of truth)
 AUDIO.mkdir(exist_ok=True)
+REC_DIR = DATA / "recordings"          # campaign call recordings (AMR)
+REC_DIR.mkdir(exist_ok=True)
 
 log = logging.getLogger("gsm")
 
@@ -68,6 +70,12 @@ calls = Store(DATA / "calls.json", [])
 campaigns = Store(DATA / "campaigns.json", [])
 bulk = Store(DATA / "bulk.json", [])
 ai_calls = Store(DATA / "ai_calls.json", [])
+drafts = Store(DATA / "drafts.json", [])
+sms_templates = Store(DATA / "sms_templates.json", [
+    {"id": "t_confirm", "name": "Thank you / confirmed", "text": "Thank you {name|}! Your response has been recorded: {choice|confirmed}."},
+    {"id": "t_missed", "name": "We tried to call you", "text": "Hello {name|there}, we tried to call you today. Please call us back at your convenience."},
+    {"id": "t_reminder", "name": "Appointment reminder", "text": "Hi {name|there}, this is a reminder about your appointment tomorrow. Reply YES to confirm."},
+])
 AGENT_DIR = ROOT.parent / "agent"
 dtmf_log = deque(maxlen=200)
 console = deque(maxlen=400)
@@ -309,12 +317,32 @@ async def _campaign_done(camp):
     await email_report("campaign", camp)
 
 runner.on_done = _campaign_done
+runner.record_sent = None   # set after record_sent is defined
+runner.rec_dir = REC_DIR
+
+
+async def _make_room(need: int, keep: str):
+    """Free module flash for a recording: stale recordings first, then prompts that have a PC copy."""
+    st = await modem.list_files()
+    files = st["files"]
+    free = st["free"]
+    stale = [f for f in files if re.fullmatch(r"r[0-9a-f]{6}\d+\.amr", f["name"])]
+    ours = [f for f in files if f["name"] != keep and (AUDIO / f["name"]).exists()]
+    for f in stale + sorted(ours, key=lambda f: (AUDIO / f["name"]).stat().st_mtime):
+        if free >= need:
+            break
+        await modem.delete_file(f["name"])
+        free += f["size"]
+        log.info("freed %s (%d KB) on the module for a call recording", f["name"], f["size"] // 1024)
+
+runner.make_room = _make_room
 
 
 async def _bulk_done(job):
     await email_report("bulk", job)
 
 bulk_runner = bulksms.BulkSmsRunner(modem, broadcast, bulk, record_sent, _bulk_done)
+runner.record_sent = record_sent
 
 
 def repair_stored_messages():
@@ -677,6 +705,11 @@ async def handle_op(op: str, d: dict):
         if d.get("pc", True) and (AUDIO / name).exists():
             (AUDIO / name).unlink()
         return await library_state()
+    if op == "file_download_test":                       # diagnostics: read a file back from the module
+        files = {f["name"]: f["size"] for f in (await modem.list_files())["files"]}
+        name = d["name"]
+        data = await modem.download_file(name, files.get(name, 0))
+        return {"name": name, "size": len(data), "head": data[:16].hex()}
     if op == "file_play":
         await modem.play_file(d["name"], remote=bool(d.get("remote")), repeat=int(d.get("repeat", 0)))
         return {}
@@ -690,7 +723,9 @@ async def handle_op(op: str, d: dict):
     if op == "campaigns_list":
         return {"campaigns": campaigns.data, "running": runner.running, "dtmf": list(dtmf_log)}
     if op == "campaign_start":
-        if d.get("audio"):
+        if bulk_runner.running:
+            raise RuntimeError("A bulk SMS job is running. Wait for it or stop it first.")
+        if d.get("audio") and (d.get("mode") or "call") != "sms":
             await ensure_on_module(d["audio"])
             f = AUDIO / d["audio"]
             if f.exists():
@@ -704,6 +739,8 @@ async def handle_op(op: str, d: dict):
             raise RuntimeError("stop the campaign first")
         campaigns.data[:] = [c for c in campaigns.data if c["id"] != d["id"]]
         campaigns.save()
+        import shutil
+        shutil.rmtree(REC_DIR / re.sub(r"[^0-9a-f]", "", d["id"]), ignore_errors=True)   # its recordings
         return {"campaigns": campaigns.data}
     if op == "campaign_csv":
         c = next((c for c in campaigns.data if c["id"] == d["id"]), None)
@@ -765,6 +802,37 @@ async def handle_op(op: str, d: dict):
         await modem.read_sim_identity()
         await modem.emit_status()
         return asdict(modem.status)
+    # ---------------- campaign drafts + SMS templates
+    if op == "drafts_list":
+        return {"drafts": drafts.data}
+    if op == "draft_save":
+        dr = dict(d.get("draft") or {})
+        dr["id"] = dr.get("id") or uuid.uuid4().hex[:10]
+        dr["updated"] = m.now_iso()
+        drafts.data[:] = [x for x in drafts.data if x.get("id") != dr["id"]]
+        drafts.data.insert(0, dr)
+        drafts.data[:] = drafts.data[:100]
+        drafts.save()
+        return {"draft": dr, "drafts": drafts.data}
+    if op == "draft_delete":
+        drafts.data[:] = [x for x in drafts.data if x.get("id") != d["id"]]
+        drafts.save()
+        return {"drafts": drafts.data}
+    if op == "templates_list":
+        return {"templates": sms_templates.data}
+    if op == "template_save":
+        t = {"id": d.get("id") or uuid.uuid4().hex[:10], "name": (d.get("name") or "Untitled").strip()[:60],
+             "text": (d.get("text") or "").strip()}
+        if not t["text"]:
+            raise ValueError("Write the message text")
+        sms_templates.data[:] = [x for x in sms_templates.data if x.get("id") != t["id"]]
+        sms_templates.data.insert(0, t)
+        sms_templates.save()
+        return {"templates": sms_templates.data}
+    if op == "template_delete":
+        sms_templates.data[:] = [x for x in sms_templates.data if x.get("id") != d["id"]]
+        sms_templates.save()
+        return {"templates": sms_templates.data}
     # ---------------- backup summary
     if op == "backup_info":
         sd = DATA / "backups"
@@ -1008,7 +1076,8 @@ def _local(request) -> bool:
 
 
 def _stores() -> dict:
-    return {"messages": messages, "calls": calls, "campaigns": campaigns, "bulk": bulk, "ai_calls": ai_calls}
+    return {"messages": messages, "calls": calls, "campaigns": campaigns, "bulk": bulk, "ai_calls": ai_calls,
+            "drafts": drafts, "sms_templates": sms_templates}
 
 
 async def backup_handler(request):
@@ -1114,6 +1183,7 @@ def main():
     app.router.add_static("/static", STATIC)
     app.router.add_static("/doc", ROOT.parent / "doc")
     app.router.add_static("/audio", AUDIO)
+    app.router.add_static("/recordings", REC_DIR)
     app.router.add_post("/api/shutdown", shutdown_handler)
     app.router.add_get("/api/backup", backup_handler)
     app.router.add_get("/favicon.ico", lambda r: web.FileResponse(STATIC / "icons" / "favicon.ico"))
