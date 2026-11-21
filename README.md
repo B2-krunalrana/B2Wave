@@ -1,84 +1,142 @@
-# B2Wave: SMS, calls and voice campaigns from your browser
+# B2Wave
 
-Board: **KTRON ESP32-S3 + SIMCom A7672S 4G DevKit** (KSTM2098)
+**SMS, calls, voice campaigns and bulk messaging from your browser**, powered by a
+KTRON **ESP32-S3 + SIMCom A7672S 4G** development board (KSTM2098).
+
+B2Wave is a small Python web app that runs on your PC and talks to the 4G module
+over USB (or over Wi-Fi through the ESP32 bridge firmware). Everything stays on your
+PC. There is no cloud and no account.
 
 ```
- Browser (PC / phone)  <--WebSocket-->  Python app (gsm_app.py)  <--Wi-Fi TCP 7000-->  ESP32-S3  <--UART-->  A7672S  <--LTE-->  network
-                                                                  (or USB cable straight to the 4G_USB port)
+ Browser (PC / phone)  <--WebSocket-->  B2Wave (Python, aiohttp)  <--USB AT port-->  A7672S  <--LTE/VoLTE-->  network
+                                               |                     (or Wi-Fi TCP 7000 -> ESP32-S3 bridge -> UART)
+                                               +--> SMTP (Gmail etc.) for emailed reports
 ```
-
-## What works now (Phase 1)
-- Send and receive SMS (English and Unicode such as Hindi or emoji), shown as chat threads and saved on the PC
-- Place, answer and hang up calls, with a DTMF keypad, call log, ringtone and desktop notifications
-- Live signal, operator and SIM status, plus an AT command console
-- Auto-discovers the board on your Wi-Fi. No IP setup needed.
-
-> **Voice audio in Phase 1** goes through the board's **SPEAKER / MIC pads** (back side).
-> Getting voice into your PC speaker and mic is Phase 2 (see the end of this file).
 
 ---
 
-## Step 1: Hardware
-1. Insert a **nano SIM** with no PIN lock, contacts down, into the slot on the back.
-2. Connect the **LTE antenna** to the `LTE` U.FL connector. Without it, calls and SMS fail.
-3. Optional, for call audio: connect an 8 to 32 Ω speaker to `SPK` and an electret mic to `MIC`.
-4. Plug USB-C into the **ESP_UART** port (the USB-C port nearer the SIMCom chip).
-   For 4G power, a 5–12 V 2 A supply on VIN is the most reliable. USB alone can brown out on LTE peaks.
+## Features
 
-## Step 2: Run the app. It does the rest.
-Double-click **`run.bat`**. The first run installs Python packages into `app/.venv`, then your browser opens http://127.0.0.1:8080 on the **Setup** page:
-
-| Step | What happens |
+| Area | What you get |
 |---|---|
-| 1 · Connect | Click **Detect board**. It finds the ESP32-S3 on the ESP_UART USB port. |
-| 2 · Install | One click flashes the prebuilt firmware with esptool, with a progress bar. **No Arduino IDE.** |
-| 3 · Test | Checks the ESP32 firmware, 4G module, SIM, signal and network registration, and tells you what to fix. |
-| 4 · Link | **Wi-Fi:** pick your network and type the password; the board joins it. **USB:** move the cable to 4G_USB and set USB_SELECT to 4G; the page detects the port. |
-| 5 · Done | Opens Messages and Phone. |
-
-- If flashing can't connect: hold **BOOT**, tap **RESET**, release BOOT, then click Install again.
-- If no COM port appears at all: install the CH343 USB driver (link shown on the page).
-- `run.bat --lan` lets you open the app from your phone at `http://<pc-ip>:8080`.
-
-Developers: rebuild the firmware with `tools\.pio-venv\Scripts\python tools\build_firmware.py` (writes `firmware/bin/gsm_bridge.bin`).
-
-### Alternative: no Wi-Fi, USB cable only
-Set the **USB_SELECT** switch to `4G` and plug USB-C into the **4G_USB** port. Install the SIMCom A76xx USB driver if Windows shows unknown devices. In the app, choose Settings > USB cable > the "AT" COM port.
-
-### Try it without the board
-```
-app\.venv\Scripts\python tools\fake_modem.py     (then start run.bat; Auto finds it)
-```
-In the fake-modem window, type `sms +911234567890 hi` or `ring +911234567890`.
+| **Home** | Live board / SIM / network status, contextual guidance, 7-day activity chart, campaign outcome chart |
+| **Messages** | Chat-style SMS threads, Unicode (Gujarati, Hindi, emoji), auto-split long texts, desktop notifications |
+| **Bulk SMS** | Paste numbers or upload CSV, personalised templates (`{name}`, `{order}`, `{name\|Customer}` fallback), throttling, auto-retry, stop, per-number delivery report, CSV, retry failed |
+| **Phone** | Dialer, answer/decline, in-call keypad (DTMF), call log with network end reason |
+| **Voice campaigns** | Upload any audio (converted to 8 kHz in the browser, kept on the PC, auto-copied to the module), batch calls, **key-press capture (1 / 2 …)**, per-call analytics |
+| **Call analytics** | Outcome (Responded, Listened no response, Hung up during prompt, No answer, Busy, Rejected, Unreachable, Invalid number, Network error), who ended the call, ring/talk time, prompt played fully/partly/stopped by key, key timestamps, hold/resume, network cause (AT+CEER), full timeline, CSV |
+| **Email reports** | Gmail / Outlook / Zoho / Yahoo / custom SMTP. Campaign and bulk reports are emailed automatically when finished (HTML summary + CSV) |
+| **Setup wizard** | Detects the board, flashes the prebuilt ESP32 firmware (no Arduino IDE), layered tests (Wi-Fi → module → SIM → network), driver guidance, diagnostics report |
+| **Talk on calls** | Wiring guides: speaker+mic, USB sound card with built-in PC audio bridge, I2S codec |
+| **Robustness** | Auto-reconnect after COM renumbering, Wi-Fi fallback, call recovery after restart, single-instance launcher, friendly errors, app log |
+| **UI** | Light/dark theme, collapsible sidebar (Ctrl+B), mobile drawer, animated logo, splash + progress loaders, Help & guide page |
 
 ---
+
+## Quick start (Windows)
+
+### 1. Hardware
+1. Insert a **nano SIM** (PIN lock off) on the back of the board. Jio, Airtel and Vi all work (Jio calls use VoLTE).
+2. Screw the **LTE antenna** onto the `LTE` U.FL connector.
+3. **Cable 1:** the `ESP_UART` USB-C port (nearer the SIMCom chip) → PC. Used for setup and flashing.
+4. **Cable 2:** the `4G_USB` USB-C port (nearer the ESP32 module) → PC, with the **USB_SELECT switch on "4G"**. SMS, calls and campaigns use this link.
+
+### 2. Drivers (one time)
+| Device Manager shows | Install |
+|---|---|
+| `CP2102 USB to UART Bridge Controller` ⚠ | [Silicon Labs CP210x VCP driver](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers) |
+| `Mobile AT Interface` / `Mobile Diag Interface` ⚠ | [SIMCom A76xx driver](https://files.waveshare.com/wiki/ESP32-S3-A7670E-4G/A7600X-Windows-Driver.7z). Extract it, then Update driver → Browse → tick *Include subfolders*. Afterwards it shows as `SimTech HS-USB AT Port 9011` |
+
+### 3. Run
+Install **Python 3.10+**, then double-click **`run.bat`**.
+The first run creates `app/.venv` and installs the dependencies; after that the browser opens **http://127.0.0.1:8080**.
+
+- First launch opens **Setup**: *Detect board* → *Install firmware* → layered tests.
+- `run.bat --lan` lets phones on the same Wi-Fi open `http://<pc-ip>:8080`.
+- Running `run.bat` again safely replaces an already running copy.
+
+### 4. Email reports (optional)
+**Settings → Email (SMTP)** → choose Gmail → enter your address and a **Gmail App Password**
+(turn on 2-Step Verification, then create one at <https://myaccount.google.com/apppasswords>) → **Send test email**.
+
+---
+
+## Using it
+
+- **Bulk SMS:** paste `number, name` lines or upload a CSV with a `number` column, write the message with variable chips, check the preview, then Send. Keep the gap at 3 s or more.
+- **Voice campaign:** upload a short prompt (*"Press 1 to confirm, 2 to cancel"*), add numbers, Start. Watch live key presses, open any row's timeline, download the CSV or have it emailed.
+- **Talking on calls:** this module's firmware (A131B01A7672M6) can't stream call audio over USB, so voice uses the board's **SPK/MIC pads**. See the **Talk on calls** page for wiring (a USB sound card for about ₹250 plus the built-in bridge is the recommended way to talk from the PC).
+
+---
+
+## Project structure
+
+```
+app/
+  gsm_app.py        web server (aiohttp), WebSocket API, connection supervisor, storage
+  modem.py          A7672S AT engine: SMS (text/UCS2), calls, URCs, DTMF, hold, CEER, file upload/playback
+  campaign.py       voice campaigns + per-call analytics
+  bulksms.py        bulk SMS runner with templates and retry
+  mailer.py         SMTP email + HTML report templates
+  flasher.py        board detection, esptool flashing, USB diagnostics
+  static/index.html single-page UI
+  static/vendor/    pinned libraries: Lucide, Chart.js, SweetAlert2, Notyf
+  data/             YOUR data: messages, calls, campaigns, audio, settings (git-ignored)
+firmware/
+  gsm_bridge/       ESP32-S3 Arduino firmware (Wi-Fi bridge, diagnostics, auto reset-level detection)
+  bin/              prebuilt firmware flashed by the Setup page
+  platformio.ini
+tools/
+  board_debug.py    CLI: diag / log / at / reset4g / flash / sms (USB or Wi-Fi)
+  build_firmware.py rebuild firmware/bin/gsm_bridge.bin with PlatformIO
+  fake_modem.py     simulator: try the whole app without hardware
+doc/                board pinout images
+run.bat             one-click launcher
+```
+
+### Board pin map (KTRON ESP32-S3 + A7672S)
+| Function | ESP32-S3 | Header |
+|---|---|---|
+| 4G TX / RX | GPIO17 / GPIO18 | J6 pin 19 / 21 |
+| 4G RI / DTR / STATUS / RESET | GPIO16 / 9 / 10 / 13 | J6 pin 17 / 29 / 31 / 37 |
+| LEDs Wi-Fi / 4G / SYS | GPIO11 / 12 / 14 | J6 pin 33 / 35 / 39 |
+| Power in | VIN 5–12 V, 2 A | J9 pin 42 (GND 44) |
+
+---
+
+## Development
+
+```bat
+:: run the simulator and the app (no hardware needed)
+app\.venv\Scripts\python tools\fake_modem.py
+run.bat
+
+:: talk to a real board
+app\.venv\Scripts\python tools\board_debug.py diag
+app\.venv\Scripts\python tools\board_debug.py at "AT+CSQ"
+
+:: rebuild the ESP32 firmware (PlatformIO in its own venv)
+python -m venv tools\.pio-venv
+tools\.pio-venv\Scripts\python -m pip install platformio esptool
+tools\.pio-venv\Scripts\python tools\build_firmware.py
+```
+
+- Logs: `app/data/app.log` (all modem traffic), `logs/diag-*.txt` (diagnostic reports).
+- Separate data folder for testing: `set B2W_DATA=C:\path\to\testdata` before starting.
+- Default Wi-Fi for the bridge firmware is set in `firmware/gsm_bridge/config.h`.
 
 ## Troubleshooting
-| Symptom | Fix |
+| Problem | Fix |
 |---|---|
-| Status page says "Modem NOT responding" | Use a VIN 5–12 V supply, then press "Hard-reset 4G module". The firmware already tries TX/RX in both directions. |
-| `SIM: NOT INSERTED` / `SIM PIN` | Reseat the SIM. Remove the PIN lock in a phone. |
-| Network "searching" / "denied" | Check the antenna. Check that the SIM supports 4G VoLTE (Jio needs VoLTE; Airtel and Vi also work on 2G). |
-| Calls connect but no sound | Phase 1 audio is on the board's SPK/MIC pads. Try `AT+CLVL=5` in the Console. |
-| "Mobile AT Interface" has a yellow warning in Device Manager | Install the SIMCom A76xx driver: [A7600X-Windows-Driver.7z](https://files.waveshare.com/wiki/ESP32-S3-A7670E-4G/A7600X-Windows-Driver.7z). Extract it, then in Device Manager choose Update driver, then Browse, pick the folder and tick Include subfolders. Afterwards you should see "SimTech HS-USB AT Port 9011". |
-| No COM port for the board (CP2102 shows an error) | Install the [CP210x driver](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers) |
-| SMS fails with `+CMS ERROR` | No credit or SMS centre missing. Check `AT+CSCA?` in the Console. |
+| Board not found in Setup | Install the CP210x driver, use a data cable |
+| "ESP32 to 4G serial link: no reply" | Use the 4G_USB cable (switch on 4G). This is the supported mode on this board. |
+| Audio upload fails | Board must be online; uploads go in 8 KB chunks and the PC copy is always kept, so retry with "Module" |
+| Gmail "login rejected" | Use an App Password, not your normal password |
+| Hear ringing but can't talk | Expected: audio is on the SPK/MIC pads, see *Talk on calls* |
+| Anything else | Setup → step 3 → **Diagnostics report** |
 
-Files: `app/` is the Python app (`modem.py` = AT engine, `gsm_app.py` = server, `static/index.html` = UI). `firmware/` is the ESP32 bridge. `app/data/` holds your saved messages, calls and settings.
-
-## Voice campaigns (batch IVR calls)
-Open **Campaigns**:
-1. Upload any audio file. The browser converts it to 8 kHz telephone WAV and stores it on the 4G module (about 20 s fits). You can use English text-to-speech instead.
-2. Paste phone numbers, choose the prompt, and click **Start campaign**.
-3. Each number is dialled. When answered, the prompt plays and any key the person presses (1, 2, ...) is captured live and saved per number. Download the results as CSV.
-
-## Talk on calls (Audio page)
-The module firmware (A131B01A7672M6) can't stream call audio over USB, so voice uses the SPK/MIC pads. The **Audio** page has wiring diagrams for:
-- **A:** a speaker and mic on the pads
-- **B:** a USB sound card, plus the built-in PC audio bridge
-- **C:** an I2S codec, for voice over Wi-Fi
-
-## Old notes: voice through the PC speaker and mic
-The A7672S has no digital audio over its UART, so voice can't travel over the same Wi-Fi link as AT commands. Options:
-1. **USB voice (no extra hardware):** with the 4G_USB cable to the PC, the A7672S can stream call audio as PCM over USB (`AT+CPCMREG`). The app would relay it to the browser mic and speaker over WebRTC/WebSocket.
-2. **Wi-Fi voice (extra hardware):** add an I2S mic and amp/ADC module wired to the SPK/MIC pads. The ESP32 streams that audio over Wi-Fi to the app and browser.
+## Status / roadmap
+- ✅ USB mode: SMS, bulk SMS, calls, campaigns, analytics, email reports
+- ⚠️ Wi-Fi-only (standalone) mode: board status works; SMS/calls need the ESP32 → 4G serial link, which doesn't answer on this board revision
+- 🔜 ESP32-S3 USB-host mode (switch on ESP) for true cable-free operation
+- 🔜 PC voice via a USB sound card bridge or an I2S codec
